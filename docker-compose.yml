@@ -1,0 +1,36 @@
+version: '3'
+services:
+  backend:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=db
+      - DB_USER=bryce
+      - DB_PASSWORD=1234
+      - DB_NAME=pos
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app
+
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: bryce
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: pos
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6.2
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres-data:
