@@ -11,7 +11,7 @@ const Navigation = () => {
         {user && (
           <>
             <li><Link to="/dashboard">Dashboard</Link></li>
-            <li><Link to="/pos">POS</Link></li>
+            <li><Link to="/order">OrderPage</Link></li>
             <li><Link to="/inventory">Inventory</Link></li>
             <li><Link to="/orders">Orders</Link></li>
             <li><Link to="/reports">Reports</Link></li>

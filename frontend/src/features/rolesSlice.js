@@ -2,15 +2,29 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../api/axios';
 
 // Fetch roles from the backend
-export const fetchRoles = createAsyncThunk('roles/fetchRoles', async () => {
-  const response = await axios.get('/roles');
-  return response.data;
+export const fetchRoles = createAsyncThunk('roles/fetchRoles', async (_, { rejectWithValue }) => {
+  try {
+    const response = await axios.get('/roles');
+    return response.data;
+  } catch (error) {
+    if (!error.response) {
+      throw error; // Handle network errors
+    }
+    return rejectWithValue(error.response.data);
+  }
 });
 
 // Add a new role
-export const addRole = createAsyncThunk('roles/addRole', async (roleData) => {
-  const response = await axios.post('/roles', roleData);
-  return response.data;
+export const addRole = createAsyncThunk('roles/addRole', async (roleData, { rejectWithValue }) => {
+  try {
+    const response = await axios.post('/roles', roleData);
+    return response.data;
+  } catch (error) {
+    if (!error.response) {
+      throw error; // Handle network errors
+    }
+    return rejectWithValue(error.response.data);
+  }
 });
 
 const rolesSlice = createSlice({
@@ -32,7 +46,7 @@ const rolesSlice = createSlice({
       })
       .addCase(fetchRoles.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.error.message;
+        state.error = action.payload || 'Failed to fetch roles.';
       })
       .addCase(addRole.fulfilled, (state, action) => {
         state.roles.push(action.payload);
@@ -41,3 +55,4 @@ const rolesSlice = createSlice({
 });
 
 export default rolesSlice.reducer;
+

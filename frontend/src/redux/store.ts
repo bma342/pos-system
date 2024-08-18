@@ -1,50 +1,20 @@
-import { configureStore, createSlice, PayloadAction, ThunkAction, Action } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
+import authReducer from './slices/authSlice';
+import menuReducer from './slices/menuSlice';
+import ordersReducer from './slices/ordersSlice';
+import cartReducer from './slices/cartSlice';
 
-// Define a type for the slice state
-interface PlaceholderState {
-  // Define your state properties here
-  value: number;
-}
-
-// Define the initial state
-const initialState: PlaceholderState = {
-  value: 0,
-};
-
-// Create the slice
-const placeholderSlice = createSlice({
-  name: 'placeholder',
-  initialState,
-  reducers: {
-    increment: (state) => {
-      state.value += 1;
-    },
-    decrement: (state) => {
-      state.value -= 1;
-    },
-    incrementByAmount: (state, action: PayloadAction<number>) => {
-      state.value += action.payload;
-    },
-  },
-});
-
-// Export the action creators
-export const { increment, decrement, incrementByAmount } = placeholderSlice.actions;
-
-// Create the store
 export const store = configureStore({
   reducer: {
-    placeholder: placeholderSlice.reducer,
+    auth: authReducer, // Include your actual auth slice
+    menu: menuReducer,
+    orders: ordersReducer,
+    cart: cartReducer,
+    // Add more reducers as needed
   },
 });
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-export type AppThunk<ReturnType = void> = ThunkAction<
-  ReturnType,
-  RootState,
-  unknown,
-  Action<string>
->;
 
 export default store;

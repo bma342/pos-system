@@ -11,15 +11,19 @@ const logger = require('./utils/logger');
 const sanitizeMiddleware = require('./middleware/sanitizeMiddleware');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
-const subdomainMiddleware = require('./middleware/subdomainMiddleware'); // Import the subdomain middleware
+const subdomainMiddleware = require('./middleware/subdomainMiddleware');
 const sequelize = require('./config/database');
 
 const app = express();
 
-// Test the database connection
+// Test and synchronize the database connection
 sequelize.authenticate()
-  .then(() => console.log('Database connected...'))
-  .catch(err => console.error('Error connecting to the database:', err));
+  .then(() => {
+    console.log('Database connected...');
+    return sequelize.sync({ alter: true }); // Adjust alter to sync schema changes without dropping tables
+  })
+  .then(() => console.log('Database synchronized...'))
+  .catch(err => console.error('Error connecting to or synchronizing the database:', err));
 
 // Swagger configuration
 const swaggerOptions = {
@@ -56,13 +60,13 @@ const redisClient = new Redis({
 // Rate limiter middleware
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 100,
   message: 'Too many requests from this IP, please try again later.',
 });
 
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // Limit each IP to 10 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 10,
   message: 'Too many requests, please try again later.',
 });
 
@@ -119,7 +123,7 @@ app.use('/api/loyalty', loyaltyRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/reports', reportRoutes);
-app.use('/api/taxes', taxRoutes); // NEW: Register tax routes
+app.use('/api/taxes', taxRoutes);
 
 // Global error handler
 app.use(errorHandler);

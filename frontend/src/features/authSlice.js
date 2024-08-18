@@ -2,15 +2,29 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../api/axios';
 
 // Thunk for login
-export const loginUser = createAsyncThunk('auth/loginUser', async (credentials) => {
-  const response = await axios.post('/auth/login', credentials);
-  return response.data;
+export const loginUser = createAsyncThunk('auth/loginUser', async (credentials, { rejectWithValue }) => {
+  try {
+    const response = await axios.post('/auth/login', credentials);
+    return response.data;
+  } catch (error) {
+    if (!error.response) {
+      throw error; // Handle network errors
+    }
+    return rejectWithValue(error.response.data);
+  }
 });
 
 // Thunk for registration
-export const registerUser = createAsyncThunk('auth/registerUser', async (userData) => {
-  const response = await axios.post('/auth/register', userData);
-  return response.data;
+export const registerUser = createAsyncThunk('auth/registerUser', async (userData, { rejectWithValue }) => {
+  try {
+    const response = await axios.post('/auth/register', userData);
+    return response.data;
+  } catch (error) {
+    if (!error.response) {
+      throw error; // Handle network errors
+    }
+    return rejectWithValue(error.response.data);
+  }
 });
 
 const authSlice = createSlice({
@@ -20,6 +34,8 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.token = null;
+      // Clear session storage upon logout
+      sessionStorage.clear();
     },
   },
   extraReducers: (builder) => {
@@ -31,10 +47,12 @@ const authSlice = createSlice({
         state.status = 'succeeded';
         state.user = action.payload.user;
         state.token = action.payload.token;
+        // Store token securely in session storage
+        sessionStorage.setItem('token', action.payload.token);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.error.message;
+        state.error = action.payload || 'Login failed. Please try again.';
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.user = action.payload.user;

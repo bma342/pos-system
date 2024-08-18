@@ -39,3 +39,15 @@ class TaxService {
       if (!created) {
         taxConfig.taxRate = taxRate;
         taxConfig.taxIdNumber = taxIdNumber;
+        await taxConfig.save();
+      }
+
+      return taxConfig;
+    } catch (error) {
+      console.error('Error updating tax settings:', error);
+      throw error;
+    }
+  }
+}
+
+module.exports = new TaxService();

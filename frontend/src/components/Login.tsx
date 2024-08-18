@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { Helmet } from 'react-helmet-async';
 import FocusTrap from 'focus-trap-react';
+import { loginUser } from '../redux/slices/authSlice';
+import { RootState, AppDispatch } from '../redux/store';
+import { useNavigate } from 'react-router-dom';
 
 interface LoginForm {
   username: string;
@@ -10,20 +14,29 @@ interface LoginForm {
 
 const Login: React.FC = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+  const { status, error } = useSelector((state: RootState) => state.auth);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit = async (data: LoginForm) => {
     setIsSubmitting(true);
-    // Here you would typically call your API
-    console.log(data);
-    setIsSubmitting(false);
+    try {
+      await dispatch(loginUser(data)).unwrap(); // Type-safe dispatch with unwrap
+      navigate('/dashboard');
+    } catch (err) {
+      // Handle the error as any since unwrap can throw unknown errors
+      console.error('Login failed:', err as any);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <FocusTrap>
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <Helmet>
-          <title>Login - Your App Name</title>
+          <title>Login - POS System</title>
           <meta name="description" content="Login to your account" />
         </Helmet>
         <div className="max-w-md w-full space-y-8">
@@ -65,6 +78,7 @@ const Login: React.FC = () => {
               >
                 {isSubmitting ? 'Signing in...' : 'Sign in'}
               </button>
+              {status === 'failed' && <div className="text-red-500 text-center mt-2">{error}</div>}
             </div>
           </form>
         </div>
@@ -74,3 +88,4 @@ const Login: React.FC = () => {
 };
 
 export default Login;
+
