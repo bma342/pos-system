@@ -24,12 +24,28 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true,
     },
+    serviceFee: {
+      type: DataTypes.FLOAT,
+    },
+    tipAmount: {
+      type: DataTypes.FLOAT,
+    },
+    loyaltyPointsUsed: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    discountApplied: {
+      type: DataTypes.FLOAT,
+      defaultValue: 0.0,
+    },
   });
 
   Order.associate = (models) => {
     Order.belongsTo(models.Guest, { foreignKey: 'guestId' });
     Order.belongsTo(models.Location, { foreignKey: 'locationId' });
     Order.hasMany(models.MenuItem, { foreignKey: 'orderId' });
+    Order.belongsTo(models.Loyalty, { foreignKey: 'loyaltyId' });
+    Order.belongsTo(models.Discount, { foreignKey: 'discountId' });
   };
 
   return Order;
