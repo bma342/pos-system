@@ -20,6 +20,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    subdomain: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        is: /^[a-zA-Z0-9-]+$/, // Only allow valid subdomains
+      },
+    },
   });
 
   Client.associate = (models) => {

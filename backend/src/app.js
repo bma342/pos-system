@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const session = require('express-session');
 const RedisStore = require('connect-redis').default;
 const Redis = require('ioredis');
@@ -11,8 +11,7 @@ const logger = require('./utils/logger');
 const sanitizeMiddleware = require('./middleware/sanitizeMiddleware');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
-
-// Add this line for database connection
+const subdomainMiddleware = require('./middleware/subdomainMiddleware'); // Import the subdomain middleware
 const sequelize = require('./config/database');
 
 const app = express();
@@ -41,7 +40,11 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Sanitize all incoming requests
+// Security middleware
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
+app.use(subdomainMiddleware); // Apply the subdomain middleware globally
 app.use(sanitizeMiddleware);
 
 // Set Redis host to the service name defined in docker-compose
@@ -49,9 +52,6 @@ const redisClient = new Redis({
   host: process.env.REDIS_HOST || 'redis',
   port: process.env.REDIS_PORT || 6379,
 });
-
-// Security middleware
-app.use(helmet());
 
 // Rate limiter middleware
 const apiLimiter = rateLimit({
@@ -68,8 +68,6 @@ const authLimiter = rateLimit({
 
 app.use('/api/auth/', authLimiter);
 app.use('/api/', apiLimiter);
-app.use(cors());
-app.use(express.json());
 
 // Session middleware
 app.use(
@@ -97,17 +95,17 @@ const checkoutRoutes = require('./routes/checkoutRoutes');
 const discountsRoutes = require('./routes/discountsRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const rewardRoutes = require('./routes/rewardRoutes');
-const loyaltyRoutes = require('./routes/loyaltyRoutes'); 
-const clientRoutes = require('./routes/clientRoutes'); // New client routes for admin functionalities
-const roleRoutes = require('./routes/roleRoutes'); // New role routes for custom role management
-const reportRoutes = require('./routes/reportRoutes'); // New report routes for data walls and analytics
+const loyaltyRoutes = require('./routes/loyaltyRoutes');
+const clientRoutes = require('./routes/clientRoutes');
+const roleRoutes = require('./routes/roleRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 
 // Mock secure route for testing
 app.get('/api/secure-endpoint', authenticateToken, (req, res) => {
   res.status(200).json({ message: 'Access granted' });
 });
 
-// Registering the routes after all middleware is set up
+// Registering the routes
 app.use('/api/menus', menuRoutes);
 app.use('/api/pos-integration', posIntegrationRoutes);
 app.use('/api/auth', authRoutes);
@@ -116,13 +114,12 @@ app.use('/api/checkout', checkoutRoutes);
 app.use('/api/discounts', discountsRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/rewards', rewardRoutes);
-app.use('/api/loyalty', loyaltyRoutes); 
-app.use('/api/clients', clientRoutes); // Register client routes for admin
-app.use('/api/roles', roleRoutes); // Register role routes
-app.use('/api/reports', reportRoutes); // Register report routes
+app.use('/api/loyalty', loyaltyRoutes);
+app.use('/api/clients', clientRoutes);
+app.use('/api/roles', roleRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Global error handler
 app.use(errorHandler);
 
 module.exports = app;
-
