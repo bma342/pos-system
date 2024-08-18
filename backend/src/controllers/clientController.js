@@ -43,3 +43,23 @@ exports.getClientDetails = async (req, res) => {
     res.status(500).json({ message: 'Error fetching client details', error });
   }
 };
+
+exports.getClientTheme = async (req, res) => {
+  try {
+    const subdomain = req.headers['x-subdomain']; // Assuming subdomain is passed in header
+    const client = await Client.findOne({ where: { subdomain: subdomain } });
+    if (!client) return res.status(404).json({ message: 'Client not found' });
+
+    const theme = {
+      primaryColor: client.primaryColor,
+      secondaryColor: client.secondaryColor,
+      accentColor: client.accentColor,
+      primaryFont: client.primaryFont,
+      secondaryFont: client.secondaryFont,
+    };
+
+    res.json(theme);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching client theme', error });
+  }
+};

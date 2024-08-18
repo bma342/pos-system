@@ -9,5 +9,7 @@ router.put('/:id', authenticateToken, authorizeRoles(['Super Admin']), clientCon
 router.delete('/:id', authenticateToken, authorizeRoles(['Super Admin']), clientController.deleteClient);
 router.get('/:id', authenticateToken, authorizeRoles(['Super Admin', 'Admin']), clientController.getClientDetails);
 
-module.exports = router;
+// New route for fetching client theme
+router.get('/theme', clientController.getClientTheme);
 
+module.exports = router;
