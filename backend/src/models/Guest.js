@@ -37,9 +37,21 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    preferredOrderMethod: {
+    favoriteOrderType: {
       type: DataTypes.STRING, // Example: 'in-store', 'online', 'delivery', 'pickup'
       allowNull: true,
+    },
+    lastLocationVisited: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    mostFrequentedLocation: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    numberOfUniqueLocationsVisited: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
     numberOfOrders: {
       type: DataTypes.INTEGER,
@@ -133,4 +145,3 @@ module.exports = (sequelize, DataTypes) => {
 
   return Guest;
 };
-

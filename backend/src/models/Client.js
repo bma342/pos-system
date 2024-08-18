@@ -53,6 +53,8 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 'Open Sans, sans-serif',
     },
+  }, {
+    tableName: 'Clients', // Explicitly define the table name
   });
 
   Client.associate = (models) => {

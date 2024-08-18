@@ -1,18 +1,27 @@
 const CateringOrder = require('../models/CateringOrder');
 const Guest = require('../models/Guest');
 const HouseAccount = require('../models/HouseAccount');
+const TaxService = require('../services/taxService');
 
 exports.createCateringOrder = async (req, res) => {
   try {
-    const { guestId, houseAccountId, orderDate, scheduledDate, totalPrice, orderDetails } = req.body;
+    const { guestId, houseAccountId, orderDate, scheduledDate, totalPrice, orderDetails, locationId, provider } = req.body;
+
+    // Fetch applicable tax
+    const taxDetails = await TaxService.getApplicableTax(locationId, provider, guestId);
+
+    // Adjust the order total based on the tax rate
+    const totalWithTax = totalPrice + (totalPrice * taxDetails.rate) / 100;
 
     const order = await CateringOrder.create({
       guestId,
       houseAccountId,
       orderDate,
       scheduledDate,
-      totalPrice,
+      totalPrice: totalWithTax,
       orderDetails,
+      taxExempt: taxDetails.rate === 0, // Flag for tax-exempt orders
+      taxIdNumber: taxDetails.taxId, // Store the tax ID if applicable
     });
 
     res.status(201).json(order);

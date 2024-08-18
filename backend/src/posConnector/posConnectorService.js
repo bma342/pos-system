@@ -1,21 +1,20 @@
 const axios = require('axios');
+const TaxService = require('../services/taxService');
 
 class POSConnectorService {
   constructor(posConfig) {
-    this.posConfig = posConfig; // Each POS config will define how to interact with the POS system
+    this.posConfig = posConfig;
   }
 
   // Function to sync menus with the external POS system
-  syncMenus(menuData) {
+  async syncMenus(menuData) {
     if (this.posConfig.format === 'JSON') {
       return this.syncToJSONPOS(menuData);
     } else if (this.posConfig.format === 'XML') {
       return this.syncToXMLPOS(menuData);
     }
-    // Add more formats as needed
   }
 
-  // Example function to sync with a JSON-based POS system
   syncToJSONPOS(menuData) {
     return {
       menuName: menuData.name,
@@ -28,13 +27,10 @@ class POSConnectorService {
     };
   }
 
-  // Example function to sync with an XML-based POS system (stubbed out for now)
   syncToXMLPOS(menuData) {
-    // Implement XML syncing logic here
     return `<Menu><Name>${menuData.name}</Name></Menu>`;
   }
 
-  // Function to send/confirm orders
   async sendOrderToPOS(orderData) {
     try {
       const response = await axios.post(this.posConfig.apiEndpoint, orderData, {
@@ -49,7 +45,6 @@ class POSConnectorService {
     }
   }
 
-  // Function to sync inventory with the external POS system
   async syncInventory(inventoryData) {
     try {
       const response = await axios.post(this.posConfig.inventoryEndpoint, inventoryData, {
@@ -63,6 +58,19 @@ class POSConnectorService {
       throw error;
     }
   }
+
+  // NEW: Function to sync tax rates with the external POS system
+  async syncTaxRates(locationId, provider) {
+    try {
+      const taxDetails = await TaxService.getApplicableTax(locationId, provider);
+      // Logic to sync the tax rate with the POS system using taxDetails
+      // Implementation depends on the provider's API requirements
+    } catch (error) {
+      console.error('Error syncing tax rates with POS:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = POSConnectorService;
+

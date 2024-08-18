@@ -22,9 +22,10 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    command: ["npm", "start"]  # Ensures it runs the app without triggering npm audit
 
   db:
-    image: postgres:13
+    image: postgres:14
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password

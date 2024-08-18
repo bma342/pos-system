@@ -98,6 +98,7 @@ const rewardRoutes = require('./routes/rewardRoutes');
 const loyaltyRoutes = require('./routes/loyaltyRoutes');
 const clientRoutes = require('./routes/clientRoutes');
 const roleRoutes = require('./routes/roleRoutes');
+const taxRoutes = require('./routes/taxRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 
 // Mock secure route for testing
@@ -118,6 +119,7 @@ app.use('/api/loyalty', loyaltyRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/taxes', taxRoutes); // NEW: Register tax routes
 
 // Global error handler
 app.use(errorHandler);
