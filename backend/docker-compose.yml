@@ -12,6 +12,7 @@ services:
       - DB_NAME=pos
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - SESSION_SECRET=supersecret
     depends_on:
       db:
         condition: service_healthy

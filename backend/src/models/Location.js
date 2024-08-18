@@ -4,27 +4,22 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    currentReadyTime: {
-      type: DataTypes.INTEGER, // Ready time in minutes
-      allowNull: false,
-      defaultValue: 30, // Default ready time
-    },
-    throttleSettings: {
-      type: DataTypes.JSON, // Stores item, amount, and order thresholds and increments
+    address: {
+      type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: {
-        itemThreshold: 20,
-        itemIncrement: 5,
-        amountThreshold: 100,
-        amountIncrement: 10,
-        orderThreshold: 3,
-        orderIncrement: 15,
+    },
+    clientId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'Clients',
+        key: 'id',
       },
     },
   });
 
   Location.associate = (models) => {
-    Location.hasMany(models.Order, { foreignKey: 'locationId' });
+    Location.belongsTo(models.Client, { foreignKey: 'clientId', as: 'client' });
   };
 
   return Location;

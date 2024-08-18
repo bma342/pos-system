@@ -7,7 +7,12 @@ const Guest = require('../models/Guest');
 router.get('/', authenticateToken, authorizeRoles(1, 2), async (req, res) => {
   try {
     const guests = await Guest.findAll();
-    res.json(guests);
+    const guestsWithEngagementScore = guests.map(guest => ({
+      ...guest.toJSON(),
+      engagementScore: guest.engagementScore, // Include engagement score
+    }));
+
+    res.json(guestsWithEngagementScore);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching guests', error });
   }
@@ -19,7 +24,10 @@ router.get('/:id', authenticateToken, authorizeRoles(1, 2), async (req, res) => 
     const guest = await Guest.findByPk(req.params.id);
     if (!guest) return res.status(404).json({ message: 'Guest not found' });
 
-    res.json(guest);
+    res.json({
+      ...guest.toJSON(),
+      engagementScore: guest.engagementScore, // Include engagement score
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching guest', error });
   }
@@ -32,7 +40,10 @@ router.put('/:id', authenticateToken, authorizeRoles(1, 2), async (req, res) => 
     if (!guest) return res.status(404).json({ message: 'Guest not found' });
 
     await guest.update(req.body);
-    res.json(guest);
+    res.json({
+      ...guest.toJSON(),
+      engagementScore: guest.engagementScore, // Include updated engagement score
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error updating guest profile', error });
   }

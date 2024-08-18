@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     HouseAccount.belongsTo(models.Client, { foreignKey: 'clientId' });
     HouseAccount.hasMany(models.HouseAccountUser, { foreignKey: 'houseAccountId' });
     HouseAccount.belongsToMany(models.Location, { through: 'HouseAccountLocations' });
+    HouseAccount.hasMany(models.CateringOrder, { foreignKey: 'houseAccountId' });
   };
 
   return HouseAccount;

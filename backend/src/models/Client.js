@@ -4,10 +4,26 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        isEmail: true,
+      },
+    },
+    phoneNumber: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    address: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   });
 
   Client.associate = (models) => {
-    Client.hasMany(models.Location, { foreignKey: 'clientId' });
+    Client.hasMany(models.Location, { foreignKey: 'clientId', as: 'locations' });
   };
 
   return Client;

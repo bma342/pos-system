@@ -71,22 +71,6 @@ app.use('/api/', apiLimiter);
 app.use(cors());
 app.use(express.json());
 
-// Mock secure route for testing
-app.get('/api/secure-endpoint', authenticateToken, (req, res) => {
-  res.status(200).json({ message: 'Access granted' });
-});
-
-// Registering the routes
-const menuRoutes = require('./routes/menuRoutes');
-const posIntegrationRoutes = require('./routes/posIntegrationRoutes');
-const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes');
-
-app.use('/api/menus', menuRoutes);
-app.use('/api/pos-integration', posIntegrationRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-
 // Session middleware
 app.use(
   session({
@@ -104,7 +88,41 @@ app.use((req, res, next) => {
   next();
 });
 
+// Import your routes here
+const menuRoutes = require('./routes/menuRoutes');
+const posIntegrationRoutes = require('./routes/posIntegrationRoutes');
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const checkoutRoutes = require('./routes/checkoutRoutes');
+const discountsRoutes = require('./routes/discountsRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const rewardRoutes = require('./routes/rewardRoutes');
+const loyaltyRoutes = require('./routes/loyaltyRoutes'); 
+const clientRoutes = require('./routes/clientRoutes'); // New client routes for admin functionalities
+const roleRoutes = require('./routes/roleRoutes'); // New role routes for custom role management
+const reportRoutes = require('./routes/reportRoutes'); // New report routes for data walls and analytics
+
+// Mock secure route for testing
+app.get('/api/secure-endpoint', authenticateToken, (req, res) => {
+  res.status(200).json({ message: 'Access granted' });
+});
+
+// Registering the routes after all middleware is set up
+app.use('/api/menus', menuRoutes);
+app.use('/api/pos-integration', posIntegrationRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/checkout', checkoutRoutes);
+app.use('/api/discounts', discountsRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/rewards', rewardRoutes);
+app.use('/api/loyalty', loyaltyRoutes); 
+app.use('/api/clients', clientRoutes); // Register client routes for admin
+app.use('/api/roles', roleRoutes); // Register role routes
+app.use('/api/reports', reportRoutes); // Register report routes
+
 // Global error handler
 app.use(errorHandler);
 
 module.exports = app;
+

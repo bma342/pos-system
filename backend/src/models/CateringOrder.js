@@ -37,6 +37,7 @@ module.exports = (sequelize, DataTypes) => {
   CateringOrder.associate = (models) => {
     CateringOrder.belongsTo(models.Guest, { foreignKey: 'guestId' });
     CateringOrder.belongsTo(models.HouseAccount, { foreignKey: 'houseAccountId' });
+    CateringOrder.belongsTo(models.Location, { foreignKey: 'locationId' });
   };
 
   return CateringOrder;

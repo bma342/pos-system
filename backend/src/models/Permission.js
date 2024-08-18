@@ -8,7 +8,18 @@ module.exports = (sequelize, DataTypes) => {
     description: {
       type: DataTypes.STRING,
     },
+    category: {
+      type: DataTypes.STRING,
+      allowNull: true, // Group permissions by category, e.g., "Reports", "User Management", etc.
+    },
   });
+
+  Permission.associate = (models) => {
+    Permission.belongsToMany(models.Role, {
+      through: 'RolePermissions',
+      foreignKey: 'permissionId',
+    });
+  };
 
   return Permission;
 };
