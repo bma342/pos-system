@@ -29,12 +29,26 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.JSONB,
       allowNull: false, // Stores the actual report data securely
     },
+    executiveViewSettings: {
+      type: DataTypes.JSONB, // Customizable executive dashboard settings
+      allowNull: true,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
   });
 
   Report.associate = (models) => {
     Report.belongsTo(models.Client, { foreignKey: 'clientId' });
     Report.belongsTo(models.Location, { foreignKey: 'locationId' });
+    Report.belongsTo(models.ProviderIntegration, { foreignKey: 'providerIntegrationId' });
   };
 
   return Report;
 };
+

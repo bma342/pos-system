@@ -1,7 +1,8 @@
 const OrderHistory = require('../models/OrderHistory');
 const Order = require('../models/Order');
-const axios = require('axios'); // For communicating with the POS system
+const axios = require('axios');
 const Guest = require('../models/Guest');
+const { calculateServiceFees, calculateDiscounts } = require('../utils/pricingUtils');
 
 const checkout = async (req, res) => {
   const { items, paymentMethod, guestId, locationId } = req.body;
@@ -20,38 +21,31 @@ const checkout = async (req, res) => {
         return res.status(400).json({ message: `Item ${item.menuItemId} not available for this location.` });
       }
 
+      let price = locationOverride.price;
+      if (paymentMethod === 'currency') {
+        const { finalPrice, serviceFees } = calculateServiceFees(price, locationOverride, locationId);
+        price = finalPrice;
+        totalCurrencyPrice += price * item.quantity;
+      } else if (paymentMethod === 'points') {
+        totalPointsPrice += locationOverride.pointsPrice * item.quantity;
+      }
+
       const detail = {
         menuItemId: item.menuItemId,
         name: item.name,
         quantity: item.quantity,
-        price: locationOverride.price,
+        price,
         pointsPrice: locationOverride.pointsPrice,
+        serviceFees: serviceFees || 0
       };
-
-      if (paymentMethod === 'currency') {
-        let price = locationOverride.price;
-        if (locationOverride.applyUplift) {
-          const providerPricing = await ProviderPricing.findOne({ where: { locationMenuOverrideId: locationOverride.id } });
-          if (providerPricing) {
-            price += (price * providerPricing.upliftPercentage) / 100;
-            price = applyRoundingIfNeeded(price);
-          }
-        }
-        detail.price = price;
-        totalCurrencyPrice += price * item.quantity;
-      } else if (paymentMethod === 'points') {
-        detail.pointsPrice = locationOverride.pointsPrice;
-        totalPointsPrice += locationOverride.pointsPrice * item.quantity;
-      }
 
       orderDetails.push(detail);
     }
 
-    // Logic to apply bank-style loyalty discounts before sending to POS
+    // Apply discounts
     const guest = await Guest.findByPk(guestId);
-    if (guest.loyaltyTier === 'Gold') {
-      totalCurrencyPrice *= 0.9; // Apply a 10% discount for Gold tier members
-    }
+    const discount = calculateDiscounts(guest.loyaltyTier, totalCurrencyPrice);
+    totalCurrencyPrice -= discount;
 
     // Prepare order data for POS system
     const posOrderData = {
@@ -110,11 +104,6 @@ async function sendOrderToPOS(orderData) {
     console.error('Error communicating with POS system:', error);
     return { approved: false };
   }
-}
-
-function applyRoundingIfNeeded(price) {
-  // Implement rounding logic if needed
-  return Math.ceil(price * 100) / 100; // Example rounding to nearest cent
 }
 
 module.exports = {

@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3'
 services:
   backend:
     build: .
@@ -7,12 +7,12 @@ services:
     environment:
       - NODE_ENV=production
       - DB_HOST=db
-      - DB_USER=bryce
-      - DB_PASSWORD=1234
-      - DB_NAME=pos
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - SESSION_SECRET=supersecret
+      - SESSION_SECRET=${SESSION_SECRET}
     depends_on:
       db:
         condition: service_healthy
@@ -23,30 +23,23 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:14
+    image: postgres:13
     environment:
-      POSTGRES_USER: bryce
-      POSTGRES_PASSWORD: 1234
-      POSTGRES_DB: pos
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bryce"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
-      timeout: 5s
       retries: 5
-    restart: unless-stopped
+      start_period: 30s
+      timeout: 5s
 
   redis:
-    image: redis:6.2
-    ports:
-      - "6379:6379"
+    image: redis:alpine
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
-      timeout: 5s
       retries: 5
-    restart: unless-stopped
-
-volumes:
-  postgres-data:
+      start_period: 30s
+      timeout: 5s

@@ -4,6 +4,9 @@ const { authenticateToken } = require('../middleware/auth');
 const loyaltyController = require('../controllers/loyaltyController');
 
 // Loyalty routes
-router.get('/:guestId', authenticateToken, loyaltyController.getLoyaltyInfo);
+router.get('/:guestId', authenticateToken, loyaltyController.getLoyaltyProgram);
+router.put('/:clientId', authenticateToken, loyaltyController.updateLoyaltyProgram);
+router.post('/challenge', authenticateToken, loyaltyController.upsertLoyaltyChallenge);
+router.delete('/challenge/:id', authenticateToken, loyaltyController.deleteLoyaltyChallenge);
 
 module.exports = router;

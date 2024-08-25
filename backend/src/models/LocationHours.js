@@ -3,6 +3,11 @@ module.exports = (sequelize, DataTypes) => {
     locationId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: 'Locations',
+        key: 'id',
+      },
+      onDelete: 'CASCADE',
     },
     dayOfWeek: {
       type: DataTypes.INTEGER, // 0 = Sunday, 1 = Monday, etc.
@@ -24,10 +29,24 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATEONLY,
       allowNull: true,
     },
+    endDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true, // To define when temporary hours should end
+    },
   });
 
   LocationHours.associate = (models) => {
     LocationHours.belongsTo(models.Location, { foreignKey: 'locationId' });
+
+    // Adding a hook to automatically handle temporary hours cleanup after the end date
+    LocationHours.addHook('afterUpdate', async (locationHours, options) => {
+      if (locationHours.isTemporary && locationHours.endDate) {
+        const now = new Date();
+        if (new Date(locationHours.endDate) < now) {
+          await locationHours.update({ isTemporary: false, effectiveDate: null, endDate: null });
+        }
+      }
+    });
   };
 
   return LocationHours;

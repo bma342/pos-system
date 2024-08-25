@@ -2,7 +2,7 @@ const axios = require('axios');
 
 class TranslatorService {
   constructor(providerConfig) {
-    this.providerConfig = providerConfig; // Each provider's config will define how to format the data
+    this.providerConfig = providerConfig; // Each provider's config defines how to format the data
   }
 
   // Function to translate menu data

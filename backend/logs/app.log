@@ -317,3 +317,1376 @@
 2024-08-18T00:40:00.493Z [info]: Running scheduled task for catering orders...
 2024-08-18T00:53:00.167Z [info]: Running scheduled task for guest orders...
 2024-08-18T00:53:00.180Z [info]: Running scheduled task for catering orders...
+2024-08-19T13:33:00.924Z [info]: Running scheduled task for guest orders...
+2024-08-19T13:33:00.936Z [info]: Running scheduled task for catering orders...
+2024-08-19T13:34:00.000Z [info]: Running scheduled task for guest orders...
+2024-08-19T13:34:00.004Z [info]: Running scheduled task for catering orders...
+2024-08-19T13:39:00.291Z [info]: Running scheduled task for guest orders...
+2024-08-19T13:39:00.301Z [info]: Running scheduled task for catering orders...
+2024-08-19T13:40:00.370Z [info]: Running scheduled task for guest orders...
+2024-08-19T13:40:00.373Z [info]: Running scheduled task for catering orders...
+2024-08-19T13:42:00.760Z [info]: Running scheduled task for guest orders...
+2024-08-19T13:42:00.777Z [info]: Running scheduled task for catering orders...
+2024-08-19T13:42:00.793Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:42:00.794Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:42:00.795Z [error]: Error handling scheduled guest orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:42:00.795Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:48:00.959Z [info]: Running scheduled task for guest orders...
+2024-08-19T13:48:00.969Z [info]: Running scheduled task for catering orders...
+2024-08-19T13:48:00.974Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:48:00.975Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:48:00.975Z [error]: Error handling scheduled guest orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:48:00.976Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:53:12.963Z [error]: Error connecting to or synchronizing the database: no PostgreSQL user name specified in startup packet
+2024-08-19T13:54:00.969Z [info]: Running scheduled task for guest orders...
+2024-08-19T13:54:00.980Z [info]: Running scheduled task for catering orders...
+2024-08-19T13:54:00.985Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:54:00.986Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:54:00.987Z [error]: Error handling scheduled guest orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:54:00.987Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:55:00.042Z [info]: Running scheduled task for guest orders...
+2024-08-19T13:55:00.045Z [info]: Running scheduled task for catering orders...
+2024-08-19T13:55:00.049Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:55:00.049Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:55:00.050Z [error]: Error handling scheduled guest orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:55:00.050Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:56:00.121Z [info]: Running scheduled task for guest orders...
+2024-08-19T13:56:00.124Z [info]: Running scheduled task for catering orders...
+2024-08-19T13:56:00.128Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:56:00.128Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:56:00.128Z [error]: Error handling scheduled guest orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:56:00.129Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:57:00.201Z [info]: Running scheduled task for guest orders...
+2024-08-19T13:57:00.203Z [info]: Running scheduled task for catering orders...
+2024-08-19T13:57:00.207Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:57:00.208Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:57:00.208Z [error]: Error handling scheduled guest orders: no PostgreSQL user name specified in startup packet
+2024-08-19T13:57:00.208Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T14:02:00.528Z [info]: Running scheduled task for guest orders...
+2024-08-19T14:02:00.538Z [info]: Running scheduled task for catering orders...
+2024-08-19T14:02:00.549Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T14:02:00.550Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T14:02:00.550Z [error]: Error handling scheduled guest orders: no PostgreSQL user name specified in startup packet
+2024-08-19T14:02:00.551Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T14:03:00.613Z [info]: Running scheduled task for guest orders...
+2024-08-19T14:03:00.617Z [info]: Running scheduled task for catering orders...
+2024-08-19T14:03:00.621Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T14:03:00.622Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T14:03:00.623Z [error]: Error handling scheduled guest orders: no PostgreSQL user name specified in startup packet
+2024-08-19T14:03:00.623Z [error]: Error handling scheduled catering orders: no PostgreSQL user name specified in startup packet
+2024-08-19T14:16:00.659Z [info]: Running scheduled task for guest orders...
+2024-08-19T14:16:00.670Z [info]: Running scheduled task for catering orders...
+2024-08-19T14:17:00.734Z [info]: Running scheduled task for guest orders...
+2024-08-19T14:17:00.737Z [info]: Running scheduled task for catering orders...
+2024-08-19T14:25:00.864Z [info]: Running scheduled task for guest orders...
+2024-08-19T14:25:00.875Z [info]: Running scheduled task for catering orders...
+2024-08-19T14:26:00.941Z [info]: Running scheduled task for guest orders...
+2024-08-19T14:26:00.945Z [info]: Running scheduled task for catering orders...
+2024-08-19T14:27:00.014Z [info]: Running scheduled task for guest orders...
+2024-08-19T14:27:00.018Z [info]: Running scheduled task for catering orders...
+2024-08-19T14:34:00.614Z [info]: Running scheduled task for guest orders...
+2024-08-19T14:34:00.631Z [info]: Running scheduled task for catering orders...
+2024-08-19T14:35:00.693Z [info]: Running scheduled task for guest orders...
+2024-08-19T14:35:00.696Z [info]: Running scheduled task for catering orders...
+2024-08-19T14:45:00.956Z [info]: Running scheduled task for guest orders...
+2024-08-19T14:45:00.975Z [info]: Running scheduled task for catering orders...
+2024-08-19T14:46:00.038Z [info]: Running scheduled task for guest orders...
+2024-08-19T14:46:00.042Z [info]: Running scheduled task for catering orders...
+2024-08-19T14:52:00.330Z [info]: Running scheduled task for guest orders...
+2024-08-19T14:52:00.342Z [info]: Running scheduled task for catering orders...
+2024-08-19T14:52:00.345Z [error]: Error handling scheduled catering orders: getaddrinfo EAI_AGAIN db
+2024-08-19T14:52:00.346Z [error]: Error handling scheduled catering orders: getaddrinfo EAI_AGAIN db
+2024-08-19T14:52:00.346Z [error]: Error handling scheduled guest orders: getaddrinfo EAI_AGAIN db
+2024-08-19T14:52:00.347Z [error]: Error handling scheduled catering orders: getaddrinfo EAI_AGAIN db
+2024-08-19T14:53:00.416Z [info]: Running scheduled task for guest orders...
+2024-08-19T14:53:00.419Z [info]: Running scheduled task for catering orders...
+2024-08-19T14:53:00.421Z [error]: Error handling scheduled catering orders: getaddrinfo EAI_AGAIN db
+2024-08-19T14:53:00.421Z [error]: Error handling scheduled catering orders: getaddrinfo EAI_AGAIN db
+2024-08-19T14:53:00.422Z [error]: Error handling scheduled guest orders: getaddrinfo EAI_AGAIN db
+2024-08-19T14:53:00.422Z [error]: Error handling scheduled catering orders: getaddrinfo EAI_AGAIN db
+2024-08-19T18:44:15.456Z [info]: Starting data sync jobs...
+2024-08-19T18:44:15.459Z [info]: Syncing POS data...
+2024-08-19T18:44:15.459Z [info]: POS data sync completed.
+2024-08-19T18:44:15.460Z [info]: Syncing provider data...
+2024-08-19T18:44:15.461Z [info]: Provider data sync completed.
+2024-08-19T18:44:15.461Z [info]: Data sync jobs completed successfully.
+2024-08-19T19:41:27.425Z [info]: Starting data sync jobs...
+2024-08-19T19:41:27.428Z [info]: Syncing POS data...
+2024-08-19T19:41:27.428Z [info]: POS data sync completed.
+2024-08-19T19:41:27.429Z [info]: Syncing provider data...
+2024-08-19T19:41:27.429Z [info]: Provider data sync completed.
+2024-08-19T19:41:27.429Z [info]: Data sync jobs completed successfully.
+2024-08-19T19:43:46.068Z [info]: Starting data sync jobs...
+2024-08-19T19:43:46.070Z [info]: Syncing POS data...
+2024-08-19T19:43:46.070Z [info]: POS data sync completed.
+2024-08-19T19:43:46.071Z [info]: Syncing provider data...
+2024-08-19T19:43:46.071Z [info]: Provider data sync completed.
+2024-08-19T19:43:46.072Z [info]: Data sync jobs completed successfully.
+2024-08-19T23:05:58.941Z [info]: Starting data sync jobs...
+2024-08-19T23:05:58.943Z [info]: Syncing POS data...
+2024-08-19T23:05:58.943Z [info]: POS data sync completed.
+2024-08-19T23:05:58.944Z [info]: Syncing provider data...
+2024-08-19T23:05:58.944Z [info]: Provider data sync completed.
+2024-08-19T23:05:58.945Z [info]: Data sync jobs completed successfully.
+2024-08-19T23:06:49.955Z [info]: Starting data sync jobs...
+2024-08-19T23:06:49.957Z [info]: Syncing POS data...
+2024-08-19T23:06:49.957Z [info]: POS data sync completed.
+2024-08-19T23:06:49.958Z [info]: Syncing provider data...
+2024-08-19T23:06:49.958Z [info]: Provider data sync completed.
+2024-08-19T23:06:49.958Z [info]: Data sync jobs completed successfully.
+2024-08-19T23:10:47.594Z [info]: Starting data sync jobs...
+2024-08-19T23:10:47.596Z [info]: Syncing POS data...
+2024-08-19T23:10:47.596Z [info]: POS data sync completed.
+2024-08-19T23:10:47.597Z [info]: Syncing provider data...
+2024-08-19T23:10:47.597Z [info]: Provider data sync completed.
+2024-08-19T23:10:47.597Z [info]: Data sync jobs completed successfully.
+2024-08-19T23:18:33.719Z [info]: Starting data sync jobs...
+2024-08-19T23:18:33.721Z [info]: Syncing POS data...
+2024-08-19T23:18:33.721Z [info]: POS data sync completed.
+2024-08-19T23:18:33.722Z [info]: Syncing provider data...
+2024-08-19T23:18:33.722Z [info]: Provider data sync completed.
+2024-08-19T23:18:33.722Z [info]: Data sync jobs completed successfully.
+2024-08-19T23:28:37.831Z [info]: Starting data sync jobs...
+2024-08-19T23:28:37.832Z [info]: Syncing POS data...
+2024-08-19T23:28:37.833Z [info]: POS data sync completed.
+2024-08-19T23:28:37.833Z [info]: Syncing provider data...
+2024-08-19T23:28:37.833Z [info]: Provider data sync completed.
+2024-08-19T23:28:37.834Z [info]: Data sync jobs completed successfully.
+2024-08-19T23:29:43.521Z [info]: Starting data sync jobs...
+2024-08-19T23:29:43.522Z [info]: Syncing POS data...
+2024-08-19T23:29:43.522Z [info]: POS data sync completed.
+2024-08-19T23:29:43.523Z [info]: Syncing provider data...
+2024-08-19T23:29:43.523Z [info]: Provider data sync completed.
+2024-08-19T23:29:43.523Z [info]: Data sync jobs completed successfully.
+2024-08-20T16:35:36.130Z [info]: Starting data sync jobs...
+2024-08-20T16:35:36.132Z [info]: Syncing POS data...
+2024-08-20T16:35:36.132Z [info]: POS data sync completed.
+2024-08-20T16:35:36.132Z [info]: Syncing provider data...
+2024-08-20T16:35:36.133Z [info]: Provider data sync completed.
+2024-08-20T16:35:36.133Z [info]: Data sync jobs completed successfully.
+2024-08-20T16:49:20.613Z [info]: Starting data sync jobs...
+2024-08-20T16:49:20.614Z [info]: Syncing POS data...
+2024-08-20T16:49:20.615Z [info]: POS data sync completed.
+2024-08-20T16:49:20.615Z [info]: Syncing provider data...
+2024-08-20T16:49:20.615Z [info]: Provider data sync completed.
+2024-08-20T16:49:20.615Z [info]: Data sync jobs completed successfully.
+2024-08-25T14:53:53.581Z [info]: Starting data sync jobs...
+2024-08-25T14:53:53.583Z [info]: Syncing POS data...
+2024-08-25T14:53:53.583Z [info]: POS data sync completed.
+2024-08-25T14:53:53.584Z [info]: Syncing provider data...
+2024-08-25T14:53:53.584Z [info]: Provider data sync completed.
+2024-08-25T14:53:53.584Z [info]: Data sync jobs completed successfully.
+2024-08-25T15:06:48.151Z [info]: Starting data sync jobs...
+2024-08-25T15:06:48.153Z [info]: Syncing POS data...
+2024-08-25T15:06:48.153Z [info]: POS data sync completed.
+2024-08-25T15:06:48.154Z [info]: Syncing provider data...
+2024-08-25T15:06:48.154Z [info]: Provider data sync completed.
+2024-08-25T15:06:48.155Z [info]: Data sync jobs completed successfully.
+2024-08-25T15:21:57.093Z [info]: Starting data sync jobs...
+2024-08-25T15:21:57.095Z [info]: Syncing POS data...
+2024-08-25T15:21:57.096Z [info]: POS data sync completed.
+2024-08-25T15:21:57.096Z [info]: Syncing provider data...
+2024-08-25T15:21:57.097Z [info]: Provider data sync completed.
+2024-08-25T15:21:57.097Z [info]: Data sync jobs completed successfully.
+2024-08-25T15:22:06.207Z [info]: GET /health
+2024-08-25 15:22:06 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:22:16.333Z [info]: GET /health
+2024-08-25 15:22:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:22:26.425Z [info]: GET /health
+2024-08-25 15:22:26 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:22:36.526Z [info]: GET /health
+2024-08-25 15:22:36 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:22:46.612Z [info]: GET /health
+2024-08-25 15:22:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:22:56.701Z [info]: GET /health
+2024-08-25 15:22:56 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:23:06.786Z [info]: GET /health
+2024-08-25 15:23:06 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:23:16.901Z [info]: GET /health
+2024-08-25 15:23:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:23:26.986Z [info]: GET /health
+2024-08-25 15:23:27 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:23:37.078Z [info]: GET /health
+2024-08-25 15:23:37 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:23:47.163Z [info]: GET /health
+2024-08-25 15:23:47 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:23:57.240Z [info]: GET /health
+2024-08-25 15:23:57 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:24:07.329Z [info]: GET /health
+2024-08-25 15:24:07 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:24:17.418Z [info]: GET /health
+2024-08-25 15:24:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:24:27.519Z [info]: GET /health
+2024-08-25 15:24:27 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:24:37.604Z [info]: GET /health
+2024-08-25 15:24:37 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:24:47.693Z [info]: GET /health
+2024-08-25 15:24:47 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:24:57.778Z [info]: GET /health
+2024-08-25 15:24:57 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:25:07.874Z [info]: GET /health
+2024-08-25 15:25:07 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:25:17.961Z [info]: GET /health
+2024-08-25 15:25:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:25:28.056Z [info]: GET /health
+2024-08-25 15:25:28 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:25:38.147Z [info]: GET /health
+2024-08-25 15:25:38 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:25:48.229Z [info]: GET /health
+2024-08-25 15:25:48 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:25:58.311Z [info]: GET /health
+2024-08-25 15:25:58 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:26:08.404Z [info]: GET /health
+2024-08-25 15:26:08 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:26:18.491Z [info]: GET /health
+2024-08-25 15:26:18 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:26:28.580Z [info]: GET /health
+2024-08-25 15:26:28 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:26:38.673Z [info]: GET /health
+2024-08-25 15:26:38 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:26:48.754Z [info]: GET /health
+2024-08-25 15:26:48 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:26:58.848Z [info]: GET /health
+2024-08-25 15:26:58 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:27:08.939Z [info]: GET /health
+2024-08-25 15:27:08 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:27:19.028Z [info]: GET /health
+2024-08-25 15:27:19 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:27:29.111Z [info]: GET /health
+2024-08-25 15:27:29 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:27:39.209Z [info]: GET /health
+2024-08-25 15:27:39 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:27:49.292Z [info]: GET /health
+2024-08-25 15:27:49 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:27:59.390Z [info]: GET /health
+2024-08-25 15:27:59 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:28:09.474Z [info]: GET /health
+2024-08-25 15:28:09 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:28:19.565Z [info]: GET /health
+2024-08-25 15:28:19 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:28:29.649Z [info]: GET /health
+2024-08-25 15:28:29 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:28:39.734Z [info]: GET /health
+2024-08-25 15:28:39 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:28:49.819Z [info]: GET /health
+2024-08-25 15:28:49 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:28:59.923Z [info]: GET /health
+2024-08-25 15:28:59 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:29:10.008Z [info]: GET /health
+2024-08-25 15:29:10 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:29:20.093Z [info]: GET /health
+2024-08-25 15:29:20 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:29:30.173Z [info]: GET /health
+2024-08-25 15:29:30 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:31:05.050Z [info]: Starting data sync jobs...
+2024-08-25T15:31:05.051Z [info]: Syncing POS data...
+2024-08-25T15:31:05.052Z [info]: POS data sync completed.
+2024-08-25T15:31:05.052Z [info]: Syncing provider data...
+2024-08-25T15:31:05.052Z [info]: Provider data sync completed.
+2024-08-25T15:31:05.053Z [info]: Data sync jobs completed successfully.
+2024-08-25T15:31:14.255Z [info]: GET /health
+2024-08-25 15:31:14 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:31:24.402Z [info]: GET /health
+2024-08-25 15:31:24 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:31:34.513Z [info]: GET /health
+2024-08-25 15:31:34 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:31:44.616Z [info]: GET /health
+2024-08-25 15:31:44 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:34:14.370Z [info]: Starting data sync jobs...
+2024-08-25T15:34:14.372Z [info]: Syncing POS data...
+2024-08-25T15:34:14.373Z [info]: POS data sync completed.
+2024-08-25T15:34:14.374Z [info]: Syncing provider data...
+2024-08-25T15:34:14.374Z [info]: Provider data sync completed.
+2024-08-25T15:34:14.375Z [info]: Data sync jobs completed successfully.
+2024-08-25T15:34:23.423Z [info]: GET /health
+2024-08-25 15:34:23 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:34:33.557Z [info]: GET /health
+2024-08-25 15:34:33 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:34:43.653Z [info]: GET /health
+2024-08-25 15:34:43 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:34:53.745Z [info]: GET /health
+2024-08-25 15:34:53 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:35:03.852Z [info]: GET /health
+2024-08-25 15:35:03 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:35:13.945Z [info]: GET /health
+2024-08-25 15:35:13 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:35:24.041Z [info]: GET /health
+2024-08-25 15:35:24 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:35:34.132Z [info]: GET /health
+2024-08-25 15:35:34 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:35:44.214Z [info]: GET /health
+2024-08-25 15:35:44 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:35:54.307Z [info]: GET /health
+2024-08-25 15:35:54 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:36:04.391Z [info]: GET /health
+2024-08-25 15:36:04 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:36:14.481Z [info]: GET /health
+2024-08-25 15:36:14 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:36:24.572Z [info]: GET /health
+2024-08-25 15:36:24 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:36:34.666Z [info]: GET /health
+2024-08-25 15:36:34 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:36:44.759Z [info]: GET /health
+2024-08-25 15:36:44 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:36:54.855Z [info]: GET /health
+2024-08-25 15:36:54 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:37:04.958Z [info]: GET /health
+2024-08-25 15:37:04 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:37:15.050Z [info]: GET /health
+2024-08-25 15:37:15 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:37:25.164Z [info]: GET /health
+2024-08-25 15:37:25 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:37:35.242Z [info]: GET /health
+2024-08-25 15:37:35 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:37:45.325Z [info]: GET /health
+2024-08-25 15:37:45 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:37:55.418Z [info]: GET /health
+2024-08-25 15:37:55 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:38:05.502Z [info]: GET /health
+2024-08-25 15:38:05 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:38:15.594Z [info]: GET /health
+2024-08-25 15:38:15 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:38:25.685Z [info]: GET /health
+2024-08-25 15:38:25 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:38:35.782Z [info]: GET /health
+2024-08-25 15:38:35 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:38:45.868Z [info]: GET /health
+2024-08-25 15:38:45 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:38:55.949Z [info]: GET /health
+2024-08-25 15:38:55 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:39:06.039Z [info]: GET /health
+2024-08-25 15:39:06 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:39:16.119Z [info]: GET /health
+2024-08-25 15:39:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:39:26.204Z [info]: GET /health
+2024-08-25 15:39:26 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:39:36.288Z [info]: GET /health
+2024-08-25 15:39:36 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:39:46.371Z [info]: GET /health
+2024-08-25 15:39:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:39:56.448Z [info]: GET /health
+2024-08-25 15:39:56 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:40:06.533Z [info]: GET /health
+2024-08-25 15:40:06 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:40:16.621Z [info]: GET /health
+2024-08-25 15:40:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:40:26.721Z [info]: GET /health
+2024-08-25 15:40:26 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:40:36.804Z [info]: GET /health
+2024-08-25 15:40:36 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:40:46.904Z [info]: GET /health
+2024-08-25 15:40:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:40:56.998Z [info]: GET /health
+2024-08-25 15:40:57 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:41:07.093Z [info]: GET /health
+2024-08-25 15:41:07 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:41:17.179Z [info]: GET /health
+2024-08-25 15:41:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:47:25.444Z [info]: Starting data sync jobs...
+2024-08-25T15:47:25.445Z [info]: Syncing POS data...
+2024-08-25T15:47:25.446Z [info]: POS data sync completed.
+2024-08-25T15:47:25.446Z [info]: Syncing provider data...
+2024-08-25T15:47:25.447Z [info]: Provider data sync completed.
+2024-08-25T15:47:25.447Z [info]: Data sync jobs completed successfully.
+2024-08-25T15:47:34.670Z [info]: GET /health
+2024-08-25 15:47:34 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:47:44.809Z [info]: GET /health
+2024-08-25 15:47:44 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:47:54.895Z [info]: GET /health
+2024-08-25 15:47:54 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:48:04.989Z [info]: GET /health
+2024-08-25 15:48:05 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:48:15.075Z [info]: GET /health
+2024-08-25 15:48:15 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:48:25.160Z [info]: GET /health
+2024-08-25 15:48:25 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:48:35.246Z [info]: GET /health
+2024-08-25 15:48:35 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:48:45.336Z [info]: GET /health
+2024-08-25 15:48:45 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:48:55.428Z [info]: GET /health
+2024-08-25 15:48:55 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:49:05.532Z [info]: GET /health
+2024-08-25 15:49:05 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:49:15.619Z [info]: GET /health
+2024-08-25 15:49:15 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:49:25.706Z [info]: GET /health
+2024-08-25 15:49:25 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:49:35.801Z [info]: GET /health
+2024-08-25 15:49:35 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:49:45.885Z [info]: GET /health
+2024-08-25 15:49:45 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:49:55.980Z [info]: GET /health
+2024-08-25 15:49:55 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:50:06.090Z [info]: GET /health
+2024-08-25 15:50:06 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:50:16.190Z [info]: GET /health
+2024-08-25 15:50:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:50:26.298Z [info]: GET /health
+2024-08-25 15:50:26 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:50:36.462Z [info]: GET /health
+2024-08-25 15:50:36 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:50:46.622Z [info]: GET /health
+2024-08-25 15:50:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:50:56.838Z [info]: GET /health
+2024-08-25 15:50:56 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:51:06.959Z [info]: GET /health
+2024-08-25 15:51:06 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:51:17.058Z [info]: GET /health
+2024-08-25 15:51:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:51:27.136Z [info]: GET /health
+2024-08-25 15:51:27 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:51:37.231Z [info]: GET /health
+2024-08-25 15:51:37 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:51:47.322Z [info]: GET /health
+2024-08-25 15:51:47 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:51:57.404Z [info]: GET /health
+2024-08-25 15:51:57 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:52:07.496Z [info]: GET /health
+2024-08-25 15:52:07 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T15:52:17.577Z [info]: GET /health
+2024-08-25 15:52:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:04:27.062Z [info]: Starting data sync jobs...
+2024-08-25T16:04:27.064Z [info]: Syncing POS data...
+2024-08-25T16:04:27.064Z [info]: POS data sync completed.
+2024-08-25T16:04:27.065Z [info]: Syncing provider data...
+2024-08-25T16:04:27.065Z [info]: Provider data sync completed.
+2024-08-25T16:04:27.065Z [info]: Data sync jobs completed successfully.
+2024-08-25T16:04:36.209Z [info]: GET /health
+2024-08-25 16:04:36 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:04:46.341Z [info]: GET /health
+2024-08-25 16:04:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:04:56.430Z [info]: GET /health
+2024-08-25 16:04:56 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:05:06.533Z [info]: GET /health
+2024-08-25 16:05:06 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:05:16.644Z [info]: GET /health
+2024-08-25 16:05:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:05:26.743Z [info]: GET /health
+2024-08-25 16:05:26 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:05:36.829Z [info]: GET /health
+2024-08-25 16:05:36 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:05:46.921Z [info]: GET /health
+2024-08-25 16:05:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:05:57.020Z [info]: GET /health
+2024-08-25 16:05:57 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:06:07.108Z [info]: GET /health
+2024-08-25 16:06:07 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:06:17.199Z [info]: GET /health
+2024-08-25 16:06:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:06:27.282Z [info]: GET /health
+2024-08-25 16:06:27 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:06:37.374Z [info]: GET /health
+2024-08-25 16:06:37 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:06:47.458Z [info]: GET /health
+2024-08-25 16:06:47 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:06:57.541Z [info]: GET /health
+2024-08-25 16:06:57 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:07:07.624Z [info]: GET /health
+2024-08-25 16:07:07 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:07:17.722Z [info]: GET /health
+2024-08-25 16:07:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:07:27.814Z [info]: GET /health
+2024-08-25 16:07:27 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:07:37.904Z [info]: GET /health
+2024-08-25 16:07:37 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:07:47.991Z [info]: GET /health
+2024-08-25 16:07:48 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:07:58.079Z [info]: GET /health
+2024-08-25 16:07:58 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:08:08.162Z [info]: GET /health
+2024-08-25 16:08:08 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:08:18.247Z [info]: GET /health
+2024-08-25 16:08:18 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:08:28.323Z [info]: GET /health
+2024-08-25 16:08:28 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:08:38.418Z [info]: GET /health
+2024-08-25 16:08:38 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:08:48.504Z [info]: GET /health
+2024-08-25 16:08:48 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:08:58.594Z [info]: GET /health
+2024-08-25 16:08:58 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:09:08.689Z [info]: GET /health
+2024-08-25 16:09:08 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:09:18.800Z [info]: GET /health
+2024-08-25 16:09:18 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:09:28.908Z [info]: GET /health
+2024-08-25 16:09:28 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:09:38.992Z [info]: GET /health
+2024-08-25 16:09:39 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:09:49.076Z [info]: GET /health
+2024-08-25 16:09:49 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:09:59.167Z [info]: GET /health
+2024-08-25 16:09:59 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:10:09.269Z [info]: GET /health
+2024-08-25 16:10:09 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:10:19.364Z [info]: GET /health
+2024-08-25 16:10:19 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:10:29.446Z [info]: GET /health
+2024-08-25 16:10:29 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:10:39.544Z [info]: GET /health
+2024-08-25 16:10:39 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:10:49.621Z [info]: GET /health
+2024-08-25 16:10:49 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:10:59.702Z [info]: GET /health
+2024-08-25 16:10:59 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:11:09.785Z [info]: GET /health
+2024-08-25 16:11:09 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:11:19.864Z [info]: GET /health
+2024-08-25 16:11:19 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:11:29.949Z [info]: GET /health
+2024-08-25 16:11:29 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:11:40.037Z [info]: GET /health
+2024-08-25 16:11:40 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:11:50.122Z [info]: GET /health
+2024-08-25 16:11:50 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:12:00.215Z [info]: GET /health
+2024-08-25 16:12:00 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:12:10.303Z [info]: GET /health
+2024-08-25 16:12:10 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:12:20.387Z [info]: GET /health
+2024-08-25 16:12:20 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:12:30.471Z [info]: GET /health
+2024-08-25 16:12:30 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:12:40.561Z [info]: GET /health
+2024-08-25 16:12:40 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:12:50.653Z [info]: GET /health
+2024-08-25 16:12:50 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:13:00.748Z [info]: GET /health
+2024-08-25 16:13:00 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:13:10.826Z [info]: GET /health
+2024-08-25 16:13:10 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:13:20.913Z [info]: GET /health
+2024-08-25 16:13:20 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:13:30.993Z [info]: GET /health
+2024-08-25 16:13:31 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:13:41.082Z [info]: GET /health
+2024-08-25 16:13:41 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:13:51.166Z [info]: GET /health
+2024-08-25 16:13:51 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:14:01.263Z [info]: GET /health
+2024-08-25 16:14:01 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:14:11.377Z [info]: GET /health
+2024-08-25 16:14:11 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:14:21.456Z [info]: GET /health
+2024-08-25 16:14:21 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:14:31.543Z [info]: GET /health
+2024-08-25 16:14:31 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:14:41.630Z [info]: GET /health
+2024-08-25 16:14:41 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:14:51.721Z [info]: GET /health
+2024-08-25 16:14:51 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:15:01.885Z [info]: GET /health
+2024-08-25 16:15:01 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:15:12.039Z [info]: GET /health
+2024-08-25 16:15:12 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:15:22.135Z [info]: GET /health
+2024-08-25 16:15:22 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:15:32.229Z [info]: GET /health
+2024-08-25 16:15:32 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:15:42.323Z [info]: GET /health
+2024-08-25 16:15:42 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:15:52.432Z [info]: GET /health
+2024-08-25 16:15:52 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:16:02.544Z [info]: GET /health
+2024-08-25 16:16:02 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:16:12.635Z [info]: GET /health
+2024-08-25 16:16:12 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:16:22.720Z [info]: GET /health
+2024-08-25 16:16:22 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:16:32.807Z [info]: GET /health
+2024-08-25 16:16:32 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:16:42.909Z [info]: GET /health
+2024-08-25 16:16:42 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:16:52.987Z [info]: GET /health
+2024-08-25 16:16:53 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:17:03.074Z [info]: GET /health
+2024-08-25 16:17:03 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:17:13.165Z [info]: GET /health
+2024-08-25 16:17:13 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:17:23.251Z [info]: GET /health
+2024-08-25 16:17:23 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:17:33.346Z [info]: GET /health
+2024-08-25 16:17:33 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:17:43.431Z [info]: GET /health
+2024-08-25 16:17:43 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:17:53.511Z [info]: GET /health
+2024-08-25 16:17:53 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:18:03.602Z [info]: GET /health
+2024-08-25 16:18:03 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:18:13.698Z [info]: GET /health
+2024-08-25 16:18:13 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:18:23.783Z [info]: GET /health
+2024-08-25 16:18:23 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:18:33.880Z [info]: GET /health
+2024-08-25 16:18:33 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:18:43.962Z [info]: GET /health
+2024-08-25 16:18:43 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:18:54.048Z [info]: GET /health
+2024-08-25 16:18:54 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:19:04.132Z [info]: GET /health
+2024-08-25 16:19:04 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:19:14.244Z [info]: GET /health
+2024-08-25 16:19:14 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:19:24.329Z [info]: GET /health
+2024-08-25 16:19:24 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:19:34.417Z [info]: GET /health
+2024-08-25 16:19:34 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:19:44.495Z [info]: GET /health
+2024-08-25 16:19:44 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:19:54.578Z [info]: GET /health
+2024-08-25 16:19:54 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:20:02.355Z [info]: GET /
+2024-08-25 16:20:02 [[31merror[39m]: Error retrieving client information for subdomain: 64
+2024-08-25T16:20:04.668Z [info]: GET /health
+2024-08-25 16:20:04 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:20:14.738Z [info]: GET /health
+2024-08-25 16:20:14 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:20:24.811Z [info]: GET /health
+2024-08-25 16:20:24 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:20:34.886Z [info]: GET /health
+2024-08-25 16:20:34 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:20:44.967Z [info]: GET /health
+2024-08-25 16:20:44 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:20:55.055Z [info]: GET /health
+2024-08-25 16:20:55 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:21:05.132Z [info]: GET /health
+2024-08-25 16:21:05 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:21:15.214Z [info]: GET /health
+2024-08-25 16:21:15 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:21:25.290Z [info]: GET /health
+2024-08-25 16:21:25 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:21:35.362Z [info]: GET /health
+2024-08-25 16:21:35 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:21:45.438Z [info]: GET /health
+2024-08-25 16:21:45 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:21:55.517Z [info]: GET /health
+2024-08-25 16:21:55 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:22:05.585Z [info]: GET /health
+2024-08-25 16:22:05 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:22:15.654Z [info]: GET /health
+2024-08-25 16:22:15 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:22:25.728Z [info]: GET /health
+2024-08-25 16:22:25 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:22:35.793Z [info]: GET /health
+2024-08-25 16:22:35 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:22:45.886Z [info]: GET /health
+2024-08-25 16:22:45 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:22:55.971Z [info]: GET /health
+2024-08-25 16:22:55 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:23:06.063Z [info]: GET /health
+2024-08-25 16:23:06 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:23:16.139Z [info]: GET /health
+2024-08-25 16:23:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:23:26.225Z [info]: GET /health
+2024-08-25 16:23:26 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:23:36.313Z [info]: GET /health
+2024-08-25 16:23:36 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:23:46.404Z [info]: GET /health
+2024-08-25 16:23:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:23:56.485Z [info]: GET /health
+2024-08-25 16:23:56 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:24:06.574Z [info]: GET /health
+2024-08-25 16:24:06 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:24:16.662Z [info]: GET /health
+2024-08-25 16:24:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:24:26.748Z [info]: GET /health
+2024-08-25 16:24:26 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:24:36.839Z [info]: GET /health
+2024-08-25 16:24:36 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:24:46.924Z [info]: GET /health
+2024-08-25 16:24:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:24:57.021Z [info]: GET /health
+2024-08-25 16:24:57 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:25:07.108Z [info]: GET /health
+2024-08-25 16:25:07 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:25:17.194Z [info]: GET /health
+2024-08-25 16:25:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:25:27.275Z [info]: GET /health
+2024-08-25 16:25:27 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:25:37.364Z [info]: GET /health
+2024-08-25 16:25:37 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:25:47.447Z [info]: GET /health
+2024-08-25 16:25:47 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:25:57.537Z [info]: GET /health
+2024-08-25 16:25:57 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:26:07.639Z [info]: GET /health
+2024-08-25 16:26:07 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:26:17.718Z [info]: GET /health
+2024-08-25 16:26:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:26:27.806Z [info]: GET /health
+2024-08-25 16:26:27 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:26:37.897Z [info]: GET /health
+2024-08-25 16:26:37 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:26:47.989Z [info]: GET /health
+2024-08-25 16:26:48 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:26:58.077Z [info]: GET /health
+2024-08-25 16:26:58 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:27:08.167Z [info]: GET /health
+2024-08-25 16:27:08 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:27:18.247Z [info]: GET /health
+2024-08-25 16:27:18 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:27:28.328Z [info]: GET /health
+2024-08-25 16:27:28 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:27:38.422Z [info]: GET /health
+2024-08-25 16:27:38 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:27:48.525Z [info]: GET /health
+2024-08-25 16:27:48 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:27:58.615Z [info]: GET /health
+2024-08-25 16:27:58 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:28:08.699Z [info]: GET /health
+2024-08-25 16:28:08 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:28:18.786Z [info]: GET /health
+2024-08-25 16:28:18 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:28:28.873Z [info]: GET /health
+2024-08-25 16:28:28 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:28:38.960Z [info]: GET /health
+2024-08-25 16:28:38 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:28:49.050Z [info]: GET /health
+2024-08-25 16:28:49 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:28:59.131Z [info]: GET /health
+2024-08-25 16:28:59 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:29:09.217Z [info]: GET /health
+2024-08-25 16:29:09 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:29:19.316Z [info]: GET /health
+2024-08-25 16:29:19 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:29:29.404Z [info]: GET /health
+2024-08-25 16:29:29 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:29:39.499Z [info]: GET /health
+2024-08-25 16:29:39 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:29:49.590Z [info]: GET /health
+2024-08-25 16:29:49 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:29:59.688Z [info]: GET /health
+2024-08-25 16:29:59 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:30:09.796Z [info]: GET /health
+2024-08-25 16:30:09 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:30:19.887Z [info]: GET /health
+2024-08-25 16:30:19 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:30:29.969Z [info]: GET /health
+2024-08-25 16:30:29 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:30:40.049Z [info]: GET /health
+2024-08-25 16:30:40 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:30:50.141Z [info]: GET /health
+2024-08-25 16:30:50 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:31:00.226Z [info]: GET /health
+2024-08-25 16:31:00 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:31:10.314Z [info]: GET /health
+2024-08-25 16:31:10 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:31:20.408Z [info]: GET /health
+2024-08-25 16:31:20 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:31:30.487Z [info]: GET /health
+2024-08-25 16:31:30 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:31:40.572Z [info]: GET /health
+2024-08-25 16:31:40 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:31:50.664Z [info]: GET /health
+2024-08-25 16:31:50 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:32:00.750Z [info]: GET /health
+2024-08-25 16:32:00 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:32:10.850Z [info]: GET /health
+2024-08-25 16:32:10 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:32:20.937Z [info]: GET /health
+2024-08-25 16:32:20 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:32:31.017Z [info]: GET /health
+2024-08-25 16:32:31 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:32:41.098Z [info]: GET /health
+2024-08-25 16:32:41 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:32:51.184Z [info]: GET /health
+2024-08-25 16:32:51 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:33:01.275Z [info]: GET /health
+2024-08-25 16:33:01 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:33:11.360Z [info]: GET /health
+2024-08-25 16:33:11 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:33:21.447Z [info]: GET /health
+2024-08-25 16:33:21 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:33:31.540Z [info]: GET /health
+2024-08-25 16:33:31 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:33:41.625Z [info]: GET /health
+2024-08-25 16:33:41 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:33:51.716Z [info]: GET /health
+2024-08-25 16:33:51 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:34:01.826Z [info]: GET /health
+2024-08-25 16:34:01 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:34:11.911Z [info]: GET /health
+2024-08-25 16:34:11 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:34:22.035Z [info]: GET /health
+2024-08-25 16:34:22 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:34:32.114Z [info]: GET /health
+2024-08-25 16:34:32 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:34:42.205Z [info]: GET /health
+2024-08-25 16:34:42 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:34:52.296Z [info]: GET /health
+2024-08-25 16:34:52 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:35:02.509Z [info]: GET /health
+2024-08-25 16:35:02 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:35:12.653Z [info]: GET /health
+2024-08-25 16:35:12 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:35:22.740Z [info]: GET /health
+2024-08-25 16:35:22 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:35:32.820Z [info]: GET /health
+2024-08-25 16:35:32 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:35:42.904Z [info]: GET /health
+2024-08-25 16:35:42 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:35:53.003Z [info]: GET /health
+2024-08-25 16:35:53 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:36:03.104Z [info]: GET /health
+2024-08-25 16:36:03 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:36:13.205Z [info]: GET /health
+2024-08-25 16:36:13 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:36:23.311Z [info]: GET /health
+2024-08-25 16:36:23 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:36:33.411Z [info]: GET /health
+2024-08-25 16:36:33 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:36:43.494Z [info]: GET /health
+2024-08-25 16:36:43 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:36:53.580Z [info]: GET /health
+2024-08-25 16:36:53 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:37:03.676Z [info]: GET /health
+2024-08-25 16:37:03 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:37:13.776Z [info]: GET /health
+2024-08-25 16:37:13 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:37:23.869Z [info]: GET /health
+2024-08-25 16:37:23 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:37:33.970Z [info]: GET /health
+2024-08-25 16:37:33 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:37:44.053Z [info]: GET /health
+2024-08-25 16:37:44 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:37:54.135Z [info]: GET /health
+2024-08-25 16:37:54 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:38:04.218Z [info]: GET /health
+2024-08-25 16:38:04 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:38:14.309Z [info]: GET /health
+2024-08-25 16:38:14 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:38:24.400Z [info]: GET /health
+2024-08-25 16:38:24 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:38:34.496Z [info]: GET /health
+2024-08-25 16:38:34 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:38:44.585Z [info]: GET /health
+2024-08-25 16:38:44 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:38:54.669Z [info]: GET /health
+2024-08-25 16:38:54 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:39:04.752Z [info]: GET /health
+2024-08-25 16:39:04 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:39:14.844Z [info]: GET /health
+2024-08-25 16:39:14 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:39:24.935Z [info]: GET /health
+2024-08-25 16:39:24 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:39:35.017Z [info]: GET /health
+2024-08-25 16:39:35 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:39:45.111Z [info]: GET /health
+2024-08-25 16:39:45 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:39:55.202Z [info]: GET /health
+2024-08-25 16:39:55 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:40:05.313Z [info]: GET /health
+2024-08-25 16:40:05 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:40:15.419Z [info]: GET /health
+2024-08-25 16:40:15 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:40:25.501Z [info]: GET /health
+2024-08-25 16:40:25 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:40:35.590Z [info]: GET /health
+2024-08-25 16:40:35 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:40:45.675Z [info]: GET /health
+2024-08-25 16:40:45 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:40:55.764Z [info]: GET /health
+2024-08-25 16:40:55 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:41:05.856Z [info]: GET /health
+2024-08-25 16:41:05 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:41:15.933Z [info]: GET /health
+2024-08-25 16:41:15 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:41:26.014Z [info]: GET /health
+2024-08-25 16:41:26 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:41:36.096Z [info]: GET /health
+2024-08-25 16:41:36 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:41:46.190Z [info]: GET /health
+2024-08-25 16:41:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:41:56.277Z [info]: GET /health
+2024-08-25 16:41:56 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:42:06.368Z [info]: GET /health
+2024-08-25 16:42:06 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:42:16.452Z [info]: GET /health
+2024-08-25 16:42:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:42:26.539Z [info]: GET /health
+2024-08-25 16:42:26 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:42:36.623Z [info]: GET /health
+2024-08-25 16:42:36 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:42:46.714Z [info]: GET /health
+2024-08-25 16:42:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:42:56.806Z [info]: GET /health
+2024-08-25 16:42:56 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:43:06.896Z [info]: GET /health
+2024-08-25 16:43:06 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:43:16.976Z [info]: GET /health
+2024-08-25 16:43:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:43:27.055Z [info]: GET /health
+2024-08-25 16:43:27 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:43:37.135Z [info]: GET /health
+2024-08-25 16:43:37 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:43:47.213Z [info]: GET /health
+2024-08-25 16:43:47 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:43:57.290Z [info]: GET /health
+2024-08-25 16:43:57 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:44:07.374Z [info]: GET /health
+2024-08-25 16:44:07 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:44:17.458Z [info]: GET /health
+2024-08-25 16:44:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:44:27.539Z [info]: GET /health
+2024-08-25 16:44:27 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:44:37.631Z [info]: GET /health
+2024-08-25 16:44:37 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:44:47.729Z [info]: GET /health
+2024-08-25 16:44:47 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:44:57.809Z [info]: GET /health
+2024-08-25 16:44:57 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:45:07.896Z [info]: GET /health
+2024-08-25 16:45:07 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:45:17.974Z [info]: GET /health
+2024-08-25 16:45:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:45:28.051Z [info]: GET /health
+2024-08-25 16:45:28 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:45:38.134Z [info]: GET /health
+2024-08-25 16:45:38 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:45:48.217Z [info]: GET /health
+2024-08-25 16:45:48 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:45:58.302Z [info]: GET /health
+2024-08-25 16:45:58 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:46:08.387Z [info]: GET /health
+2024-08-25 16:46:08 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:46:18.465Z [info]: GET /health
+2024-08-25 16:46:18 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:46:28.544Z [info]: GET /health
+2024-08-25 16:46:28 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:46:38.636Z [info]: GET /health
+2024-08-25 16:46:38 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:46:48.718Z [info]: GET /health
+2024-08-25 16:46:48 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:46:58.795Z [info]: GET /health
+2024-08-25 16:46:58 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:47:08.882Z [info]: GET /health
+2024-08-25 16:47:08 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:47:18.964Z [info]: GET /health
+2024-08-25 16:47:18 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:47:29.059Z [info]: GET /health
+2024-08-25 16:47:29 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:47:39.155Z [info]: GET /health
+2024-08-25 16:47:39 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:47:49.240Z [info]: GET /health
+2024-08-25 16:47:49 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:47:59.332Z [info]: GET /health
+2024-08-25 16:47:59 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:48:09.415Z [info]: GET /health
+2024-08-25 16:48:09 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:48:19.505Z [info]: GET /health
+2024-08-25 16:48:19 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:48:29.584Z [info]: GET /health
+2024-08-25 16:48:29 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:48:39.665Z [info]: GET /health
+2024-08-25 16:48:39 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:48:49.762Z [info]: GET /health
+2024-08-25 16:48:49 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:48:59.855Z [info]: GET /health
+2024-08-25 16:48:59 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:49:09.942Z [info]: GET /health
+2024-08-25 16:49:09 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:49:20.028Z [info]: GET /health
+2024-08-25 16:49:20 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:49:30.110Z [info]: GET /health
+2024-08-25 16:49:30 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:49:40.191Z [info]: GET /health
+2024-08-25 16:49:40 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:49:50.274Z [info]: GET /health
+2024-08-25 16:49:50 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:50:00.368Z [info]: GET /health
+2024-08-25 16:50:00 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:50:10.460Z [info]: GET /health
+2024-08-25 16:50:10 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:50:20.569Z [info]: GET /health
+2024-08-25 16:50:20 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:50:30.741Z [info]: GET /health
+2024-08-25 16:50:30 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:50:40.971Z [info]: GET /health
+2024-08-25 16:50:41 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:50:51.194Z [info]: GET /health
+2024-08-25 16:50:51 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:51:01.411Z [info]: GET /health
+2024-08-25 16:51:01 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:51:11.571Z [info]: GET /health
+2024-08-25 16:51:11 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:51:21.655Z [info]: GET /health
+2024-08-25 16:51:21 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:51:31.736Z [info]: GET /health
+2024-08-25 16:51:31 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:51:41.819Z [info]: GET /health
+2024-08-25 16:51:41 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:51:51.911Z [info]: GET /health
+2024-08-25 16:51:51 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:52:02.011Z [info]: GET /health
+2024-08-25 16:52:02 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:52:12.122Z [info]: GET /health
+2024-08-25 16:52:12 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:52:22.225Z [info]: GET /health
+2024-08-25 16:52:22 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:52:32.411Z [info]: GET /health
+2024-08-25 16:52:32 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:52:42.583Z [info]: GET /health
+2024-08-25 16:52:42 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:52:52.672Z [info]: GET /health
+2024-08-25 16:52:52 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:53:02.811Z [info]: GET /health
+2024-08-25 16:53:02 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:53:12.920Z [info]: GET /health
+2024-08-25 16:53:12 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:53:23.011Z [info]: GET /health
+2024-08-25 16:53:23 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:53:33.089Z [info]: GET /health
+2024-08-25 16:53:33 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:53:43.199Z [info]: GET /health
+2024-08-25 16:53:43 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:53:53.309Z [info]: GET /health
+2024-08-25 16:53:53 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:54:03.429Z [info]: GET /health
+2024-08-25 16:54:03 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:54:13.557Z [info]: GET /health
+2024-08-25 16:54:13 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:54:23.699Z [info]: GET /health
+2024-08-25 16:54:23 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:54:33.841Z [info]: GET /health
+2024-08-25 16:54:33 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:54:43.930Z [info]: GET /health
+2024-08-25 16:54:43 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:54:54.109Z [info]: GET /health
+2024-08-25 16:54:54 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:55:04.249Z [info]: GET /health
+2024-08-25 16:55:04 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:55:14.374Z [info]: GET /health
+2024-08-25 16:55:14 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:55:24.496Z [info]: GET /health
+2024-08-25 16:55:24 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:55:34.595Z [info]: GET /health
+2024-08-25 16:55:34 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:55:44.706Z [info]: GET /health
+2024-08-25 16:55:44 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:55:54.793Z [info]: GET /health
+2024-08-25 16:55:54 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:56:04.877Z [info]: GET /health
+2024-08-25 16:56:04 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:56:14.955Z [info]: GET /health
+2024-08-25 16:56:14 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:56:25.037Z [info]: GET /health
+2024-08-25 16:56:25 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:56:35.131Z [info]: GET /health
+2024-08-25 16:56:35 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:56:45.217Z [info]: GET /health
+2024-08-25 16:56:45 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:56:55.308Z [info]: GET /health
+2024-08-25 16:56:55 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:57:05.408Z [info]: GET /health
+2024-08-25 16:57:05 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:57:15.506Z [info]: GET /health
+2024-08-25 16:57:15 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:57:25.595Z [info]: GET /health
+2024-08-25 16:57:25 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:57:35.682Z [info]: GET /health
+2024-08-25 16:57:35 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:57:45.777Z [info]: GET /health
+2024-08-25 16:57:45 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:57:55.865Z [info]: GET /health
+2024-08-25 16:57:55 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:58:05.950Z [info]: GET /health
+2024-08-25 16:58:05 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:58:16.047Z [info]: GET /health
+2024-08-25 16:58:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:58:26.130Z [info]: GET /health
+2024-08-25 16:58:26 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:58:36.211Z [info]: GET /health
+2024-08-25 16:58:36 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:58:46.296Z [info]: GET /health
+2024-08-25 16:58:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:58:56.378Z [info]: GET /health
+2024-08-25 16:58:56 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:59:06.459Z [info]: GET /health
+2024-08-25 16:59:06 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:59:16.537Z [info]: GET /health
+2024-08-25 16:59:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:59:26.613Z [info]: GET /health
+2024-08-25 16:59:26 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:59:36.694Z [info]: GET /health
+2024-08-25 16:59:36 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:59:46.776Z [info]: GET /health
+2024-08-25 16:59:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T16:59:56.860Z [info]: GET /health
+2024-08-25 16:59:56 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:00:06.970Z [info]: GET /health
+2024-08-25 17:00:06 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:00:17.081Z [info]: GET /health
+2024-08-25 17:00:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:00:27.191Z [info]: GET /health
+2024-08-25 17:00:27 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:00:37.281Z [info]: GET /health
+2024-08-25 17:00:37 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:00:47.367Z [info]: GET /health
+2024-08-25 17:00:47 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:00:57.452Z [info]: GET /health
+2024-08-25 17:00:57 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:01:07.541Z [info]: GET /health
+2024-08-25 17:01:07 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:01:17.619Z [info]: GET /health
+2024-08-25 17:01:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:01:27.708Z [info]: GET /health
+2024-08-25 17:01:27 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:01:37.794Z [info]: GET /health
+2024-08-25 17:01:37 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:01:47.874Z [info]: GET /health
+2024-08-25 17:01:47 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:01:57.959Z [info]: GET /health
+2024-08-25 17:01:57 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:02:08.047Z [info]: GET /health
+2024-08-25 17:02:08 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:02:18.126Z [info]: GET /health
+2024-08-25 17:02:18 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:02:28.204Z [info]: GET /health
+2024-08-25 17:02:28 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:02:38.287Z [info]: GET /health
+2024-08-25 17:02:38 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:02:48.372Z [info]: GET /health
+2024-08-25 17:02:48 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:09:55.474Z [info]: Starting data sync jobs...
+2024-08-25T17:09:55.476Z [info]: Syncing POS data...
+2024-08-25T17:09:55.476Z [info]: POS data sync completed.
+2024-08-25T17:09:55.476Z [info]: Syncing provider data...
+2024-08-25T17:09:55.477Z [info]: Provider data sync completed.
+2024-08-25T17:09:55.477Z [info]: Data sync jobs completed successfully.
+2024-08-25T17:10:04.687Z [info]: GET /health
+2024-08-25 17:10:04 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:10:14.859Z [info]: GET /health
+2024-08-25 17:10:14 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:10:24.962Z [info]: GET /health
+2024-08-25 17:10:24 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:10:35.050Z [info]: GET /health
+2024-08-25 17:10:35 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:10:45.137Z [info]: GET /health
+2024-08-25 17:10:45 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:10:55.220Z [info]: GET /health
+2024-08-25 17:10:55 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:11:05.309Z [info]: GET /health
+2024-08-25 17:11:05 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:11:15.395Z [info]: GET /health
+2024-08-25 17:11:15 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:11:25.482Z [info]: GET /health
+2024-08-25 17:11:25 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:11:35.578Z [info]: GET /health
+2024-08-25 17:11:35 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:11:45.676Z [info]: GET /health
+2024-08-25 17:11:45 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:11:55.763Z [info]: GET /health
+2024-08-25 17:11:55 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:12:05.862Z [info]: GET /health
+2024-08-25 17:12:05 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:12:15.963Z [info]: GET /health
+2024-08-25 17:12:15 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:12:26.054Z [info]: GET /health
+2024-08-25 17:12:26 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:12:36.154Z [info]: GET /health
+2024-08-25 17:12:36 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:12:46.235Z [info]: GET /health
+2024-08-25 17:12:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:12:56.317Z [info]: GET /health
+2024-08-25 17:12:56 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:13:06.406Z [info]: GET /health
+2024-08-25 17:13:06 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:13:16.495Z [info]: GET /health
+2024-08-25 17:13:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:13:26.589Z [info]: GET /health
+2024-08-25 17:13:26 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:13:36.681Z [info]: GET /health
+2024-08-25 17:13:36 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:13:46.761Z [info]: GET /health
+2024-08-25 17:13:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:13:56.843Z [info]: GET /health
+2024-08-25 17:13:56 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:14:06.940Z [info]: GET /health
+2024-08-25 17:14:06 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:14:17.036Z [info]: GET /health
+2024-08-25 17:14:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:14:27.118Z [info]: GET /health
+2024-08-25 17:14:27 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:14:37.202Z [info]: GET /health
+2024-08-25 17:14:37 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:14:47.282Z [info]: GET /health
+2024-08-25 17:14:47 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:14:57.363Z [info]: GET /health
+2024-08-25 17:14:57 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:15:07.470Z [info]: GET /health
+2024-08-25 17:15:07 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:15:17.567Z [info]: GET /health
+2024-08-25 17:15:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:15:27.655Z [info]: GET /health
+2024-08-25 17:15:27 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:15:37.732Z [info]: GET /health
+2024-08-25 17:15:37 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:15:47.812Z [info]: GET /health
+2024-08-25 17:15:47 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:15:57.903Z [info]: GET /health
+2024-08-25 17:15:57 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:16:07.984Z [info]: GET /health
+2024-08-25 17:16:07 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:16:18.075Z [info]: GET /health
+2024-08-25 17:16:18 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:16:28.156Z [info]: GET /health
+2024-08-25 17:16:28 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:16:38.241Z [info]: GET /health
+2024-08-25 17:16:38 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:16:48.315Z [info]: GET /health
+2024-08-25 17:16:48 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:16:58.397Z [info]: GET /health
+2024-08-25 17:16:58 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:17:08.477Z [info]: GET /health
+2024-08-25 17:17:08 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:17:18.563Z [info]: GET /health
+2024-08-25 17:17:18 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:17:28.649Z [info]: GET /health
+2024-08-25 17:17:28 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:17:38.734Z [info]: GET /health
+2024-08-25 17:17:38 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:17:48.824Z [info]: GET /health
+2024-08-25 17:17:48 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:17:58.913Z [info]: GET /health
+2024-08-25 17:17:58 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:18:08.996Z [info]: GET /health
+2024-08-25 17:18:09 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:18:19.084Z [info]: GET /health
+2024-08-25 17:18:19 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:22:56.305Z [info]: Starting data sync jobs...
+2024-08-25T17:22:56.307Z [info]: Syncing POS data...
+2024-08-25T17:22:56.308Z [info]: POS data sync completed.
+2024-08-25T17:22:56.308Z [info]: Syncing provider data...
+2024-08-25T17:22:56.309Z [info]: Provider data sync completed.
+2024-08-25T17:22:56.309Z [info]: Data sync jobs completed successfully.
+2024-08-25T17:23:25.476Z [info]: GET /health
+2024-08-25 17:23:25 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:23:55.601Z [info]: GET /health
+2024-08-25 17:23:55 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:24:25.719Z [info]: GET /health
+2024-08-25 17:24:25 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:24:55.817Z [info]: GET /health
+2024-08-25 17:24:55 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:25:25.911Z [info]: GET /health
+2024-08-25 17:25:25 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:25:55.999Z [info]: GET /health
+2024-08-25 17:25:56 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:32:46.260Z [info]: Starting data sync jobs...
+2024-08-25T17:32:46.261Z [info]: Syncing POS data...
+2024-08-25T17:32:46.261Z [info]: POS data sync completed.
+2024-08-25T17:32:46.262Z [info]: Syncing provider data...
+2024-08-25T17:32:46.262Z [info]: Provider data sync completed.
+2024-08-25T17:32:46.263Z [info]: Data sync jobs completed successfully.
+2024-08-25T17:33:15.549Z [info]: GET /health
+2024-08-25 17:33:15 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:33:45.701Z [info]: GET /health
+2024-08-25 17:33:45 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:34:15.789Z [info]: GET /health
+2024-08-25 17:34:15 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:34:45.875Z [info]: GET /health
+2024-08-25 17:34:45 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:35:15.962Z [info]: GET /health
+2024-08-25 17:35:15 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:35:46.051Z [info]: GET /health
+2024-08-25 17:35:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:36:16.133Z [info]: GET /health
+2024-08-25 17:36:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:36:46.230Z [info]: GET /health
+2024-08-25 17:36:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:37:16.317Z [info]: GET /health
+2024-08-25 17:37:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:37:46.399Z [info]: GET /health
+2024-08-25 17:37:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:38:16.479Z [info]: GET /health
+2024-08-25 17:38:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:38:46.566Z [info]: GET /health
+2024-08-25 17:38:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:39:16.649Z [info]: GET /health
+2024-08-25 17:39:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:39:46.747Z [info]: GET /health
+2024-08-25 17:39:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:40:16.848Z [info]: GET /health
+2024-08-25 17:40:16 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:40:46.938Z [info]: GET /health
+2024-08-25 17:40:46 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:41:17.031Z [info]: GET /health
+2024-08-25 17:41:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:41:47.109Z [info]: GET /health
+2024-08-25 17:41:47 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:42:17.188Z [info]: GET /health
+2024-08-25 17:42:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:42:47.286Z [info]: GET /health
+2024-08-25 17:42:47 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:43:17.357Z [info]: GET /health
+2024-08-25 17:43:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:43:47.437Z [info]: GET /health
+2024-08-25 17:43:47 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:44:17.524Z [info]: GET /health
+2024-08-25 17:44:17 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:51:24.776Z [info]: Starting data sync jobs...
+2024-08-25T17:51:24.779Z [info]: Syncing POS data...
+2024-08-25T17:51:24.779Z [info]: POS data sync completed.
+2024-08-25T17:51:24.780Z [info]: Syncing provider data...
+2024-08-25T17:51:24.780Z [info]: Provider data sync completed.
+2024-08-25T17:51:24.781Z [info]: Data sync jobs completed successfully.
+2024-08-25T17:51:53.999Z [info]: GET /health
+2024-08-25 17:51:54 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:54:20.959Z [info]: Starting data sync jobs...
+2024-08-25T17:54:20.961Z [info]: Syncing POS data...
+2024-08-25T17:54:20.962Z [info]: POS data sync completed.
+2024-08-25T17:54:20.963Z [info]: Syncing provider data...
+2024-08-25T17:54:20.963Z [info]: Provider data sync completed.
+2024-08-25T17:54:20.963Z [info]: Data sync jobs completed successfully.
+2024-08-25T17:54:50.050Z [info]: GET /health
+2024-08-25 17:54:50 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:55:20.169Z [info]: GET /health
+2024-08-25 17:55:20 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:55:50.257Z [info]: GET /health
+2024-08-25 17:55:50 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:56:20.347Z [info]: GET /health
+2024-08-25 17:56:20 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:56:50.446Z [info]: GET /health
+2024-08-25 17:56:50 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:57:20.532Z [info]: GET /health
+2024-08-25 17:57:20 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:57:50.623Z [info]: GET /health
+2024-08-25 17:57:50 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:58:20.705Z [info]: GET /health
+2024-08-25 17:58:20 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:58:50.785Z [info]: GET /health
+2024-08-25 17:58:50 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:59:20.876Z [info]: GET /health
+2024-08-25 17:59:20 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T17:59:50.963Z [info]: GET /health
+2024-08-25 17:59:50 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T18:00:21.056Z [info]: GET /health
+2024-08-25 18:00:21 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T18:00:51.140Z [info]: GET /health
+2024-08-25 18:00:51 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T18:01:21.246Z [info]: GET /health
+2024-08-25 18:01:21 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T18:01:51.365Z [info]: GET /health
+2024-08-25 18:01:51 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T18:02:21.446Z [info]: GET /health
+2024-08-25 18:02:21 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T18:02:51.524Z [info]: GET /health
+2024-08-25 18:02:51 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T18:03:21.611Z [info]: GET /health
+2024-08-25 18:03:21 [[31merror[39m]: Error retrieving client information for subdomain: localhost:5000
+2024-08-25T18:10:34.610Z [info]: Starting data sync jobs...
+2024-08-25T18:10:34.612Z [info]: Syncing POS data...
+2024-08-25T18:10:34.612Z [info]: POS data sync completed.
+2024-08-25T18:10:34.613Z [info]: Syncing provider data...
+2024-08-25T18:10:34.613Z [info]: Provider data sync completed.
+2024-08-25T18:10:34.613Z [info]: Data sync jobs completed successfully.
+2024-08-25T18:11:03.836Z [info]: GET /health
+2024-08-25T18:11:33.918Z [info]: GET /health
+2024-08-25T18:12:03.990Z [info]: GET /health
+2024-08-25T18:12:34.069Z [info]: GET /health
+2024-08-25T18:13:04.147Z [info]: GET /health
+2024-08-25T18:13:34.221Z [info]: GET /health
+2024-08-25T18:14:04.286Z [info]: GET /health
+2024-08-25T18:14:34.371Z [info]: GET /health
+2024-08-25T18:15:04.461Z [info]: GET /health
+2024-08-25T18:15:34.540Z [info]: GET /health

@@ -13,6 +13,10 @@ RUN npm install
 # Copy the application files
 COPY . .
 
+# Create ssl directory and copy certificates
+RUN mkdir -p ssl
+COPY ssl/server.key ssl/server.cert ssl/
+
 # Expose the application port
 EXPOSE 5000
 

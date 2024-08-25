@@ -45,26 +45,6 @@ class PosIntegrationService {
       throw error;
     }
   }
-
-  // Method to sync inventory with external POS
-  static async syncInventory(locationId, provider) {
-    try {
-      const inventory = await db.Inventory.findAll({
-        where: { locationId },
-      });
-
-      const response = await axios.post(`https://api.${provider}.com/sync/inventory`, inventory);
-
-      if (response.status === 200) {
-        logger.info(`Inventory sync successful for provider ${provider} at location ${locationId}`);
-      } else {
-        logger.error(`Inventory sync failed for provider ${provider}: ${response.data.message}`);
-      }
-    } catch (error) {
-      logger.error(`Error syncing inventory for provider ${provider}:`, error);
-      throw error;
-    }
-  }
 }
 
 module.exports = PosIntegrationService;

@@ -1,40 +1,88 @@
-version: '3'
+version: '3.8'
+
 services:
   backend:
-    build: ./backend
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "5000:5000"
-    depends_on:
-      - db
     environment:
-      - DATABASE_URL=postgres://user:password@db:5432/dbname
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=db
       - REDIS_URL=redis://redis:6379
+      - SESSION_SECRET=${SESSION_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
+      - NODE_ENV=${NODE_ENV}
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -k -f https://localhost:5000/health || exit 1"]
+      interval: 30s
+      retries: 3
+      start_period: 40s
+      timeout: 10s
     volumes:
       - ./backend:/app
       - /app/node_modules
+      - ./backend/ssl:/app/ssl
+    restart: unless-stopped
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "443:443"
+    environment:
+      - REACT_APP_API_URL=https://localhost:5000/api
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -k -f https://localhost/ || exit 1"]
+      interval: 30s
+      retries: 3
+      start_period: 40s
+      timeout: 10s
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    command: ["npm", "start"]  # Ensures it runs the app without triggering npm audit
+      - ./frontend/ssl:/etc/nginx/ssl
+    restart: unless-stopped
 
   db:
     image: postgres:14
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=dbname
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
+    restart: unless-stopped
 
   redis:
-    image: redis:6
+    image: redis:6-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
+    restart: unless-stopped
 
 volumes:
   postgres_data:

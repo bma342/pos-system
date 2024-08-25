@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
 
-// Define routes here
-// Example: router.use('/users', require('./users'));
+const authRoutes = require('./authRoutes');
+const toastRoutes = require('./toastRoutes'); // Add this line
 
-// Default route
-router.get('/', (req, res) => res.send('API is working'));
+// Existing routes
+router.use('/auth', authRoutes);
+
+// Add Toast routes
+router.use('/api', toastRoutes);
 
 module.exports = router;

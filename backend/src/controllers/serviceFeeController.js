@@ -1,20 +1,35 @@
-const { ServiceFee } = require('../models');
-
-exports.createServiceFee = async (req, res) => {
-  try {
-    const { clientId, locationId, feeAmount, feeType } = req.body;
-    const serviceFee = await ServiceFee.create({ clientId, locationId, feeAmount, feeType });
-    res.status(201).json(serviceFee);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+const ServiceFee = require('../models/ServiceFee');
+const posSyncService = require('../services/posSyncService');
 
 exports.getServiceFees = async (req, res) => {
   try {
     const serviceFees = await ServiceFee.findAll();
-    res.status(200).json(serviceFees);
+    res.json(serviceFees);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: 'Error fetching service fees', error });
+  }
+};
+
+exports.updateServiceFee = async (req, res) => {
+  try {
+    const { locationId, providerId, orderType, feeAmount } = req.body;
+    let serviceFee = await ServiceFee.findOne({ where: { locationId, providerId, orderType } });
+
+    if (serviceFee) {
+      serviceFee.feeAmount = feeAmount;
+      await serviceFee.save();
+    } else {
+      serviceFee = await ServiceFee.create({ locationId, providerId, orderType, feeAmount });
+    }
+
+    // Sync service fee with POS
+    const posProfile = await serviceFee.getLocation().getPosProfile();
+    if (posProfile) {
+      await posSyncService.syncServiceFees(posProfile);
+    }
+
+    res.json(serviceFee);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating service fee', error });
   }
 };

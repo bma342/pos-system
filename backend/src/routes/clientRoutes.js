@@ -1,15 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken, authorizeRoles } = require('../middleware/roleMiddleware');
-const clientController = require('../controllers/clientController');
+const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+const ClientController = require('../controllers/clientController');
 
-// Routes for managing clients
-router.post('/', authenticateToken, authorizeRoles(['Super Admin']), clientController.createClient);
-router.put('/:id', authenticateToken, authorizeRoles(['Super Admin']), clientController.updateClient);
-router.delete('/:id', authenticateToken, authorizeRoles(['Super Admin']), clientController.deleteClient);
-router.get('/:id', authenticateToken, authorizeRoles(['Super Admin', 'Admin']), clientController.getClientDetails);
-
-// New route for fetching client theme
-router.get('/theme', clientController.getClientTheme);
+// Client routes
+router.get('/', authenticateToken, authorizeRoles('Super Admin', 'Admin'), ClientController.getAllClients);
+router.get('/:id', authenticateToken, authorizeRoles('Super Admin', 'Admin'), ClientController.getClientById);
+router.post('/', authenticateToken, authorizeRoles('Super Admin'), ClientController.createClient);
+router.put('/:id', authenticateToken, authorizeRoles('Super Admin', 'Admin'), ClientController.updateClient);
+router.delete('/:id', authenticateToken, authorizeRoles('Super Admin'), ClientController.deleteClient);
+router.get('/theme', ClientController.getClientTheme);
 
 module.exports = router;

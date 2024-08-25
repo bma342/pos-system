@@ -11,9 +11,9 @@ module.exports = (sequelize, DataTypes) => {
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
+      unique: 'compositeIndex', // Unique in combination with clientId
     },
-    phoneNumber: {
+    phone: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -97,51 +97,53 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.FLOAT,
       defaultValue: 0.0,
     },
-    averageVisitTime: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    preferredPaymentMethod: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    visitHistory: {
-      type: DataTypes.JSONB,
-      allowNull: true,
-    },
-    referralSource: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     engagementScore: {
-      type: DataTypes.VIRTUAL,
-      get() {
-        // Calculate the engagement score based on normalized values and weights
-        const orderFrequencyScore = this.orderFrequency ? (30 - this.orderFrequency) / 30 : 0;
-        const spendScore = this.totalSpend ? this.totalSpend / 1000 : 0; // Assuming max $1000 for full score
-        const pointsScore = this.loyaltyPoints ? this.loyaltyPoints / 500 : 0; // Assuming max 500 points for full score
-        const visitScore = this.visitHistory ? this.visitHistory.length / 50 : 0; // Assuming 50 visits for full score
-        const recencyScore = this.lastOrderDate
-          ? (30 - Math.min((Date.now() - new Date(this.lastOrderDate)) / (1000 * 60 * 60 * 24), 30)) / 30
-          : 0;
-
-        // Apply weights
-        return Math.min(
-          (orderFrequencyScore * 0.3 +
-            spendScore * 0.3 +
-            pointsScore * 0.2 +
-            visitScore * 0.1 +
-            recencyScore * 0.1) * 100,
-          100
-        ).toFixed(2); // Capping score at 100
-      },
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    clientId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
   });
 
   Guest.associate = (models) => {
+    Guest.belongsTo(models.Client, { foreignKey: 'clientId', allowNull: false }); // Enforce tenant isolation
     Guest.hasMany(models.Order, { foreignKey: 'guestId' });
-    Guest.hasMany(models.OrderHistory, { foreignKey: 'guestId' });
+    Guest.hasOne(models.Wallet, { foreignKey: 'guestId' });
+    Guest.hasMany(models.ItemReview, { foreignKey: 'guestId' }); // Associate with reviews
+  };
+
+  // Business logic for updating calculated fields
+  Guest.prototype.updateCalculatedFields = async function () {
+    const orders = await this.getOrders();
+
+    // Calculate average order size
+    if (orders.length) {
+      this.averageOrderSize = orders.reduce((total, order) => total + order.totalAmount, 0) / orders.length;
+    }
+
+    // Calculate days between orders (order frequency)
+    if (orders.length > 1) {
+      const daysBetweenOrders = orders
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+        .map((order, index, arr) => index > 0 ? (new Date(order.createdAt) - new Date(arr[index - 1].createdAt)) / (1000 * 60 * 60 * 24) : 0)
+        .filter(day => day > 0);
+
+      if (daysBetweenOrders.length > 0) {
+        this.orderFrequency = Math.round(daysBetweenOrders.reduce((a, b) => a + b, 0) / daysBetweenOrders.length);
+      }
+    }
+
+    // Calculate total spend
+    this.totalSpend = orders.reduce((total, order) => total + order.totalAmount, 0);
+
+    // Calculate engagement score (based on total spend, order frequency, etc.)
+    this.engagementScore = Math.round((this.totalSpend / this.numberOfOrders) * (100 / (this.orderFrequency || 1)));
+
+    await this.save();
   };
 
   return Guest;
 };
+

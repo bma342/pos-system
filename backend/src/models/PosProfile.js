@@ -1,42 +1,63 @@
-const posConfigs = {
-  par: {
-    format: 'JSON',
-    apiEndpoint: 'https://api.par.com/orders',
-    inventoryEndpoint: 'https://api.par.com/inventory',
-    contentType: 'application/json',
-  },
-  brink: {
-    format: 'XML',
-    apiEndpoint: 'https://api.brinkpos.net/orders',
-    inventoryEndpoint: 'https://api.brinkpos.net/inventory',
-    contentType: 'application/xml',
-  },
-  toast: {
-    format: 'JSON',
-    apiEndpoint: 'https://api.toasttab.com/orders',
-    inventoryEndpoint: 'https://api.toasttab.com/inventory',
-    contentType: 'application/json',
-  },
-  // Add more POS systems as needed
-};
+module.exports = (sequelize, DataTypes) => {
+  const PosProfile = sequelize.define('PosProfile', {
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    posProvider: {
+      type: DataTypes.STRING,
+      allowNull: false, // e.g., 'Square', 'Toast', 'Revel'
+    },
+    posApiKey: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    posSecretKey: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    locationId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'Locations',
+        key: 'id',
+      },
+      onDelete: 'CASCADE',
+    },
+    syncEnabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true, // Whether synchronization is enabled for this profile
+    },
+    syncSchedule: {
+      type: DataTypes.STRING,
+      defaultValue: 'daily', // e.g., 'hourly', 'daily'
+    },
+    roundingOption: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false, // Whether to apply rounding to prices
+    },
+    flatUpliftPercentage: {
+      type: DataTypes.FLOAT,
+      allowNull: true, // Optional flat uplift percentage for prices
+    },
+    enableInventorySync: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true, // Whether inventory sync is enabled
+    },
+  });
 
-const posProfiles = {
-  location1: {
-    posSystem: 'par',
-    locationId: 1,
-    posConfig: posConfigs.par,
-  },
-  location2: {
-    posSystem: 'brink',
-    locationId: 2,
-    posConfig: posConfigs.brink,
-  },
-  location3: {
-    posSystem: 'toast',
-    locationId: 3,
-    posConfig: posConfigs.toast,
-  },
-  // Add more locations as needed
-};
+  PosProfile.associate = (models) => {
+    PosProfile.belongsTo(models.Location, { foreignKey: 'locationId' });
 
-module.exports = { posConfigs, posProfiles };
+    // Association with POS-related sync histories
+    PosProfile.hasMany(models.PosSyncHistory, { foreignKey: 'posProfileId', as: 'syncHistory' });
+  };
+
+  // Hooks to manage sensitive operations like key updates or sync settings
+  PosProfile.addHook('beforeSave', (profile) => {
+    // Example: Additional validation or logging before saving changes
+  });
+
+  return PosProfile;
+};

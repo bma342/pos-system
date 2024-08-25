@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "node-cache": "^5.1.2",
+    "stripe": "^16.8.0"
+  },
+  "devDependencies": {
+    "cypress": "^13.13.3"
+  }
+}

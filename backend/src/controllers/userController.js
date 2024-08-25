@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const { createAuditLog } = require('../services/auditLogService');
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -15,6 +16,7 @@ exports.updateUser = async (req, res) => {
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     await user.update(req.body);
+    await createAuditLog('User Updated', { userId: user.id }, req.user.id);
     res.json(user);
   } catch (error) {
     res.status(500).json({ message: 'Error updating user', error });

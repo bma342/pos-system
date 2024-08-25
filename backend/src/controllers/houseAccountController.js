@@ -43,4 +43,3 @@ exports.getUsersByHouseAccount = async (req, res) => {
     res.status(500).json({ message: 'Error fetching house account users', error });
   }
 };
-   

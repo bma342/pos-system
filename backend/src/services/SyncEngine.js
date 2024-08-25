@@ -1,49 +1,61 @@
-const POSConnectorService = require('../posConnector/posConnectorService');
-const { posProfiles } = require('../models/PosProfile');
-const { Menu } = require('../models/Menu');
+const PosSyncService = require('./posSyncService');
+const ToastService = require('./toastService');
+const db = require('../models');
 
 class SyncEngine {
-  constructor() {
-    this.lastSyncTime = new Date();
-  }
+  static async syncMenus(locationId) {
+    try {
+      const posProfiles = await db.PosProfile.findAll({ where: { locationId } });
 
-  async syncMenus(locationId) {
-    const posProfile = posProfiles[`location${locationId}`];
-    if (!posProfile) {
-      throw new Error(`No POS profile found for location ${locationId}`);
-    }
-
-    const posConnector = new POSConnectorService(posProfile.posConfig);
-    
-    // Fetch menu data from your database
-    const localMenus = await Menu.findAll({ where: { locationId } });
-
-    // Determine if partial sync or full sync is needed
-    const shouldPerformFullSync = posProfile.posSystem === 'par' || this.requiresFullSync(locationId);
-    
-    if (shouldPerformFullSync) {
-      // Full sync logic
-      const syncedData = await posConnector.syncMenus(localMenus);
-      console.log(`Performed full sync for location ${locationId}`);
-      return syncedData;
-    } else {
-      // Perform incremental sync
-      const updatedMenus = this.getUpdatedMenus(localMenus, this.lastSyncTime);
-      const syncedData = await posConnector.syncMenus(updatedMenus);
-      this.lastSyncTime = new Date(); // Update last sync time
-      console.log(`Performed incremental sync for location ${locationId}`);
-      return syncedData;
+      for (const profile of posProfiles) {
+        if (profile.posSystem === 'toast') {
+          const toastService = new ToastService();
+          await toastService.syncMenus(profile);
+        } else {
+          await PosSyncService.syncMenus(profile);
+        }
+      }
+      console.log(`Menus synced successfully for location ${locationId}`);
+    } catch (error) {
+      console.error(`Error syncing menus for location ${locationId}:`, error);
     }
   }
 
-  requiresFullSync(locationId) {
-    // Logic to determine if a full sync is required, can be extended
-    return false;
+  static async syncMenuGroups(locationId) {
+    try {
+      const posProfiles = await db.PosProfile.findAll({ where: { locationId } });
+
+      for (const profile of posProfiles) {
+        if (profile.posSystem === 'toast') {
+          const toastService = new ToastService();
+          await toastService.syncMenuGroups(profile);
+        } else {
+          await PosSyncService.syncMenuGroups(profile);
+        }
+      }
+      console.log(`Menu groups synced successfully for location ${locationId}`);
+    } catch (error) {
+      console.error(`Error syncing menu groups for location ${locationId}:`, error);
+    }
   }
 
-  getUpdatedMenus(localMenus, lastSyncTime) {
-    return localMenus.filter(menu => new Date(menu.updatedAt) > lastSyncTime);
+  static async syncMenuItems(locationId) {
+    try {
+      const posProfiles = await db.PosProfile.findAll({ where: { locationId } });
+
+      for (const profile of posProfiles) {
+        if (profile.posSystem === 'toast') {
+          const toastService = new ToastService();
+          await toastService.syncMenuItems(profile);
+        } else {
+          await PosSyncService.syncMenuItems(profile);
+        }
+      }
+      console.log(`Menu items synced successfully for location ${locationId}`);
+    } catch (error) {
+      console.error(`Error syncing menu items for location ${locationId}:`, error);
+    }
   }
 }
 
-module.exports = new SyncEngine();
+module.exports = SyncEngine;

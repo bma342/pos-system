@@ -1,0 +1,53 @@
+.branding-management {
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.profile-selector {
+  margin-bottom: 20px;
+}
+
+.color-picker-group {
+  margin-bottom: 15px;
+}
+
+.color-picker-group label {
+  font-weight: bold;
+}
+
+.color-picker-group input {
+  margin-top: 5px;
+  padding: 5px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.logo-upload input {
+  margin-top: 10px;
+}
+
+.schedule-section {
+  margin-top: 20px;
+}
+
+.save-profile-btn,
+.schedule-profile-btn {
+  margin-top: 20px;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+}
+
+.save-profile-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.schedule-profile-btn {
+  background-color: #28a745;
+  color: white;
+  margin-left: 10px;
+}

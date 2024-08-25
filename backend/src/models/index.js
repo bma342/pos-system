@@ -2,8 +2,7 @@ const { Sequelize, DataTypes } = require('sequelize');
 const dotenv = require('dotenv');
 const path = require('path');
 
-// Load .env file from the correct directory
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 console.log('Loaded DB Config:', {
   dbName: process.env.DB_NAME,
@@ -15,7 +14,7 @@ console.log('Loaded DB Config:', {
 const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
   host: process.env.DB_HOST,
   dialect: 'postgres',
-  logging: false, // Optional: Disable SQL logging for cleaner output
+  logging: false,
 });
 
 const db = {};
@@ -42,6 +41,7 @@ db.OrderHistory = require('./OrderHistory')(sequelize, DataTypes);
 db.HouseAccount = require('./HouseAccount')(sequelize, DataTypes);
 db.HouseAccountUser = require('./HouseAccountUser')(sequelize, DataTypes);
 db.Branding = require('./Branding')(sequelize, DataTypes);
+db.MenuItemModifier = require('./MenuItemModifier')(sequelize, DataTypes); // Added for the many-to-many relationship
 
 // Define associations
 db.Role.hasMany(db.User, { foreignKey: 'roleId' });
@@ -85,5 +85,19 @@ db.ProviderPricing.belongsTo(db.MenuItem, { foreignKey: 'menuItemId' });
 
 db.Menu.hasMany(db.LocationMenuOverride, { foreignKey: 'menuId' });
 db.LocationMenuOverride.belongsTo(db.Menu, { foreignKey: 'menuId' });
+
+// New Many-to-Many Relationship
+db.MenuItem.belongsToMany(db.Modifier, {
+  through: db.MenuItemModifier,
+  foreignKey: 'menuItemId',
+  as: 'modifiers',
+});
+db.Modifier.belongsToMany(db.MenuItem, {
+  through: db.MenuItemModifier,
+  foreignKey: 'modifierId',
+  as: 'menuItems',
+});
+
+db.sequelize = sequelize;
 
 module.exports = db;

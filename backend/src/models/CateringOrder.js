@@ -3,18 +3,31 @@ module.exports = (sequelize, DataTypes) => {
     orderNumber: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
     guestId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: 'Guests',
+        key: 'id',
+      },
     },
     houseAccountId: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: 'HouseAccounts',
+        key: 'id',
+      },
     },
-    orderDate: {
-      type: DataTypes.DATE,
+    locationId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: 'Locations',
+        key: 'id',
+      },
     },
     scheduledDate: {
       type: DataTypes.DATE,
@@ -25,12 +38,49 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     orderDetails: {
-      type: DataTypes.JSONB, // Store detailed items, prices, etc.
+      type: DataTypes.JSONB,
       allowNull: false,
     },
     status: {
       type: DataTypes.STRING,
       defaultValue: 'scheduled',
+    },
+    deliveryMethod: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    driverTip: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    kitchenTip: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    serviceFees: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+    },
+    cateringFees: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+    },
+    commissaryKitchenId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'Locations',
+        key: 'id',
+      },
+    },
+    taxExempt: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    taxIdNumber: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   });
 
@@ -38,6 +88,7 @@ module.exports = (sequelize, DataTypes) => {
     CateringOrder.belongsTo(models.Guest, { foreignKey: 'guestId' });
     CateringOrder.belongsTo(models.HouseAccount, { foreignKey: 'houseAccountId' });
     CateringOrder.belongsTo(models.Location, { foreignKey: 'locationId' });
+    CateringOrder.belongsTo(models.Location, { foreignKey: 'commissaryKitchenId', as: 'commissaryKitchen' });
   };
 
   return CateringOrder;

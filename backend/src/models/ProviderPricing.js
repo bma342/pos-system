@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const { roundToNext99 } = require('../utils/pricingUtils'); // Import the rounding utility
 
-module.exports = (sequelize, Sequelize) => {
+module.exports = (sequelize) => {
   const ProviderPricing = sequelize.define('ProviderPricing', {
     provider: {
       type: DataTypes.STRING, // e.g., 'DoorDash', 'UberEats'
@@ -21,24 +21,30 @@ module.exports = (sequelize, Sequelize) => {
     },
   }, {
     hooks: {
-      beforeCreate: (providerPricing, options) => {
-        const originalPrice = providerPricing.getDataValue('upliftPercentage'); // Get uplift percentage
-        const shouldRound = providerPricing.getDataValue('shouldRound'); // Check if rounding is needed
+      beforeCreate: (providerPricing) => {
+        const upliftPercentage = providerPricing.getDataValue('upliftPercentage');
+        const shouldRound = providerPricing.getDataValue('shouldRound');
 
         if (shouldRound) {
-          providerPricing.setDataValue('roundedPrice', roundToNext99(originalPrice)); // Set rounded price
+          providerPricing.setDataValue('roundedPrice', roundToNext99(upliftPercentage));
         }
       },
-      beforeUpdate: (providerPricing, options) => {
-        const originalPrice = providerPricing.getDataValue('upliftPercentage'); // Get uplift percentage
-        const shouldRound = providerPricing.getDataValue('shouldRound'); // Check if rounding is needed
+      beforeUpdate: (providerPricing) => {
+        const upliftPercentage = providerPricing.getDataValue('upliftPercentage');
+        const shouldRound = providerPricing.getDataValue('shouldRound');
 
         if (shouldRound) {
-          providerPricing.setDataValue('roundedPrice', roundToNext99(originalPrice)); // Set rounded price
+          providerPricing.setDataValue('roundedPrice', roundToNext99(upliftPercentage));
         }
-      }
-    }
+      },
+    },
   });
+
+  // Associations
+  ProviderPricing.associate = (models) => {
+    ProviderPricing.belongsTo(models.MenuItem, { foreignKey: 'menuItemId' });
+  };
 
   return ProviderPricing;
 };
+

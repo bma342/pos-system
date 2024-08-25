@@ -20,10 +20,13 @@ const app = express();
 sequelize.authenticate()
   .then(() => {
     console.log('Database connected...');
-    return sequelize.sync({ alter: true }); // Adjust alter to sync schema changes without dropping tables
+    return sequelize.sync({ alter: true });
   })
   .then(() => console.log('Database synchronized...'))
-  .catch(err => console.error('Error connecting to or synchronizing the database:', err));
+  .catch(err => {
+    console.error('Error connecting to or synchronizing the database:', err);
+    console.error('Error details:', JSON.stringify(err, null, 2));
+  });
 
 // Swagger configuration
 const swaggerOptions = {
@@ -35,10 +38,10 @@ const swaggerOptions = {
       description: 'API documentation for the POS system',
     },
     servers: [
-      { url: 'http://localhost:5000', description: 'Development server' },
+      { url: process.env.API_URL || 'https://localhost:5000', description: 'API Server' },
     ],
   },
-  apis: ['./src/routes/*.js'], // Path to your route files
+  apis: ['./routes/*.js'], // Updated path for routes
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
@@ -48,41 +51,20 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
-app.use(subdomainMiddleware); // Apply the subdomain middleware globally
-app.use(sanitizeMiddleware);
-
-// Set Redis host to the service name defined in docker-compose
-const redisClient = new Redis({
-  host: process.env.REDIS_HOST || 'redis',
-  port: process.env.REDIS_PORT || 6379,
-});
-
-// Rate limiter middleware
-const apiLimiter = rateLimit({
+app.use(rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
-  message: 'Too many requests from this IP, please try again later.',
-});
+  max: 100, // limit each IP to 100 requests per windowMs
+}));
 
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  message: 'Too many requests, please try again later.',
-});
-
-app.use('/api/auth/', authLimiter);
-app.use('/api/', apiLimiter);
-
-// Session middleware
-app.use(
-  session({
-    store: new RedisStore({ client: redisClient }),
-    secret: process.env.SESSION_SECRET || 'supersecret',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: process.env.NODE_ENV === 'production' },
-  })
-);
+// Redis session store
+const redisClient = new Redis(process.env.REDIS_URL);
+app.use(session({
+  store: new RedisStore({ client: redisClient }),
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: process.env.NODE_ENV === 'production' }
+}));
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -90,42 +72,30 @@ app.use((req, res, next) => {
   next();
 });
 
-// Import your routes here
-const menuRoutes = require('./routes/menuRoutes');
-const posIntegrationRoutes = require('./routes/posIntegrationRoutes');
-const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes');
-const checkoutRoutes = require('./routes/checkoutRoutes');
-const discountsRoutes = require('./routes/discountsRoutes');
-const paymentRoutes = require('./routes/paymentRoutes');
-const rewardRoutes = require('./routes/rewardRoutes');
-const loyaltyRoutes = require('./routes/loyaltyRoutes');
-const clientRoutes = require('./routes/clientRoutes');
-const roleRoutes = require('./routes/roleRoutes');
-const taxRoutes = require('./routes/taxRoutes');
-const reportRoutes = require('./routes/reportRoutes');
-
-// Mock secure route for testing
-app.get('/api/secure-endpoint', authenticateToken, (req, res) => {
-  res.status(200).json({ message: 'Access granted' });
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy' });
 });
 
-// Registering the routes
-app.use('/api/menus', menuRoutes);
-app.use('/api/pos-integration', posIntegrationRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/checkout', checkoutRoutes);
-app.use('/api/discounts', discountsRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/rewards', rewardRoutes);
-app.use('/api/loyalty', loyaltyRoutes);
-app.use('/api/clients', clientRoutes);
-app.use('/api/roles', roleRoutes);
-app.use('/api/reports', reportRoutes);
-app.use('/api/taxes', taxRoutes);
+// Subdomain middleware for client-based routing
+app.use(subdomainMiddleware);
 
-// Global error handler
+// Import and use existing routes
+const authRoutes = require('./routes/authRoutes');
+const clientRoutes = require('./routes/clientRoutes');
+const locationRoutes = require('./routes/locationRoutes');
+const userRoutes = require('./routes/userRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+// Add other routes here as needed
+
+app.use('/api/auth', authRoutes);
+app.use('/api/clients', authenticateToken, clientRoutes);
+app.use('/api/locations', authenticateToken, locationRoutes);
+app.use('/api/users', authenticateToken, userRoutes);
+app.use('/api/orders', authenticateToken, orderRoutes);
+// Register additional routes here
+
+// Error handling middleware
 app.use(errorHandler);
 
 module.exports = app;

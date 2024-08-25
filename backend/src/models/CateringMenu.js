@@ -11,12 +11,21 @@ module.exports = (sequelize, DataTypes) => {
     clientId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: 'Clients',
+        key: 'id',
+      },
+      onDelete: 'CASCADE',
     },
   });
 
   CateringMenu.associate = (models) => {
-    CateringMenu.belongsTo(models.Client, { foreignKey: 'clientId' });
-    CateringMenu.hasMany(models.CateringMenuItem, { foreignKey: 'menuId' });
+    CateringMenu.belongsTo(models.Client, { foreignKey: 'clientId', onDelete: 'CASCADE' });
+    CateringMenu.hasMany(models.CateringMenuItem, { foreignKey: 'menuId', onDelete: 'CASCADE' });
+    CateringMenu.belongsToMany(models.Location, {
+      through: 'CateringMenuLocations',
+      foreignKey: 'menuId',
+    });
   };
 
   return CateringMenu;

@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+body {
+  @apply font-sans text-gray-900;
+}
+
+button {
+  @apply bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600;
+}
+
+input,
+select,
+textarea {
+  @apply border border-gray-300 rounded p-2 w-full;
+}
+
+table {
+  @apply min-w-full bg-white border border-gray-200;
+}
+
+thead {
+  @apply bg-gray-100;
+}
+
+tbody tr:hover {
+  @apply bg-gray-50;
+}

@@ -1,45 +1,58 @@
-const { Order, Guest } = require('../models');
-const logger = require('../utils/logger');
+const Order = require('../models/Order');
+const moment = require('moment-timezone');
+const Location = require('../models/Location');
+const PosIntegrationService = require('./PosIntegrationService');
 
 class OrderService {
-  static async handleScheduledOrders() {
-    try {
-      // Fetch all scheduled orders that need to be processed
-      const orders = await Order.findAll({
-        where: {
-          status: 'scheduled', // Assuming 'scheduled' is a status for orders waiting to be processed
-          scheduledTime: { // Orders scheduled to be processed within the next 5 minutes
-            $lte: new Date(Date.now() + 5 * 60000)
-          }
-        },
-        include: [Guest],
-      });
+  static async createOrder(orderData) {
+    const { scheduleType, scheduledTime, locationId } = orderData;
+    const location = await Location.findByPk(locationId);
 
-      if (orders.length === 0) {
-        logger.info('No scheduled guest orders to process.');
-        return;
+    const timeZone = location.timeZone; // Get the location's assigned time zone
+    let finalScheduledTime = scheduledTime;
+
+    if (scheduleType === 'scheduled') {
+      const prepTime = location.prepTime; // Location-specific prep time in minutes
+      const roundedScheduledTime = roundToNextPrettyTimeSlot(scheduledTime, prepTime, timeZone);
+
+      // Adjust the scheduled time dynamically if the user takes too long to check out
+      if (moment.tz(new Date(), timeZone).isAfter(moment.tz(roundedScheduledTime, timeZone).subtract(prepTime, 'minutes'))) {
+        finalScheduledTime = roundToNextPrettyTimeSlot(new Date(), prepTime, timeZone);
       }
-
-      for (const order of orders) {
-        // Process each order
-        logger.info(`Processing scheduled order for guest: ${order.Guest.name}, Order ID: ${order.id}`);
-
-        // Logic to mark the order as "in-progress" or any other processing status
-        order.status = 'in-progress';
-        await order.save();
-
-        // Send notifications, prepare items, etc.
-
-        // Mark the order as "completed"
-        order.status = 'completed';
-        await order.save();
-
-        logger.info(`Order ID ${order.id} for guest ${order.Guest.name} completed.`);
-      }
-    } catch (error) {
-      logger.error('Error handling scheduled guest orders:', error);
+    } else {
+      // If it's ASAP, dynamically calculate the estimated ready time based on prep time
+      finalScheduledTime = moment.tz(timeZone).add(location.prepTime, 'minutes').toDate();
     }
+
+    // Logic to handle whether the order is fired immediately to the POS or held based on global settings
+    if (scheduleType === 'scheduled') {
+      const globalSetting = await getGlobalSettingForScheduledOrders(); // Assume this function exists
+      if (globalSetting === 'fire_immediately') {
+        // Send to POS immediately
+        await PosIntegrationService.sendOrderToPOS(orderData);
+      } else {
+        // Hold the order and fire it at the appropriate time
+        setTimeout(() => {
+          PosIntegrationService.sendOrderToPOS(orderData);
+        }, moment.tz(finalScheduledTime, timeZone).diff(moment.tz(timeZone), 'milliseconds') - location.prepTime * 60 * 1000);
+      }
+    } else {
+      // For ASAP orders, send directly to POS
+      await PosIntegrationService.sendOrderToPOS(orderData);
+    }
+
+    return await Order.create({
+      ...orderData,
+      scheduledTime: finalScheduledTime,
+    });
   }
+}
+
+// Helper function to round the time to the next "pretty" time slot while respecting the time zone
+function roundToNextPrettyTimeSlot(date, prepTime, timeZone) {
+  const roundedMinutes = Math.ceil(moment.tz(date, timeZone).minute() / 15) * 15;
+  const roundedDate = moment.tz(date, timeZone).startOf('hour').add(roundedMinutes, 'minutes');
+  return roundedDate.add(prepTime, 'minutes').toDate();
 }
 
 module.exports = OrderService;
