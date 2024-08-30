@@ -1,9 +1,11 @@
+'use strict';
+
 module.exports = (sequelize, DataTypes) => {
   const PosIntegrationSettings = sequelize.define('PosIntegrationSettings', {
     providerName: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true, // Ensure unique setting for each POS provider
+      unique: true,
     },
     apiUrl: {
       type: DataTypes.STRING,
@@ -12,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     apiVersion: {
       type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: 'v1', // Default API version
+      defaultValue: 'v1',
     },
     clientId: {
       type: DataTypes.STRING,
@@ -23,39 +25,44 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     requestHeaders: {
-      type: DataTypes.JSONB, // Store headers required for API calls
+      type: DataTypes.JSONB,
       allowNull: true,
     },
     requestMethod: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 'POST', // Default HTTP method
+      defaultValue: 'POST',
     },
     authType: {
-      type: DataTypes.STRING, // 'OAuth', 'API Key', etc.
+      type: DataTypes.STRING,
       allowNull: false,
     },
     endpointMappings: {
-      type: DataTypes.JSONB, // Map our internal endpoints to the POS provider’s endpoints
+      type: DataTypes.JSONB,
       allowNull: true,
     },
     syncFrequency: {
       type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: 'daily', // Could be 'hourly', 'daily', 'weekly', etc.
+      defaultValue: 'daily',
     },
     errorHandling: {
-      type: DataTypes.JSONB, // Custom error handling rules based on provider-specific requirements
+      type: DataTypes.JSONB,
       allowNull: true,
     },
     isActive: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true, // Allow enabling/disabling of the integration
+      defaultValue: true,
     },
+  }, {
+    tableName: 'PosIntegrationSettings'
   });
 
-  PosIntegrationSettings.associate = (models) => {
-    PosIntegrationSettings.belongsTo(models.PosIntegration, { foreignKey: 'posIntegrationId', onDelete: 'CASCADE' });
+  PosIntegrationSettings.associate = function(models) {
+    PosIntegrationSettings.hasMany(models.CorePOSProfiles, {
+      foreignKey: 'integrationSettingsId',
+      as: 'coreProfiles'
+    });
   };
 
   return PosIntegrationSettings;

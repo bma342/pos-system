@@ -26,6 +26,9 @@ class InventoryService {
       // Save online inventory to the database
       await OnlineInventory.bulkCreate(onlineInventory, { updateOnDuplicate: ['onlineCount'] });
 
+      // Update the POS Inventory after calculating online inventory
+      await Inventory.bulkCreate(posInventory, { updateOnDuplicate: ['count'] });
+
       logger.info(`Online inventory synced and calculated for location ID ${locationId}`);
       return onlineInventory;
     } catch (error) {

@@ -37,17 +37,26 @@ module.exports = (sequelize, DataTypes) => {
 
   LocationHours.associate = (models) => {
     LocationHours.belongsTo(models.Location, { foreignKey: 'locationId' });
-
-    // Adding a hook to automatically handle temporary hours cleanup after the end date
-    LocationHours.addHook('afterUpdate', async (locationHours, options) => {
-      if (locationHours.isTemporary && locationHours.endDate) {
-        const now = new Date();
-        if (new Date(locationHours.endDate) < now) {
-          await locationHours.update({ isTemporary: false, effectiveDate: null, endDate: null });
-        }
-      }
-    });
   };
+
+  LocationHours.addHook('afterUpdate', async (locationHours, options) => {
+    if (locationHours.isTemporary && locationHours.endDate) {
+      const now = new Date();
+      if (new Date(locationHours.endDate) < now) {
+        await locationHours.update(
+          { 
+            isTemporary: false, 
+            effectiveDate: null, 
+            endDate: null 
+          }, 
+          { 
+            transaction: options.transaction,
+            hooks: false // Prevent infinite loop
+          }
+        );
+      }
+    }
+  });
 
   return LocationHours;
 };

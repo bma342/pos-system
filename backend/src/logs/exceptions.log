@@ -1,0 +1,77 @@
+2024-08-27T22:32:04.233Z [error]: TypeError: require(...) is not a function
+    at /home/bryce/pos-system/backend/src/models/index.js:24:54
+    at Array.forEach (<anonymous>)
+    at Object.<anonymous> (/home/bryce/pos-system/backend/src/models/index.js:23:4)
+    at Module._compile (node:internal/modules/cjs/loader:1358:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1416:10)
+    at Module.load (node:internal/modules/cjs/loader:1208:32)
+    at Module._load (node:internal/modules/cjs/loader:1024:12)
+    at Module.require (node:internal/modules/cjs/loader:1233:19)
+    at require (node:internal/modules/helpers:179:18)
+    at Object.<anonymous> (/home/bryce/pos-system/backend/src/controllers/corePosProfileController.js:1:28)
+2024-08-27T22:32:15.756Z [error]: TypeError: require(...) is not a function
+    at /home/bryce/pos-system/backend/src/models/index.js:24:54
+    at Array.forEach (<anonymous>)
+    at Object.<anonymous> (/home/bryce/pos-system/backend/src/models/index.js:23:4)
+    at Module._compile (node:internal/modules/cjs/loader:1358:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1416:10)
+    at Module.load (node:internal/modules/cjs/loader:1208:32)
+    at Module._load (node:internal/modules/cjs/loader:1024:12)
+    at Module.require (node:internal/modules/cjs/loader:1233:19)
+    at require (node:internal/modules/helpers:179:18)
+    at Object.<anonymous> (/home/bryce/pos-system/backend/src/controllers/corePosProfileController.js:1:28)
+2024-08-28T00:20:55.541Z [error]: TypeError: require(...) is not a function
+    at /home/bryce/pos-system/backend/src/models/index.js:24:54
+    at Array.forEach (<anonymous>)
+    at Object.<anonymous> (/home/bryce/pos-system/backend/src/models/index.js:23:4)
+    at Module._compile (node:internal/modules/cjs/loader:1358:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1416:10)
+    at Module.load (node:internal/modules/cjs/loader:1208:32)
+    at Module._load (node:internal/modules/cjs/loader:1024:12)
+    at Module.require (node:internal/modules/cjs/loader:1233:19)
+    at require (node:internal/modules/helpers:179:18)
+    at Object.<anonymous> (/home/bryce/pos-system/backend/src/middleware/subdomainMiddleware.js:1:20)
+2024-08-28T00:21:20.340Z [error]: TypeError: require(...) is not a function
+    at /home/bryce/pos-system/backend/src/models/index.js:24:54
+    at Array.forEach (<anonymous>)
+    at Object.<anonymous> (/home/bryce/pos-system/backend/src/models/index.js:23:4)
+    at Module._compile (node:internal/modules/cjs/loader:1358:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1416:10)
+    at Module.load (node:internal/modules/cjs/loader:1208:32)
+    at Module._load (node:internal/modules/cjs/loader:1024:12)
+    at Module.require (node:internal/modules/cjs/loader:1233:19)
+    at require (node:internal/modules/helpers:179:18)
+    at Object.<anonymous> (/home/bryce/pos-system/backend/src/middleware/subdomainMiddleware.js:1:20)
+2024-08-28T00:23:39.183Z [error]: TypeError: require(...) is not a function
+    at /home/bryce/pos-system/backend/src/models/index.js:24:54
+    at Array.forEach (<anonymous>)
+    at Object.<anonymous> (/home/bryce/pos-system/backend/src/models/index.js:23:4)
+    at Module._compile (node:internal/modules/cjs/loader:1358:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1416:10)
+    at Module.load (node:internal/modules/cjs/loader:1208:32)
+    at Module._load (node:internal/modules/cjs/loader:1024:12)
+    at Module.require (node:internal/modules/cjs/loader:1233:19)
+    at require (node:internal/modules/helpers:179:18)
+    at Object.<anonymous> (/home/bryce/pos-system/backend/src/middleware/subdomainMiddleware.js:1:20)
+2024-08-28T00:23:54.886Z [error]: TypeError: require(...) is not a function
+    at /home/bryce/pos-system/backend/src/models/index.js:24:54
+    at Array.forEach (<anonymous>)
+    at Object.<anonymous> (/home/bryce/pos-system/backend/src/models/index.js:23:4)
+    at Module._compile (node:internal/modules/cjs/loader:1358:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1416:10)
+    at Module.load (node:internal/modules/cjs/loader:1208:32)
+    at Module._load (node:internal/modules/cjs/loader:1024:12)
+    at Module.require (node:internal/modules/cjs/loader:1233:19)
+    at require (node:internal/modules/helpers:179:18)
+    at Object.<anonymous> (/home/bryce/pos-system/backend/src/middleware/subdomainMiddleware.js:1:20)
+2024-08-28T00:24:10.892Z [error]: TypeError: require(...) is not a function
+    at /home/bryce/pos-system/backend/src/models/index.js:24:54
+    at Array.forEach (<anonymous>)
+    at Object.<anonymous> (/home/bryce/pos-system/backend/src/models/index.js:23:4)
+    at Module._compile (node:internal/modules/cjs/loader:1358:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1416:10)
+    at Module.load (node:internal/modules/cjs/loader:1208:32)
+    at Module._load (node:internal/modules/cjs/loader:1024:12)
+    at Module.require (node:internal/modules/cjs/loader:1233:19)
+    at require (node:internal/modules/helpers:179:18)
+    at Object.<anonymous> (/home/bryce/pos-system/backend/src/middleware/subdomainMiddleware.js:1:20)

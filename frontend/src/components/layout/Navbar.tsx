@@ -21,8 +21,8 @@ const Navbar: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated
+  const { isAuthenticated, user } = useSelector(
+    (state: RootState) => state.auth
   );
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
@@ -76,13 +76,15 @@ const Navbar: React.FC = () => {
               </MenuItem>
               {isAuthenticated ? (
                 <>
-                  <MenuItem
-                    component={Link}
-                    to="/dashboard"
-                    onClick={handleClose}
-                  >
-                    Dashboard
-                  </MenuItem>
+                  {user?.role === 'admin' && (
+                    <MenuItem
+                      component={Link}
+                      to="/admin/dashboard"
+                      onClick={handleClose}
+                    >
+                      Admin Dashboard
+                    </MenuItem>
+                  )}
                   <MenuItem
                     component={Link}
                     to="/profile"
@@ -113,9 +115,15 @@ const Navbar: React.FC = () => {
             </Button>
             {isAuthenticated ? (
               <>
-                <Button color="inherit" component={Link} to="/dashboard">
-                  Dashboard
-                </Button>
+                {user?.role === 'admin' && (
+                  <Button
+                    color="inherit"
+                    component={Link}
+                    to="/admin/dashboard"
+                  >
+                    Admin Dashboard
+                  </Button>
+                )}
                 <Button color="inherit" component={Link} to="/profile">
                   Profile
                 </Button>

@@ -304,7 +304,19 @@ export interface ApiResponse<T> {
   success: boolean;
   message: string;
 }
-
+// src/types.ts
+export interface Location {
+  id: number;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  phoneNumber: string;
+  email: string;
+  latitude: number;
+  longitude: number;
+}
 // Define the AuthResponse type
 export interface AuthResponse {
   user: User;

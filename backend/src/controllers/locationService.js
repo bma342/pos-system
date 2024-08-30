@@ -21,7 +21,12 @@ class LocationService {
 
   // Setup default settings for a new location
   async setupDefaultLocationSettings(location) {
-    // Implement logic for default hours, menu assignments, etc.
+    // Example: Setup default hours for the new location
+    if (!location.hours) {
+      location.hours = '9 AM - 5 PM'; // Default hours setup
+      await location.save();
+    }
+    // Placeholder for further default settings logic
   }
 
   // Update location details

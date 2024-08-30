@@ -1,0 +1,26 @@
+[
+  {
+    "seeder": "20240821-create-client-profile.js",
+    "error": "Command failed: npx sequelize-cli db:seed --seed 20240821-create-client-profile.js\n\u001b[31mERROR:\u001b[39m column \"clientSettings\" of relation \"Clients\" does not exist\n"
+  },
+  {
+    "seeder": "20240821-create-guest-profiles.js",
+    "error": "Command failed: npx sequelize-cli db:seed --seed 20240821-create-guest-profiles.js\n\u001b[31mERROR:\u001b[39m Cannot read properties of undefined (reading 'id')\n"
+  },
+  {
+    "seeder": "20240821-create-locations.js",
+    "error": "Command failed: npx sequelize-cli db:seed --seed 20240821-create-locations.js\n\u001b[31mERROR:\u001b[39m column \"latitude\" of relation \"Locations\" does not exist\n"
+  },
+  {
+    "seeder": "20240821-create-orders.js",
+    "error": "Command failed: npx sequelize-cli db:seed --seed 20240821-create-orders.js\n\u001b[31mERROR:\u001b[39m Cannot read properties of undefined (reading 'id')\n"
+  },
+  {
+    "seeder": "20240821-create-test-pos-profile.js",
+    "error": "Command failed: npx sequelize-cli db:seed --seed 20240821-create-test-pos-profile.js\n\u001b[31mERROR:\u001b[39m column \"posProvider\" of relation \"PosProfiles\" does not exist\n"
+  },
+  {
+    "seeder": "20240822000400-seed-global-settings.js",
+    "error": "Command failed: npx sequelize-cli db:seed --seed 20240822000400-seed-global-settings.js\n\u001b[31mERROR:\u001b[39m Cannot read properties of undefined (reading 'map')\n"
+  }
+]

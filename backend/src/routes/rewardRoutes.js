@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken } = require('../middleware/auth');
 const rewardController = require('../controllers/rewardController');
+const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 
-// Create or update reward schedule for a guest
-router.post('/schedule', authenticateToken, rewardController.createOrUpdateRewardSchedule);
+router.use(authenticateToken);
 
-// Placeholder route for triggering rewards manually (can be scheduled by cron jobs)
-router.post('/trigger', rewardController.checkAndTriggerRewards);
+router.get('/', authorizeRoles('Admin', 'Manager'), rewardController.getAllRewards);
+router.post('/', authorizeRoles('Admin', 'Manager'), rewardController.createReward);
+router.get('/:id', authorizeRoles('Admin', 'Manager'), rewardController.getRewardById);
 
 module.exports = router;

@@ -1,16 +1,14 @@
 const db = require('../models');
-const { Op } = require('sequelize');
 
 exports.getGuestProfile = async (req, res) => {
   const { guestId } = req.params;
-  const { clientId } = req.user; // Assume clientId is extracted from authenticated user
+  const { clientId } = req.user;
 
   try {
-    // Ensure guest belongs to the requesting client
     const guest = await db.Guest.findOne({
       where: {
         id: guestId,
-        clientId, // Tenant isolation
+        clientId,
       },
       include: [
         {
@@ -23,7 +21,6 @@ exports.getGuestProfile = async (req, res) => {
 
     if (!guest) return res.status(404).json({ message: 'Guest not found or access denied.' });
 
-    // Calculate engagement score, order frequency, etc.
     const orderCount = guest.Orders.length;
     const totalSpend = guest.Orders.reduce((acc, order) => acc + order.totalAmount, 0);
     const daysSinceFirstOrder = guest.Orders.length

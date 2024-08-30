@@ -1,5 +1,5 @@
 const cron = require('node-cron');
-const Order = require('../models/Order');
+const { Order, Op } = require('../models'); // Added Op import
 
 // Schedule job to process scheduled orders every minute
 cron.schedule('* * * * *', async () => {

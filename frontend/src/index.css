@@ -1,37 +1,23 @@
-/* index.css */
-
-/* Tailwind Base */
 @tailwind base;
-
-/* Tailwind Components */
 @tailwind components;
-
-/* Tailwind Utilities */
 @tailwind utilities;
 
-/* Custom Variables for Client-Specific Branding */
 :root {
-  --color-primary: #3b82f6; /* Default blue */
-  --color-secondary: #1e40af; /* Default dark blue */
-  --color-accent: #f59e0b; /* Default amber */
+  --color-primary: #3b82f6;
+  --color-secondary: #1e40af;
+  --color-accent: #f59e0b;
   --font-primary: 'Roboto', sans-serif;
   --font-secondary: 'Open Sans', sans-serif;
-  --button-shape: 0.5rem; /* Default rounded */
+  --button-shape: 0.5rem;
 }
 
-/* Support for Client-Specific Branding */
 body {
   font-family: var(--font-primary);
   background-color: var(--color-primary);
   color: var(--font-secondary);
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-primary);
   color: var(--color-secondary);
 }
@@ -60,24 +46,18 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Forms */
-input,
-select,
-textarea {
+input, select, textarea {
   border: 1px solid var(--color-secondary);
   padding: 0.5rem;
   font-family: var(--font-primary);
   border-radius: var(--button-shape);
 }
 
-input:focus,
-select:focus,
-textarea:focus {
+input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--color-accent);
 }
 
-/* Custom Button Styles */
 .btn-primary {
   background-color: var(--color-primary);
   color: white;
@@ -90,63 +70,34 @@ textarea:focus {
   border-radius: var(--button-shape);
 }
 
-/* Additional Utility Classes */
-.bg-primary {
-  background-color: var(--color-primary);
-}
+.bg-primary { background-color: var(--color-primary); }
+.bg-secondary { background-color: var(--color-secondary); }
+.bg-accent { background-color: var(--color-accent); }
+.text-primary { color: var(--color-primary); }
+.text-secondary { color: var(--color-secondary); }
+.text-accent { color: var(--color-accent); }
 
-.bg-secondary {
-  background-color: var(--color-secondary);
-}
-
-.bg-accent {
-  background-color: var(--color-accent);
-}
-
-.text-primary {
-  color: var(--color-primary);
-}
-
-.text-secondary {
-  color: var(--color-secondary);
-}
-
-.text-accent {
-  color: var(--color-accent);
-}
-
-/* Brandable Sections */
 .brand-header {
   background-image: var(--header-background-url);
   background-color: var(--color-primary);
   color: var(--font-color);
   padding: 1rem;
 }
+
 .brand-footer {
   background-color: var(--color-secondary);
   color: var(--font-color);
   padding: 1rem;
 }
 
-/* Override specific Tailwind classes for consistent branding */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 1rem;
 }
 
-/* Media Queries for Responsiveness */
 @media (max-width: 768px) {
-  body {
-    font-size: 0.875rem;
-  }
-
-  h1 {
-    font-size: 1.5rem;
-  }
-
-  .brand-header,
-  .brand-footer {
-    padding: 0.75rem;
-  }
+  body { font-size: 0.875rem; }
+  h1 { font-size: 1.5rem; }
+  .brand-header, .brand-footer { padding: 0.75rem; }
 }

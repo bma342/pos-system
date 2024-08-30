@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 'pending',
     },
     paymentMethod: {
-      type: DataTypes.STRING, // e.g., 'corporate card', 'invoice', 'PO'
+      type: DataTypes.STRING,
       allowNull: true,
     },
     generatedAt: {
@@ -27,11 +27,18 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: DataTypes.NOW,
     },
+  }, {
+    tableName: 'Invoices',
+    timestamps: true,
   });
 
   Invoice.associate = (models) => {
-    Invoice.belongsTo(models.HouseAccount, { foreignKey: 'houseAccountId' });
-    Invoice.hasMany(models.Order, { foreignKey: 'invoiceId' });
+    if (models.HouseAccount) {
+      Invoice.belongsTo(models.HouseAccount, { foreignKey: 'houseAccountId' });
+    }
+    if (models.Order) {
+      Invoice.hasMany(models.Order, { foreignKey: 'invoiceId' });
+    }
   };
 
   return Invoice;

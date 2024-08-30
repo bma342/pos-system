@@ -1,28 +1,37 @@
 const https = require('https');
 const fs = require('fs');
 const app = require('./app');
-const db = require('./config/database');
-const SyncService = require('./services/SyncService');
+const logger = require('./utils/logger');
 
-const PORT = process.env.PORT || 5000;
+const port = process.env.PORT || 5000;
 
-// Load SSL certificate and key
-const sslOptions = {
+logger.info('Attempting to start server...');
+
+const options = {
   key: fs.readFileSync('/app/ssl/server.key'),
   cert: fs.readFileSync('/app/ssl/server.cert')
 };
 
-// Add simple health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'healthy' });
+const server = https.createServer(options, app);
+
+server.listen(port, () => {
+  logger.info(`Server is running on https://localhost:${port}`);
 });
 
-// Start the HTTPS server and synchronize the database
-db.sync().then(() => {
-  https.createServer(sslOptions, app).listen(PORT, () => {
-    console.log(`Secure server running on https://localhost:${PORT}`);
-    SyncService.startDataSyncJobs();
-  });
-}).catch(err => {
-  console.error('Failed to sync database:', err);
+server.on('error', (err) => {
+  logger.error('Server error:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+// Add a simple health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK' });
 });

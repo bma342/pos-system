@@ -1,3 +1,7 @@
+// ~/pos-system/backend/src/models/Guest.js
+'use strict';
+const bcrypt = require('bcrypt');
+
 module.exports = (sequelize, DataTypes) => {
   const Guest = sequelize.define('Guest', {
     firstName: {
@@ -20,6 +24,12 @@ module.exports = (sequelize, DataTypes) => {
     password: {
       type: DataTypes.STRING,
       allowNull: true, // Optional for social logins
+      set(value) {
+        if (value) {
+          const salt = bcrypt.genSaltSync(10);
+          this.setDataValue('password', bcrypt.hashSync(value, salt));
+        }
+      },
     },
     googleId: {
       type: DataTypes.STRING,
@@ -114,6 +124,12 @@ module.exports = (sequelize, DataTypes) => {
     Guest.hasMany(models.ItemReview, { foreignKey: 'guestId' }); // Associate with reviews
   };
 
+  // Instance method to check if the entered password matches the stored hash
+  Guest.prototype.validPassword = async function (password) {
+    if (!this.password) return false; // If password is not set (e.g., social login), return false
+    return await bcrypt.compare(password, this.password);
+  };
+
   // Business logic for updating calculated fields
   Guest.prototype.updateCalculatedFields = async function () {
     const orders = await this.getOrders();
@@ -146,4 +162,3 @@ module.exports = (sequelize, DataTypes) => {
 
   return Guest;
 };
-

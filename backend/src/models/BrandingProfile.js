@@ -3,31 +3,31 @@ module.exports = (sequelize, DataTypes) => {
     clientId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: 'Clients',
+        key: 'id'
+      }
     },
-    name: {
+    primaryColor: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true
     },
-    colors: {
-      type: DataTypes.JSONB,
-      allowNull: false,
-    },
-    logo: {
+    secondaryColor: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: true
     },
-    schedule: {
-      type: DataTypes.JSONB,
-      allowNull: true, // Holds start and end date for scheduling themes
+    logoUrl: {
+      type: DataTypes.STRING,
+      allowNull: true
     },
-    navigationButtons: {
-      type: DataTypes.JSONB, // Optional branded navigation buttons
-      allowNull: true,
+    fontFamily: {
+      type: DataTypes.STRING,
+      allowNull: true
     },
-    imageRestrictions: {
-      type: DataTypes.JSONB, // Restrictions on file types, sizes, dimensions
-      allowNull: true,
-    },
+    customCss: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    }
   });
 
   BrandingProfile.associate = (models) => {

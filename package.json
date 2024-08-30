@@ -1,9 +1,12 @@
 {
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.27.1",
     "node-cache": "^5.1.2",
+    "sequelize": "^6.37.3",
     "stripe": "^16.8.0"
   },
   "devDependencies": {
-    "cypress": "^13.13.3"
+    "cypress": "^13.13.3",
+    "sequelize-cli": "^6.6.2"
   }
 }

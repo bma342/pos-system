@@ -10,28 +10,23 @@ module.exports = (sequelize, DataTypes) => {
     },
     poNumber: {
       type: DataTypes.STRING,
-      allowNull: true, // Required only if billingType is 'PO'
+      allowNull: true,
     },
     clientId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'Clients',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
     },
     isApprovedForPO: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false, // Indicates whether the account is approved for PO billing
+      defaultValue: false,
     },
     isApprovedForInvoice: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false, // Indicates whether the account is approved for invoice billing
+      defaultValue: false,
     },
     creditLimit: {
       type: DataTypes.FLOAT,
-      allowNull: true, // Optional credit limit for the house account
+      allowNull: true,
     },
     balance: {
       type: DataTypes.FLOAT,
@@ -39,64 +34,61 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     paymentTerms: {
-      type: DataTypes.STRING, // E.g., 'Net 30', 'Net 60'
+      type: DataTypes.STRING,
       allowNull: true,
     },
     approvalStatus: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 'Pending', // Status can be 'Pending', 'Approved', 'Rejected'
+      defaultValue: 'Pending',
     },
     approvedBy: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      references: {
-        model: 'Users',
-        key: 'id',
-      },
-      onDelete: 'SET NULL',
     },
     createdBy: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'Users',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
     },
     notes: {
       type: DataTypes.TEXT,
-      allowNull: true, // Optional field to store additional notes or details
+      allowNull: true,
     },
+  }, {
+    tableName: 'HouseAccounts',
+    timestamps: true,
   });
 
   HouseAccount.associate = (models) => {
-    HouseAccount.belongsTo(models.Client, { foreignKey: 'clientId' });
-    HouseAccount.hasMany(models.HouseAccountUser, { foreignKey: 'houseAccountId' });
-    HouseAccount.belongsToMany(models.Location, { through: 'HouseAccountLocations' });
-    HouseAccount.hasMany(models.CateringOrder, { foreignKey: 'houseAccountId' });
-
-    // Associate with transaction history
-    HouseAccount.hasMany(models.HouseAccountTransaction, { foreignKey: 'houseAccountId' });
+    if (models.Client) {
+      HouseAccount.belongsTo(models.Client, { foreignKey: 'clientId' });
+    }
+    if (models.HouseAccountUser) {
+      HouseAccount.hasMany(models.HouseAccountUser, { foreignKey: 'houseAccountId' });
+    }
+    if (models.Location) {
+      HouseAccount.belongsToMany(models.Location, { through: 'HouseAccountLocations' });
+    }
+    if (models.CateringOrder) {
+      HouseAccount.hasMany(models.CateringOrder, { foreignKey: 'houseAccountId' });
+    }
+    if (models.HouseAccountTransaction) {
+      HouseAccount.hasMany(models.HouseAccountTransaction, { foreignKey: 'houseAccountId' });
+    }
   };
 
-  // Business logic to calculate available credit
   HouseAccount.prototype.calculateAvailableCredit = function () {
     return this.creditLimit - this.balance;
   };
 
-  // Business logic to update balance after a transaction
   HouseAccount.prototype.updateBalance = async function (amount, transactionType) {
     if (transactionType === 'debit') {
       this.balance += amount;
     } else if (transactionType === 'credit') {
       this.balance -= amount;
     }
-
     await this.save();
   };
 
   return HouseAccount;
 };
-

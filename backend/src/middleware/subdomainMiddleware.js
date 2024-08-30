@@ -9,8 +9,8 @@ const subdomainMiddleware = async (req, res, next) => {
   const subdomain = req.headers.host.split('.')[0]; // Get the subdomain part
 
   // Ignore predefined subdomains
-  if (['www', 'api', 'yourplatform'].includes(subdomain)) {
-    return next();
+  if (['www', 'api', 'yourplatform', 'localhost'].includes(subdomain)) { 
+    return next(); 
   }
 
   try {

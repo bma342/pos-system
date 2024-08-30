@@ -9,24 +9,24 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       references: {
         model: 'MenuItems',
-        key: 'id',
+        key: 'id'
       },
       onDelete: 'CASCADE',
     },
     testVariant: {
-      type: DataTypes.STRING, // 'A' or 'B'
+      type: DataTypes.STRING,
       allowNull: false,
     },
     variantDescription: {
-      type: DataTypes.STRING, // Short description of what is being tested
+      type: DataTypes.STRING,
       allowNull: true,
     },
     testType: {
-      type: DataTypes.STRING, // 'image', 'name', 'pricing', 'modifier', or 'other'
+      type: DataTypes.STRING,
       allowNull: false,
     },
     upliftSettings: {
-      type: DataTypes.JSONB, // JSON field for uplift settings during the test
+      type: DataTypes.JSONB,
       allowNull: true,
     },
     startDate: {
@@ -35,32 +35,31 @@ module.exports = (sequelize, DataTypes) => {
     },
     endDate: {
       type: DataTypes.DATE,
-      allowNull: true, // Optional, can be ongoing
+      allowNull: true,
     },
     status: {
       type: DataTypes.STRING,
-      defaultValue: 'active', // 'active', 'completed', 'paused'
+      defaultValue: 'active',
     },
     clientId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: 'Clients',
-        key: 'id',
+        key: 'id'
       },
       onDelete: 'CASCADE',
     },
+  }, {
+    tableName: 'ABTests',
+    timestamps: true,
   });
 
   ABTest.associate = (models) => {
-    ABTest.belongsTo(models.MenuItem, { foreignKey: 'menuItemId' });
-    ABTest.belongsTo(models.Client, { foreignKey: 'clientId' }); // Ensure tenant isolation
-
-    // Link the test results back to analytics
-    ABTest.hasMany(models.MenuItemAnalytics, { foreignKey: 'testId', as: 'analytics' });
-
-    // Link the test to pricing overrides during the test
-    ABTest.hasMany(models.LocationMenuOverride, { foreignKey: 'testId', as: 'pricingOverrides' });
+    ABTest.belongsTo(models.MenuItem, { foreignKey: 'menuItemId', onDelete: 'CASCADE', constraints: false });
+    ABTest.belongsTo(models.Client, { foreignKey: 'clientId', onDelete: 'CASCADE', constraints: false });
+    ABTest.hasMany(models.MenuItemAnalytics, { foreignKey: 'testId', as: 'analytics', constraints: false });
+    ABTest.hasMany(models.LocationMenuOverride, { foreignKey: 'testId', as: 'pricingOverrides', constraints: false });
   };
 
   return ABTest;

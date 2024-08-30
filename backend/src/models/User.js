@@ -50,7 +50,7 @@ module.exports = (sequelize) => {
         model: 'Clients',
         key: 'id',
       },
-      allowNull: false,
+      allowNull: true,
     },
     verified: {
       type: DataTypes.BOOLEAN,

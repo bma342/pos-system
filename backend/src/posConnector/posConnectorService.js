@@ -1,17 +1,23 @@
 const axios = require('axios');
 const TaxService = require('../services/taxService');
+const logger = require('../services/logger');
 
 class POSConnectorService {
   constructor(posConfig) {
     this.posConfig = posConfig;
   }
 
-  // Function to sync menus with the external POS system
   async syncMenus(menuData) {
-    if (this.posConfig.format === 'JSON') {
-      return this.syncToJSONPOS(menuData);
-    } else if (this.posConfig.format === 'XML') {
-      return this.syncToXMLPOS(menuData);
+    try {
+      const formattedData = this.posConfig.format === 'JSON' 
+        ? this.syncToJSONPOS(menuData) 
+        : this.syncToXMLPOS(menuData);
+
+      const response = await this.makeRequest('post', this.posConfig.apiEndpoint, formattedData);
+      logger.info(`Menu synced successfully with POS: ${this.posConfig.name}`);
+      return response.data;
+    } catch (error) {
+      this.handleError('syncing menu', error);
     }
   }
 
@@ -33,44 +39,48 @@ class POSConnectorService {
 
   async sendOrderToPOS(orderData) {
     try {
-      const response = await axios.post(this.posConfig.apiEndpoint, orderData, {
-        headers: {
-          'Content-Type': this.posConfig.contentType,
-        },
-      });
+      const response = await this.makeRequest('post', this.posConfig.apiEndpoint, orderData);
+      logger.info(`Order sent successfully to POS: ${this.posConfig.name}`);
       return response.data;
     } catch (error) {
-      console.error('Error sending order to POS:', error);
-      throw error;
+      this.handleError('sending order', error);
     }
   }
 
   async syncInventory(inventoryData) {
     try {
-      const response = await axios.post(this.posConfig.inventoryEndpoint, inventoryData, {
-        headers: {
-          'Content-Type': this.posConfig.contentType,
-        },
-      });
+      const response = await this.makeRequest('post', this.posConfig.inventoryEndpoint, inventoryData);
+      logger.info(`Inventory synced successfully with POS: ${this.posConfig.name}`);
       return response.data;
     } catch (error) {
-      console.error('Error syncing inventory with POS:', error);
-      throw error;
+      this.handleError('syncing inventory', error);
     }
   }
 
-  // NEW: Function to sync tax rates with the external POS system
   async syncTaxRates(locationId, provider) {
     try {
       const taxDetails = await TaxService.getApplicableTax(locationId, provider);
-      // Logic to sync the tax rate with the POS system using taxDetails
-      // Implementation depends on the provider's API requirements
+      const response = await this.makeRequest('post', this.posConfig.taxEndpoint, taxDetails);
+      logger.info(`Tax rates synced successfully with POS: ${this.posConfig.name}`);
+      return response.data;
     } catch (error) {
-      console.error('Error syncing tax rates with POS:', error);
-      throw error;
+      this.handleError('syncing tax rates', error);
     }
+  }
+
+  async makeRequest(method, url, data) {
+    return axios({
+      method,
+      url,
+      data,
+      headers: { 'Content-Type': this.posConfig.contentType },
+    });
+  }
+
+  handleError(operation, error) {
+    logger.error(`Error ${operation} with POS ${this.posConfig.name}: ${error.message}`);
+    throw error;
   }
 }
 
 module.exports = POSConnectorService;
-

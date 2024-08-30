@@ -15,7 +15,17 @@ class TranslationEngine {
 
   // Add methods to support complex translation scenarios (e.g., nested objects, array mappings)
   translateNestedData(internalData, nestedMappings) {
-    // Implement logic for handling nested structures
+    const translatedData = {};
+
+    for (const [internalKey, posKey] of Object.entries(nestedMappings)) {
+      if (internalData[internalKey] && typeof internalData[internalKey] === 'object') {
+        translatedData[posKey] = this.translate(internalData[internalKey]);
+      } else {
+        translatedData[posKey] = internalData[internalKey];
+      }
+    }
+
+    return translatedData;
   }
 }
 

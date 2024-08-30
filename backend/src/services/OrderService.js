@@ -2,57 +2,68 @@ const Order = require('../models/Order');
 const moment = require('moment-timezone');
 const Location = require('../models/Location');
 const PosIntegrationService = require('./PosIntegrationService');
+const GlobalSettingService = require('./GlobalSettingService');
+const logger = require('../services/logger');
 
 class OrderService {
   static async createOrder(orderData) {
     const { scheduleType, scheduledTime, locationId } = orderData;
     const location = await Location.findByPk(locationId);
 
-    const timeZone = location.timeZone; // Get the location's assigned time zone
+    if (!location) {
+      throw new Error('Location not found');
+    }
+
+    const timeZone = location.timeZone;
     let finalScheduledTime = scheduledTime;
 
     if (scheduleType === 'scheduled') {
-      const prepTime = location.prepTime; // Location-specific prep time in minutes
-      const roundedScheduledTime = roundToNextPrettyTimeSlot(scheduledTime, prepTime, timeZone);
+      const prepTime = location.prepTime;
+      const roundedScheduledTime = this.roundToNextPrettyTimeSlot(scheduledTime, prepTime, timeZone);
 
-      // Adjust the scheduled time dynamically if the user takes too long to check out
       if (moment.tz(new Date(), timeZone).isAfter(moment.tz(roundedScheduledTime, timeZone).subtract(prepTime, 'minutes'))) {
-        finalScheduledTime = roundToNextPrettyTimeSlot(new Date(), prepTime, timeZone);
+        finalScheduledTime = this.roundToNextPrettyTimeSlot(new Date(), prepTime, timeZone);
+      } else {
+        finalScheduledTime = roundedScheduledTime;
       }
     } else {
-      // If it's ASAP, dynamically calculate the estimated ready time based on prep time
       finalScheduledTime = moment.tz(timeZone).add(location.prepTime, 'minutes').toDate();
     }
 
-    // Logic to handle whether the order is fired immediately to the POS or held based on global settings
-    if (scheduleType === 'scheduled') {
-      const globalSetting = await getGlobalSettingForScheduledOrders(); // Assume this function exists
-      if (globalSetting === 'fire_immediately') {
-        // Send to POS immediately
-        await PosIntegrationService.sendOrderToPOS(orderData);
+    try {
+      if (scheduleType === 'scheduled') {
+        const globalSetting = await GlobalSettingService.getSettingForScheduledOrders();
+        if (globalSetting === 'fire_immediately') {
+          await PosIntegrationService.sendOrderToPOS(orderData);
+        } else {
+          const delay = moment.tz(finalScheduledTime, timeZone).diff(moment.tz(timeZone), 'milliseconds') - location.prepTime * 60 * 1000;
+          setTimeout(() => {
+            PosIntegrationService.sendOrderToPOS(orderData)
+              .catch(error => logger.error(`Failed to send scheduled order to POS: ${error.message}`));
+          }, delay);
+        }
       } else {
-        // Hold the order and fire it at the appropriate time
-        setTimeout(() => {
-          PosIntegrationService.sendOrderToPOS(orderData);
-        }, moment.tz(finalScheduledTime, timeZone).diff(moment.tz(timeZone), 'milliseconds') - location.prepTime * 60 * 1000);
+        await PosIntegrationService.sendOrderToPOS(orderData);
       }
-    } else {
-      // For ASAP orders, send directly to POS
-      await PosIntegrationService.sendOrderToPOS(orderData);
+
+      const createdOrder = await Order.create({
+        ...orderData,
+        scheduledTime: finalScheduledTime,
+      });
+
+      logger.info(`Order created successfully. Order ID: ${createdOrder.id}`);
+      return createdOrder;
+    } catch (error) {
+      logger.error(`Failed to create order: ${error.message}`);
+      throw error;
     }
-
-    return await Order.create({
-      ...orderData,
-      scheduledTime: finalScheduledTime,
-    });
   }
-}
 
-// Helper function to round the time to the next "pretty" time slot while respecting the time zone
-function roundToNextPrettyTimeSlot(date, prepTime, timeZone) {
-  const roundedMinutes = Math.ceil(moment.tz(date, timeZone).minute() / 15) * 15;
-  const roundedDate = moment.tz(date, timeZone).startOf('hour').add(roundedMinutes, 'minutes');
-  return roundedDate.add(prepTime, 'minutes').toDate();
+  static roundToNextPrettyTimeSlot(date, prepTime, timeZone) {
+    const roundedMinutes = Math.ceil(moment.tz(date, timeZone).minute() / 15) * 15;
+    const roundedDate = moment.tz(date, timeZone).startOf('hour').add(roundedMinutes, 'minutes');
+    return roundedDate.add(prepTime, 'minutes').toDate();
+  }
 }
 
 module.exports = OrderService;

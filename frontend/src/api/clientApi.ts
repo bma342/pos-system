@@ -1,24 +1,38 @@
 import axios from 'axios';
 import { Client } from '../types';
 
-export const fetchClientId = async (): Promise<number> => {
-  const response = await axios.get<number>('/api/clients/get-client-id'); // Update the endpoint as needed
-  return response.data;
+export const fetchClientId = async (): Promise<number | null> => {
+  try {
+    const response = await axios.get<number>('/api/clients/get-client-id');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching client ID:', error);
+    return null;
+  }
 };
 
-// Update client details
 export const updateClientDetails = async (
   clientId: number,
   clientData: Partial<Client>
-): Promise<Client> => {
-  const response = await axios.put<Client>(
-    `/api/clients/${clientId}`,
-    clientData
-  );
-  return response.data;
+): Promise<Client | null> => {
+  try {
+    const response = await axios.put<Client>(
+      `/api/clients/${clientId}`,
+      clientData
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error updating client details:', error);
+    return null;
+  }
 };
 
-// Delete a client
-export const deleteClient = async (clientId: number): Promise<void> => {
-  await axios.delete(`/api/clients/${clientId}`);
+export const deleteClient = async (clientId: number): Promise<boolean> => {
+  try {
+    await axios.delete(`/api/clients/${clientId}`);
+    return true;
+  } catch (error) {
+    console.error('Error deleting client:', error);
+    return false;
+  }
 };

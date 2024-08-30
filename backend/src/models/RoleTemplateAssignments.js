@@ -1,5 +1,16 @@
+'use strict';
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  const RoleTemplateAssignments = sequelize.define('RoleTemplateAssignments', {
+  class RoleTemplateAssignments extends Model {
+    static associate(models) {
+      RoleTemplateAssignments.belongsTo(models.Client, { foreignKey: 'clientId' });
+      RoleTemplateAssignments.belongsTo(models.Role, { foreignKey: 'roleId' });
+      RoleTemplateAssignments.belongsTo(models.RoleTemplate, { foreignKey: 'roleTemplateId' });
+    }
+  }
+
+  RoleTemplateAssignments.init({
     roleId: {
       type: DataTypes.INTEGER,
       references: {
@@ -25,14 +36,12 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id',
       },
       onDelete: 'CASCADE',
-      allowNull: false, // Ensure tenant isolation
+      allowNull: false,
     },
+  }, {
+    sequelize,
+    modelName: 'RoleTemplateAssignments',
   });
-
-  RoleTemplateAssignments.associate = (models) => {
-    // Associations between roles, templates, and clients
-    RoleTemplateAssignments.belongsTo(models.Client, { foreignKey: 'clientId' });
-  };
 
   return RoleTemplateAssignments;
 };

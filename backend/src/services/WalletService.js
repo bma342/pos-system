@@ -4,10 +4,13 @@ class WalletService {
   static async getWalletBalance(guestId) {
     const wallet = await Wallet.findOne({
       where: { guestId },
-      include: [Guest],
+      include: [Guest, LoyaltyReward],
     });
 
-    return wallet ? wallet.balance : 0;
+    // Calculate total balance including any unused rewards
+    const totalBalance = wallet ? wallet.balance + wallet.LoyaltyRewards.reduce((sum, reward) => sum + reward.value, 0) : 0;
+
+    return totalBalance;
   }
 
   static async addDiscountToWallet(guestId, discountId) {

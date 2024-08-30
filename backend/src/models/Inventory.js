@@ -8,14 +8,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       validate: {
-        min: 0, // Ensure inventory count is non-negative
+        min: 0,
       },
     },
     onlineInventory: {
       type: DataTypes.INTEGER,
       allowNull: false,
       validate: {
-        min: 0, // Ensure online inventory count is non-negative
+        min: 0,
       },
     },
     locationId: {
@@ -29,16 +29,22 @@ module.exports = (sequelize, DataTypes) => {
     Inventory.belongsTo(models.Location, { foreignKey: 'locationId' });
   };
 
-  // Add lifecycle hooks for inventory changes
-  Inventory.addHook('beforeUpdate', (inventory, options) => {
+  Inventory.addHook('beforeUpdate', async (inventory, options) => {
     if (inventory.posCount < 0 || inventory.onlineInventory < 0) {
       throw new Error('Inventory count cannot be negative');
     }
 
-    // Example: Trigger low inventory alert if the onlineInventory drops below a threshold
     if (inventory.onlineInventory < 10) {
-      // Logic for triggering a notification (e.g., send an alert)
-      console.log(`Alert: Low online inventory for item ${inventory.itemId} at location ${inventory.locationId}`);
+      if (!options.transaction) {
+        options.transaction = await sequelize.transaction();
+      }
+      
+      await sequelize.models.Alert.create({
+        type: 'LOW_INVENTORY',
+        message: `Low online inventory for item ${inventory.itemId} at location ${inventory.locationId}`,
+        itemId: inventory.itemId,
+        locationId: inventory.locationId
+      }, { transaction: options.transaction });
     }
   });
 

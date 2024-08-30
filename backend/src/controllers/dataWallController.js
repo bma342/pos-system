@@ -1,12 +1,9 @@
 const DataWall = require('../models/DataWall');
-const Report = require('../models/Report');
-const { Op } = require('sequelize');
 
 exports.createDataWall = async (req, res) => {
   const { name, accessLevel, locationId, reportId, permissions } = req.body;
 
   try {
-    // Check if the user has the correct location permissions
     if (!req.user.locations.includes(locationId)) {
       return res.status(403).json({ message: 'Access denied to this location.' });
     }
@@ -29,7 +26,6 @@ exports.getDataWallsByLocation = async (req, res) => {
   const { locationId } = req.params;
 
   try {
-    // Check if the user has access to the requested location
     if (!req.user.locations.includes(locationId)) {
       return res.status(403).json({ message: 'Access denied to this location.' });
     }

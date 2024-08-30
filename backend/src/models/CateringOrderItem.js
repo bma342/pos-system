@@ -36,40 +36,47 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
     },
     modifiers: {
-      type: DataTypes.JSONB, // Store modifier details as JSON
+      type: DataTypes.JSONB,
       allowNull: true,
     },
     extras: {
-      type: DataTypes.JSONB, // Store extra options (e.g., sides, drinks)
+      type: DataTypes.JSONB,
       allowNull: true,
     },
     customizations: {
-      type: DataTypes.JSONB, // Store any customizations like dietary requests
+      type: DataTypes.JSONB,
       allowNull: true,
     },
     isPromoItem: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false, // Indicates if this item is part of a promotion
+      defaultValue: false,
     },
     posSyncData: {
-      type: DataTypes.JSONB, // Store POS-specific data for integration
+      type: DataTypes.JSONB,
       allowNull: true,
     },
+  }, {
+    tableName: 'CateringOrderItems',
+    timestamps: true,
   });
 
   CateringOrderItem.associate = (models) => {
     CateringOrderItem.belongsTo(models.CateringOrder, { foreignKey: 'cateringOrderId' });
     CateringOrderItem.belongsTo(models.MenuItem, { foreignKey: 'menuItemId' });
 
-    // Ensure the items have an association with modifiers, extras, and customizations
-    CateringOrderItem.hasMany(models.MenuItemModifier, { foreignKey: 'cateringOrderItemId' });
-    CateringOrderItem.hasMany(models.CateringOrderExtra, { foreignKey: 'cateringOrderItemId' });
-    CateringOrderItem.hasMany(models.CateringOrderCustomization, { foreignKey: 'cateringOrderItemId' });
-
-    // Optional associations for reporting and analytics
-    CateringOrderItem.hasMany(models.CateringOrderItemAnalytics, { foreignKey: 'cateringOrderItemId' });
+    if (models.MenuItemModifier) {
+      CateringOrderItem.hasMany(models.MenuItemModifier, { foreignKey: 'cateringOrderItemId' });
+    }
+    if (models.CateringOrderExtra) {
+      CateringOrderItem.hasMany(models.CateringOrderExtra, { foreignKey: 'cateringOrderItemId' });
+    }
+    if (models.CateringOrderCustomization) {
+      CateringOrderItem.hasMany(models.CateringOrderCustomization, { foreignKey: 'cateringOrderItemId' });
+    }
+    if (models.CateringOrderItemAnalytics) {
+      CateringOrderItem.hasMany(models.CateringOrderItemAnalytics, { foreignKey: 'cateringOrderItemId' });
+    }
   };
 
   return CateringOrderItem;
 };
-

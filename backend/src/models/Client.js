@@ -65,17 +65,22 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.JSONB, // Stores more detailed branding options if needed
       allowNull: true,
     },
-    posProfile: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'CorePOSProfiles',
-        key: 'id',
-      },
+posProfile: {
+  type: DataTypes.INTEGER,
+  references: {
+    model: 'CorePOSProfiles',
+    key: 'id',
+  },
       allowNull: true, // Optional, default Core POS Profile for the client
     },
     clientSettings: {
       type: DataTypes.JSONB, // Store settings specific to the client, such as marketing preferences
       allowNull: true,
+    },
+    features: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: null
     },
     createdAt: {
       type: DataTypes.DATE,

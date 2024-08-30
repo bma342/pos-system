@@ -101,7 +101,7 @@ exports.createDropOffSpot = async (req, res) => {
     logger.info(`Drop-off spot created for location ID ${locationId}`);
     res.status(201).json(newDropOffSpot);
   } catch (error) {
-    logger.error(`Error creating drop-off spot for location ID ${locationId}: ${error.message}`, { ip: req.ip });
+    logger.error(`Error creating drop-off spot for location ID ${req.params.locationId}: ${error.message}`, { ip: req.ip });
     res.status(500).json({ message: 'Error creating drop-off spot', error });
   }
 };
@@ -115,7 +115,7 @@ exports.updateDropOffSpot = async (req, res) => {
     logger.info(`Drop-off spot updated: ID ${spotId}`);
     res.status(200).json(updatedSpot);
   } catch (error) {
-    logger.error(`Error updating drop-off spot (ID: ${spotId}): ${error.message}`, { ip: req.ip });
+    logger.error(`Error updating drop-off spot (ID: ${req.params.spotId}): ${error.message}`, { ip: req.ip });
     res.status(500).json({ message: 'Error updating drop-off spot', error });
   }
 };
@@ -127,7 +127,7 @@ exports.getDropOffSpots = async (req, res) => {
     const spots = await locationService.getDropOffSpots(locationId);
     res.status(200).json(spots);
   } catch (error) {
-    logger.error(`Error fetching drop-off spots for location ID ${locationId}: ${error.message}`, { ip: req.ip });
+    logger.error(`Error fetching drop-off spots for location ID ${req.params.locationId}: ${error.message}`, { ip: req.ip });
     res.status(500).json({ message: 'Error fetching drop-off spots', error });
   }
 };
@@ -140,8 +140,7 @@ exports.deleteDropOffSpot = async (req, res) => {
     logger.info(`Drop-off spot deleted: ID ${spotId}`);
     res.status(204).send();
   } catch (error) {
-    logger.error(`Error deleting drop-off spot (ID: ${spotId}): ${error.message}`, { ip: req.ip });
+    logger.error(`Error deleting drop-off spot (ID: ${req.params.spotId}): ${error.message}`, { ip: req.ip });
     res.status(500).json({ message: 'Error deleting drop-off spot', error });
   }
 };
-

@@ -22,44 +22,42 @@ module.exports = (sequelize, DataTypes) => {
     },
     roundingOption: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false, // Whether to apply rounding to prices
+      defaultValue: false,
     },
     flatUpliftPercentage: {
       type: DataTypes.FLOAT,
-      allowNull: true, // Optional flat uplift percentage for prices
+      allowNull: true,
     },
     syncFrequency: {
       type: DataTypes.STRING,
-      defaultValue: 'daily', // e.g., 'hourly', 'daily', 'weekly'
+      defaultValue: 'daily',
     },
     syncMenu: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true, // Whether menus should be synced automatically
+      defaultValue: true,
     },
     syncInventory: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true, // Whether inventory should be synced automatically
+      defaultValue: true,
     },
     syncOrders: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true, // Whether orders should be synced automatically
+      defaultValue: true,
     },
     locationId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'Locations',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
     },
+  }, {
+    tableName: 'PosIntegrations',
+    timestamps: true,
   });
 
   PosIntegration.associate = (models) => {
-    PosIntegration.belongsTo(models.Location, { foreignKey: 'locationId' });
-    PosIntegration.hasMany(models.MenuSyncHistory, { foreignKey: 'posIntegrationId' });
-    PosIntegration.hasMany(models.InventorySyncHistory, { foreignKey: 'posIntegrationId' });
-    PosIntegration.hasMany(models.OrderSyncHistory, { foreignKey: 'posIntegrationId' });
+    if (models.Location) PosIntegration.belongsTo(models.Location, { foreignKey: 'locationId' });
+    if (models.MenuSyncHistory) PosIntegration.hasMany(models.MenuSyncHistory, { foreignKey: 'posIntegrationId' });
+    if (models.InventorySyncHistory) PosIntegration.hasMany(models.InventorySyncHistory, { foreignKey: 'posIntegrationId' });
+    if (models.OrderSyncHistory) PosIntegration.hasMany(models.OrderSyncHistory, { foreignKey: 'posIntegrationId' });
   };
 
   return PosIntegration;

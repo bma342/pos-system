@@ -1,4 +1,5 @@
 const Guest = require('../models/Guest');
+const LoyaltyReward = require('../models/LoyaltyReward'); // Assuming you have a LoyaltyReward model
 
 exports.getWallet = async (req, res) => {
   const { guestId } = req.params;
@@ -36,16 +37,23 @@ exports.addPoints = async (req, res) => {
 };
 
 exports.redeemReward = async (req, res) => {
-  const { guestId, reward } = req.body;
+  const { guestId, rewardId } = req.body;
 
   try {
     const guest = await Guest.findByPk(guestId);
+    const reward = await LoyaltyReward.findByPk(rewardId); // Use reward
 
     if (!guest) return res.status(404).json({ message: 'Guest not found.' });
 
-    // Logic to redeem the reward (e.g., check if reward exists in wallet, update wallet, etc.)
+    if (!reward || reward.walletId !== guest.walletId) {
+      return res.status(400).json({ message: 'Reward not found in wallet.' });
+    }
 
-    res.json({ message: 'Reward redeemed successfully.' });
+    // Logic to redeem the reward (e.g., deduct points, apply discount, etc.)
+    reward.isRedeemed = true; // Example logic
+    await reward.save();
+
+    res.json({ message: 'Reward redeemed successfully.', reward });
   } catch (error) {
     res.status(500).json({ message: 'Error redeeming reward', error });
   }

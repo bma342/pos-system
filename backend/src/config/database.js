@@ -1,38 +1,38 @@
 const { Sequelize } = require('sequelize');
 const dotenv = require('dotenv');
 const path = require('path');
-const fs = require('fs');
 
 const envPath = path.resolve(__dirname, '../../.env');
 dotenv.config({ path: envPath });
 
-console.log('Current working directory:', process.cwd());
-console.log('Env file path:', envPath);
-console.log('Env file exists:', fs.existsSync(envPath));
-console.log('Env contents:', fs.readFileSync(envPath, 'utf8'));
+const { DB_NAME, DB_USER, DB_PASSWORD, DB_HOST } = process.env;
 
-console.log('DB Config:', {
-  name: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  host: process.env.DB_HOST
+console.log('DB Config:', { name: DB_NAME, user: DB_USER, password: '****', host: DB_HOST });
+
+const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
+  host: DB_HOST,
+  dialect: 'postgres',
+  logging: console.log,
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
+  },
 });
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST,
-    dialect: 'postgres',
-    logging: console.log,
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    },
+async function testConnection() {
+  try {
+    await sequelize.authenticate();
+    console.log('Database connection has been established successfully.');
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
   }
-);
+}
 
-module.exports = sequelize;
+testConnection();
+
+module.exports = {
+  sequelize,
+  Sequelize
+};

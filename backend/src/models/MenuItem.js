@@ -26,77 +26,69 @@ module.exports = (sequelize, DataTypes) => {
     },
     isGlobal: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false, // Indicates if this item is available across all locations
+      defaultValue: false,
     },
     abTestGroup: {
-      type: DataTypes.STRING, // A/B testing group (e.g., 'A', 'B')
+      type: DataTypes.STRING,
       allowNull: true,
     },
     showReviews: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true, // Allows toggling reviews visibility
+      defaultValue: true,
     },
     clientId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: 'Clients',
-        key: 'id',
+        key: 'id'
       },
     },
     isFeatured: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false, // Indicates if this item is featured in menus
+      defaultValue: false,
     },
     isAvailable: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true, // Indicates if the item is available for ordering
+      defaultValue: true,
     },
     allergens: {
       type: DataTypes.JSONB,
-      allowNull: true, // Stores allergen information, e.g., {"gluten": true, "peanuts": false}
+      allowNull: true,
     },
     dietaryLabels: {
       type: DataTypes.JSONB,
-      allowNull: true, // Stores dietary labels, e.g., {"vegan": true, "halal": false}
-    },
-    tags: {
-      type: DataTypes.ARRAY(DataTypes.STRING), // Allows tagging menu items for easier filtering
       allowNull: true,
     },
+    tags: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: true,
+    },
+  }, {
+    tableName: 'MenuItems',
+    timestamps: true,
   });
 
   MenuItem.associate = (models) => {
-    MenuItem.belongsTo(models.MenuGroup, { foreignKey: 'menuGroupId' });
-    MenuItem.hasMany(models.LocationMenuOverride, { foreignKey: 'menuItemId' });
+    MenuItem.belongsTo(models.MenuGroup, { foreignKey: 'menuGroupId', constraints: false });
+    MenuItem.hasMany(models.LocationMenuOverride, { foreignKey: 'menuItemId', constraints: false });
     MenuItem.belongsToMany(models.Modifier, {
-      through: models.MenuItemModifier,
+      through: 'MenuItemModifier',
       foreignKey: 'menuItemId',
       otherKey: 'modifierId',
+      constraints: false
     });
-
-    MenuItem.hasMany(models.MenuItemModifier, { foreignKey: 'menuItemId' });
-
-    // Associate with size modifiers
-    MenuItem.hasMany(models.MenuItemSizeModifier, { foreignKey: 'menuItemId', as: 'sizeModifiers' });
-
-    // Associate with A/B testing
-    MenuItem.hasMany(models.ABTest, { foreignKey: 'menuItemId' });
-
-    // Associate with analytics
-    MenuItem.hasMany(models.MenuItemAnalytics, { foreignKey: 'menuItemId' });
-
-    // Associate with reviews
-    MenuItem.hasMany(models.ItemReview, { foreignKey: 'menuItemId' });
-
-    // Tenant isolation through clientId
-    MenuItem.belongsTo(models.Client, { foreignKey: 'clientId' });
-
-    // Associate with external providers (e.g., DoorDash, UberEats)
+    MenuItem.hasMany(models.MenuItemModifier, { foreignKey: 'menuItemId', constraints: false });
+    MenuItem.hasMany(models.MenuItemSizeModifier, { foreignKey: 'menuItemId', as: 'sizeModifiers', constraints: false });
+    MenuItem.hasMany(models.ABTest, { foreignKey: 'menuItemId', constraints: false });
+    MenuItem.hasMany(models.MenuItemAnalytics, { foreignKey: 'menuItemId', constraints: false });
+    MenuItem.hasMany(models.ItemReview, { foreignKey: 'menuItemId', constraints: false });
+    MenuItem.belongsTo(models.Client, { foreignKey: 'clientId', constraints: false });
     MenuItem.belongsToMany(models.ProviderIntegration, {
-      through: models.ItemProviderMapping,
+      through: 'ItemProviderMapping',
       foreignKey: 'menuItemId',
       otherKey: 'providerId',
+      constraints: false
     });
   };
 

@@ -8,26 +8,14 @@ module.exports = (sequelize, DataTypes) => {
     guestId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'Guests',
-        key: 'id',
-      },
     },
     houseAccountId: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      references: {
-        model: 'HouseAccounts',
-        key: 'id',
-      },
     },
     locationId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'Locations',
-        key: 'id',
-      },
     },
     scheduledDate: {
       type: DataTypes.DATE,
@@ -68,10 +56,6 @@ module.exports = (sequelize, DataTypes) => {
     commissaryKitchenId: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      references: {
-        model: 'Locations',
-        key: 'id',
-      },
     },
     taxExempt: {
       type: DataTypes.BOOLEAN,
@@ -82,13 +66,22 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+  }, {
+    tableName: 'CateringOrders',
+    timestamps: true,
   });
 
   CateringOrder.associate = (models) => {
-    CateringOrder.belongsTo(models.Guest, { foreignKey: 'guestId' });
-    CateringOrder.belongsTo(models.HouseAccount, { foreignKey: 'houseAccountId' });
-    CateringOrder.belongsTo(models.Location, { foreignKey: 'locationId' });
-    CateringOrder.belongsTo(models.Location, { foreignKey: 'commissaryKitchenId', as: 'commissaryKitchen' });
+    if (models.Guest) {
+      CateringOrder.belongsTo(models.Guest, { foreignKey: 'guestId' });
+    }
+    if (models.HouseAccount) {
+      CateringOrder.belongsTo(models.HouseAccount, { foreignKey: 'houseAccountId' });
+    }
+    if (models.Location) {
+      CateringOrder.belongsTo(models.Location, { foreignKey: 'locationId' });
+      CateringOrder.belongsTo(models.Location, { foreignKey: 'commissaryKitchenId', as: 'commissaryKitchen' });
+    }
   };
 
   return CateringOrder;

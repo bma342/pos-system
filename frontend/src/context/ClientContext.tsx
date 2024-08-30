@@ -26,14 +26,18 @@ export const ClientProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     const loadClientId = async () => {
       try {
         const id = await fetchClientId();
-        setClientId(id);
+        if (id !== null) {
+          setClientId(id);
+        } else {
+          setError('Failed to fetch client ID');
+        }
       } catch (err) {
-        setError('Failed to fetch client ID');
+        setError('An error occurred while fetching client ID');
+        console.error('Error in loadClientId:', err);
       } finally {
         setIsLoading(false);
       }
     };
-
     loadClientId();
   }, []);
 
@@ -43,3 +47,5 @@ export const ClientProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     </ClientContext.Provider>
   );
 };
+
+export default ClientProvider;

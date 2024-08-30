@@ -1,4 +1,4 @@
-const { Order } = require('../models');
+const { Order, Location, MenuItem } = require('../models');
 
 class OrderController {
   static async cancelOrder(req, res) {
@@ -11,11 +11,9 @@ class OrderController {
       }
 
       if (req.user.role === 'manager' || req.user.role === 'admin') {
-        // Managers and admins can cancel orders without restrictions
         await order.update({ isCancelled: true, cancelledAt: new Date(), status: 'cancelled' });
         return res.status(200).json({ message: 'Order cancelled successfully.' });
       } else {
-        // Guests can only cancel orders outside of the prep window
         if (order.canBeCancelledByGuest()) {
           await order.update({ isCancelled: true, cancelledAt: new Date(), status: 'cancelled' });
           return res.status(200).json({ message: 'Order cancelled successfully.' });
@@ -34,7 +32,7 @@ class OrderController {
       const orders = await Order.findAll({
         where: { guestId },
         order: [['orderDate', 'DESC']],
-        include: [{ model: Location }, { model: MenuItem }]
+        include: [{ model: Location }, { model: MenuItem }],
       });
 
       return res.status(200).json(orders);
@@ -45,4 +43,3 @@ class OrderController {
 }
 
 module.exports = OrderController;
-

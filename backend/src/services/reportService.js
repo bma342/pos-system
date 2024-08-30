@@ -19,6 +19,7 @@ class ReportService {
           throw new Error('Invalid report type');
       }
 
+      // Using locationId in report creation
       return await db.Report.create({
         name: `${reportType} Report`,
         reportType,
@@ -33,7 +34,8 @@ class ReportService {
   }
 
   async generateSalesReport(locationId) {
-    // Example sales data retrieval logic
+    // Example sales data retrieval logic using locationId
+    console.log(`Generating sales report for locationId: ${locationId}`);
     return {
       totalSales: 5000,
       topItems: ['Burger', 'Fries'],
@@ -41,14 +43,16 @@ class ReportService {
   }
 
   async generateInventoryReport(locationId) {
-    // Example inventory data retrieval logic
+    // Example inventory data retrieval logic using locationId
+    console.log(`Generating inventory report for locationId: ${locationId}`);
     return {
       lowStockItems: ['Tomatoes', 'Lettuce'],
     };
   }
 
   async generateLoyaltyReport(locationId) {
-    // Example loyalty data retrieval logic
+    // Example loyalty data retrieval logic using locationId
+    console.log(`Generating loyalty report for locationId: ${locationId}`);
     return {
       topLoyalCustomers: ['John Doe', 'Jane Smith'],
     };
@@ -75,3 +79,4 @@ class ReportService {
 }
 
 module.exports = new ReportService();
+

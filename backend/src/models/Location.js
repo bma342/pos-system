@@ -49,10 +49,6 @@ module.exports = (sequelize, DataTypes) => {
     clientId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'Clients',
-        key: 'id',
-      },
     },
     isCateringEnabled: {
       type: DataTypes.BOOLEAN,
@@ -67,38 +63,35 @@ module.exports = (sequelize, DataTypes) => {
     parentLocationId: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      references: {
-        model: 'Locations',
-        key: 'id',
-      },
     },
   }, {
-    sequelize,
-    modelName: 'Location',
-    tableName: 'locations',
+    tableName: 'Locations',
     timestamps: true,
   });
 
   Location.associate = (models) => {
-    Location.hasMany(models.Menu, { foreignKey: 'locationId', as: 'menus' });
-    Location.hasMany(models.LocationHours, { foreignKey: 'locationId', as: 'hours' });
-    Location.hasMany(models.LocationMenuOverride, { foreignKey: 'locationId', as: 'menuOverrides' });
-    Location.hasMany(models.PosIntegration, { foreignKey: 'locationId', as: 'posIntegrations' });
-    Location.hasMany(models.PosProfile, { foreignKey: 'locationId', as: 'posProfiles' });
-    Location.hasMany(models.ProviderPricing, { foreignKey: 'locationId', as: 'providerPricings' });
-    Location.hasMany(models.HouseAccount, { foreignKey: 'locationId', as: 'houseAccounts' });
-    Location.hasMany(models.CateringOrder, { foreignKey: 'locationId', as: 'cateringOrders' });
-    Location.belongsTo(models.Client, { foreignKey: 'clientId', as: 'client' });
+    if (models.Menu) Location.hasMany(models.Menu, { foreignKey: 'locationId', as: 'menus' });
+    if (models.LocationHours) Location.hasMany(models.LocationHours, { foreignKey: 'locationId', as: 'hours' });
+    if (models.LocationMenuOverride) Location.hasMany(models.LocationMenuOverride, { foreignKey: 'locationId', as: 'menuOverrides' });
+    if (models.PosIntegration) Location.hasMany(models.PosIntegration, { foreignKey: 'locationId', as: 'posIntegrations' });
+    if (models.PosProfile) Location.hasMany(models.PosProfile, { foreignKey: 'locationId', as: 'posProfiles' });
+    if (models.ProviderPricing) Location.hasMany(models.ProviderPricing, { foreignKey: 'locationId', as: 'providerPricings' });
+    if (models.HouseAccount) Location.hasMany(models.HouseAccount, { foreignKey: 'locationId', as: 'houseAccounts' });
+    if (models.CateringOrder) Location.hasMany(models.CateringOrder, { foreignKey: 'locationId', as: 'cateringOrders' });
+    if (models.Client) Location.belongsTo(models.Client, { foreignKey: 'clientId', as: 'client' });
     Location.belongsTo(models.Location, { foreignKey: 'parentLocationId', as: 'parentLocation' });
     Location.hasMany(models.Location, { foreignKey: 'parentLocationId', as: 'childLocations' });
+  };
 
-    Location.addHook('beforeCreate', async (location, options) => {
-      const clientExists = await models.Client.findByPk(location.clientId);
+  Location.addHook('beforeCreate', async (location, options) => {
+    const Client = sequelize.models.Client;
+    if (Client) {
+      const clientExists = await Client.findByPk(location.clientId, { transaction: options.transaction });
       if (!clientExists) {
         throw new Error('Client not found');
       }
-    });
-  };
+    }
+  });
 
   return Location;
 };

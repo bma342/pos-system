@@ -3,54 +3,77 @@ module.exports = (sequelize, DataTypes) => {
     locationId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'Locations',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
     },
     coreProfileId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'CorePOSProfile',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
     },
     syncEnabled: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true, // Whether synchronization is enabled for this profile
+      defaultValue: true,
     },
     syncSchedule: {
       type: DataTypes.STRING,
-      defaultValue: 'daily', // e.g., 'hourly', 'daily'
+      defaultValue: 'daily',
     },
     roundingOption: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false, // Whether to apply rounding to prices
+      defaultValue: false,
     },
     flatUpliftPercentage: {
       type: DataTypes.FLOAT,
-      allowNull: true, // Optional flat uplift percentage for prices
+      allowNull: true,
     },
     enableInventorySync: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true, // Whether inventory sync is enabled
+      defaultValue: true,
     },
+  }, {
+    tableName: 'LocationPOSProfiles',
+    timestamps: true,
   });
 
   LocationPOSProfile.associate = (models) => {
-    LocationPOSProfile.belongsTo(models.CorePOSProfile, { foreignKey: 'coreProfileId' });
-    LocationPOSProfile.belongsTo(models.Location, { foreignKey: 'locationId' });
-
-    // Association with POS-related sync histories
-    LocationPOSProfile.hasMany(models.PosSyncHistory, { foreignKey: 'locationPosProfileId', as: 'syncHistory' });
+    if (models.CorePOSProfile) {
+      LocationPOSProfile.belongsTo(models.CorePOSProfile, { foreignKey: 'coreProfileId' });
+    }
+    if (models.Location) {
+      LocationPOSProfile.belongsTo(models.Location, { foreignKey: 'locationId' });
+    }
+    if (models.PosSyncHistory) {
+      LocationPOSProfile.hasMany(models.PosSyncHistory, { foreignKey: 'locationPosProfileId', as: 'syncHistory' });
+    }
   };
 
-  // Hooks to manage sensitive operations like key updates or sync settings
-  LocationPOSProfile.addHook('beforeSave', (profile) => {
-    // Example: Additional validation or logging before saving changes
+  LocationPOSProfile.addHook('beforeSave', async (profile, options) => {
+    // Validate that the associated location and core profile exist
+    const [location, coreProfile] = await Promise.all([
+      sequelize.models.Location.findByPk(profile.locationId, { transaction: options.transaction }),
+      sequelize.models.CorePOSProfile.findByPk(profile.coreProfileId, { transaction: options.transaction })
+    ]);
+
+    if (!location) {
+      throw new Error(`Location with id ${profile.locationId} does not exist`);
+    }
+
+    if (!coreProfile) {
+      throw new Error(`CorePOSProfile with id ${profile.coreProfileId} does not exist`);
+    }
+
+    // Log the change
+    if (profile.changed()) {
+      await sequelize.models.ProfileChangeLog.create({
+        profileId: profile.id,
+        changes: profile.changed().reduce((acc, field) => {
+          acc[field] = {
+            oldValue: profile.previous(field),
+            newValue: profile[field]
+          };
+          return acc;
+        }, {}),
+        changeReason: 'Profile updated'
+      }, { transaction: options.transaction });
+    }
   });
 
   return LocationPOSProfile;

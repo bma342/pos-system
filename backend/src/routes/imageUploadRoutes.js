@@ -6,7 +6,7 @@ const router = express.Router();
 // Configure multer for local storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'src/uploads/images/');
+    cb(null, path.join(__dirname, '../uploads/images/'));
   },
   filename: function (req, file, cb) {
     cb(null, `${Date.now()}-${file.originalname}`);

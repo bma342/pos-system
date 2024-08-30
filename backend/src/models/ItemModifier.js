@@ -1,4 +1,4 @@
-kmodule.exports = (sequelize, DataTypes) => {
+module.exports = (sequelize, DataTypes) => {
   const ItemModifier = sequelize.define('ItemModifier', {
     itemId: {
       type: DataTypes.INTEGER,
@@ -20,8 +20,11 @@ kmodule.exports = (sequelize, DataTypes) => {
     },
     priceAdjustment: {
       type: DataTypes.FLOAT,
-      allowNull: true, // If the modifier affects the price
+      allowNull: true,
     },
+  }, {
+    tableName: 'ItemModifiers',
+    timestamps: true,
   });
 
   ItemModifier.associate = (models) => {
@@ -31,4 +34,3 @@ kmodule.exports = (sequelize, DataTypes) => {
 
   return ItemModifier;
 };
-

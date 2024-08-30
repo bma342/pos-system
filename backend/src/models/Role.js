@@ -1,30 +1,51 @@
+'use strict';
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  const Role = sequelize.define('Role', {
+  class Role extends Model {
+    static associate(models) {
+      Role.belongsToMany(models.Permission, {
+        through: 'RolePermissions',
+        foreignKey: 'roleId',
+        otherKey: 'permissionId',
+      });
+      Role.hasMany(models.User, { foreignKey: 'roleId' });
+      Role.belongsTo(models.Client, { foreignKey: 'clientId', allowNull: false });
+      Role.belongsToMany(models.RoleTemplate, {
+        through: models.RoleTemplateAssignments,
+        foreignKey: 'roleId',
+        otherKey: 'roleTemplateId',
+        as: 'AssignedTemplates',
+      });
+    }
+  }
+
+  Role.init({
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: 'compositeIndex', // Ensures uniqueness in combination with clientId
+      unique: 'compositeIndex',
     },
     level: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 1, // Define role hierarchy level (1 for Super Admin, 2 for Admin, etc.)
+      defaultValue: 1,
     },
     description: {
       type: DataTypes.TEXT,
-      allowNull: true, // Optional description of the role
+      allowNull: true,
     },
     isPredefined: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false, // Flag for predefined roles
+      defaultValue: false,
     },
     isEditable: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true, // Determines if the role can be edited by client admin
+      defaultValue: true,
     },
     isAssignable: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true, // Determines if the role can be assigned to users
+      defaultValue: true,
     },
     clientId: {
       type: DataTypes.INTEGER,
@@ -35,32 +56,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       onDelete: 'CASCADE',
     },
+  }, {
+    sequelize,
+    modelName: 'Role',
   });
-
-  Role.associate = (models) => {
-    // Role to Permission association (Many-to-Many)
-    Role.belongsToMany(models.Permission, {
-      through: 'RolePermissions',
-      foreignKey: 'roleId',
-      otherKey: 'permissionId',
-    });
-
-    // Role to User association (One-to-Many)
-    Role.hasMany(models.User, { foreignKey: 'roleId' });
-
-    // Role to Client association (Many-to-One)
-    Role.belongsTo(models.Client, { foreignKey: 'clientId', allowNull: false });
-
-    // Role to RoleTemplate association for predefined templates (Many-to-Many)
-    Role.belongsToMany(models.RoleTemplate, {
-      through: 'RoleTemplateAssignments',
-      foreignKey: 'roleId',
-      otherKey: 'roleTemplateId',
-    });
-
-    // Role to RoleTemplateAssignments (One-to-Many)
-    Role.hasMany(models.RoleTemplateAssignments, { foreignKey: 'roleId' });
-  };
 
   return Role;
 };

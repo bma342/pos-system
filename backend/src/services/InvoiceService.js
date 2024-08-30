@@ -11,10 +11,10 @@ class InvoiceService {
     return invoiceData;
   }
 
-  static storeInvoice(invoiceData) {
+  static storeInvoice(invoiceData, clientId) {
     // Placeholder logic for storing invoices in the database
     // This could involve saving the invoice to a storage service or database
-    console.log('Storing invoice:', invoiceData);
+    console.log(`Storing invoice for client ${clientId}:`, invoiceData);
     return true;
   }
 
@@ -30,6 +30,7 @@ class InvoiceService {
 
   static listInvoices(clientId) {
     // Placeholder logic for listing all invoices for a specific client
+    console.log(`Listing invoices for client ${clientId}`);
     return [
       {
         invoiceId: 1,

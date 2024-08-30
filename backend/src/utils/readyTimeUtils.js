@@ -1,4 +1,6 @@
-const updateReadyTime = (locationId, orderData) => {
+const { Location } = require('../models'); // Added import for Location model
+
+const updateReadyTime = async (locationId, orderData) => { // Added async keyword
   const { totalItems, totalAmount, totalOrders } = orderData;
 
   // Fetch location-specific throttle settings
@@ -26,3 +28,5 @@ const updateReadyTime = (locationId, orderData) => {
 
   return location.currentReadyTime;
 };
+
+module.exports = { updateReadyTime };

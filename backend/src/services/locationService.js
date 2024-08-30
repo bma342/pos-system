@@ -1,6 +1,7 @@
 const db = require('../models');
 
 class LocationService {
+  // Create a new location
   async createLocation(clientId, locationDetails) {
     const client = await db.Client.findByPk(clientId);
     if (!client) {
@@ -9,76 +10,47 @@ class LocationService {
 
     const location = await db.Location.create({
       ...locationDetails,
-      clientId: client.id,
+      clientId,
     });
 
+    // Utilize the created location object for additional operations
     await this.setupDefaultLocationSettings(location);
 
     return location;
   }
 
+  // Setup default settings for a new location
   async setupDefaultLocationSettings(location) {
-    // Implement logic for default hours, menu assignments, etc.
+    // Example logic for setting default hours or menu assignments
+    console.log(`Setting up default settings for location: ${location.id}`);
   }
 
-  async createDropOffSpot(locationId, spotDetails) {
-    const location = await db.Location.findByPk(locationId);
-    if (!location) {
-      throw new Error('Location not found');
-    }
-
-    const distanceFromLocation = this.calculateDistance(location.gpsCoordinates, spotDetails.gpsCoordinates);
-
-    if (distanceFromLocation > location.maxDropOffDistance) {
-      throw new Error('Drop-off spot is outside the allowed territory');
-    }
-
-    return await db.DropOffSpot.create({
-      ...spotDetails,
-      locationId,
-      distanceFromLocation,
-    });
-  }
-
-  async getDropOffSpots(locationId) {
-    return await db.DropOffSpot.findAll({ where: { locationId } });
-  }
-
-  async updateDropOffSpot(spotId, spotDetails) {
-    const dropOffSpot = await db.DropOffSpot.findByPk(spotId);
-    if (!dropOffSpot) {
-      throw new Error('Drop-off spot not found');
-    }
-
-    return await dropOffSpot.update(spotDetails);
-  }
-
-  async deleteDropOffSpot(spotId) {
-    const dropOffSpot = await db.DropOffSpot.findByPk(spotId);
-    if (!dropOffSpot) {
-      throw new Error('Drop-off spot not found');
-    }
-
-    return await dropOffSpot.destroy();
-  }
-
-  async getLocations(clientId) {
-    return await db.Location.findAll({ where: { clientId } });
-  }
-
-  async getLocationById(locationId) {
-    return await db.Location.findByPk(locationId);
-  }
-
+  // Update location details
   async updateLocation(locationId, locationDetails) {
     const location = await db.Location.findByPk(locationId);
     if (!location) {
       throw new Error('Location not found');
     }
 
-    return await location.update(locationDetails);
+    const updatedLocation = await location.update(locationDetails);
+
+    // Log the update for debugging purposes
+    console.log(`Updated location: ${updatedLocation.id}`);
+
+    return updatedLocation;
   }
 
+  // Fetch all locations for a client
+  async getLocations(clientId) {
+    return await db.Location.findAll({ where: { clientId } });
+  }
+
+  // Fetch a single location by ID
+  async getLocationById(locationId) {
+    return await db.Location.findByPk(locationId);
+  }
+
+  // Delete a location
   async deleteLocation(locationId) {
     const location = await db.Location.findByPk(locationId);
     if (!location) {
@@ -88,25 +60,42 @@ class LocationService {
     return await location.destroy();
   }
 
-  calculateDistance(coords1, coords2) {
-    if (!coords1 || !coords2) return 0;
+  // Create a drop-off spot for a location
+  async createDropOffSpot(locationId, spotDetails) {
+    const location = await db.Location.findByPk(locationId);
+    if (!location) {
+      throw new Error('Location not found');
+    }
 
-    const toRad = (value) => (value * Math.PI) / 180;
-    const R = 6371;
-    const dLat = toRad(coords2.latitude - coords1.latitude);
-    const dLon = toRad(coords2.longitude - coords1.longitude);
+    return await db.DropOffSpot.create({
+      ...spotDetails,
+      locationId,
+    });
+  }
 
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(coords1.latitude)) *
-        Math.cos(toRad(coords2.latitude)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+  // Fetch all drop-off spots for a location
+  async getDropOffSpots(locationId) {
+    return await db.DropOffSpot.findAll({ where: { locationId } });
+  }
 
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c;
+  // Update drop-off spot details
+  async updateDropOffSpot(spotId, spotDetails) {
+    const dropOffSpot = await db.DropOffSpot.findByPk(spotId);
+    if (!dropOffSpot) {
+      throw new Error('Drop-off spot not found');
+    }
 
-    return distance;
+    return await dropOffSpot.update(spotDetails);
+  }
+
+  // Delete a drop-off spot
+  async deleteDropOffSpot(spotId) {
+    const dropOffSpot = await db.DropOffSpot.findByPk(spotId);
+    if (!dropOffSpot) {
+      throw new Error('Drop-off spot not found');
+    }
+
+    return await dropOffSpot.destroy();
   }
 }
 

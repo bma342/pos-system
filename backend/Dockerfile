@@ -1,24 +1,16 @@
-# Use Node.js LTS image
-FROM node:18
+FROM node:18-alpine
 
-# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+RUN npm ci --only=production
 
-# Copy the application files
 COPY . .
 
-# Create ssl directory and copy certificates
-RUN mkdir -p ssl
-COPY ssl/server.key ssl/server.cert ssl/
-
-# Expose the application port
 EXPOSE 5000
 
-# Run the application
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget -qO- http://localhost:5000/health || exit 1
+
 CMD ["node", "src/server.js"]

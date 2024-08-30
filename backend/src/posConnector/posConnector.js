@@ -1,9 +1,11 @@
 const axios = require('axios');
 const posConfigs = require('./posConfigs');
+const logger = require('../services/logger');
 
 class POSConnectorService {
   constructor(posConfig) {
     this.posConfig = posConfig;
+    this.defaultConfig = posConfigs[posConfig.provider] || {};
   }
 
   syncMenus(menuData) {
@@ -32,24 +34,28 @@ class POSConnectorService {
 
   async sendOrderToPOS(orderData) {
     try {
-      const response = await axios.post(this.posConfig.apiEndpoint, orderData, {
-        headers: { 'Content-Type': this.posConfig.contentType },
+      const endpoint = this.posConfig.apiEndpoint || this.defaultConfig.apiEndpoint;
+      const response = await axios.post(endpoint, orderData, {
+        headers: { 'Content-Type': this.posConfig.contentType || this.defaultConfig.contentType },
       });
+      logger.info(`Order sent successfully to POS: ${this.posConfig.name}`);
       return response.data;
     } catch (error) {
-      console.error('Error sending order to POS:', error);
+      logger.error(`Error sending order to POS ${this.posConfig.name}: ${error.message}`);
       throw error;
     }
   }
 
   async syncInventory(inventoryData) {
     try {
-      const response = await axios.post(this.posConfig.inventoryEndpoint, inventoryData, {
-        headers: { 'Content-Type': this.posConfig.contentType },
+      const endpoint = this.posConfig.inventoryEndpoint || this.defaultConfig.inventoryEndpoint;
+      const response = await axios.post(endpoint, inventoryData, {
+        headers: { 'Content-Type': this.posConfig.contentType || this.defaultConfig.contentType },
       });
+      logger.info(`Inventory synced successfully with POS: ${this.posConfig.name}`);
       return response.data;
     } catch (error) {
-      console.error('Error syncing inventory with POS:', error);
+      logger.error(`Error syncing inventory with POS ${this.posConfig.name}: ${error.message}`);
       throw error;
     }
   }

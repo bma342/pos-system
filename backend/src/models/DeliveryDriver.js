@@ -16,22 +16,28 @@ module.exports = (sequelize, DataTypes) => {
     phoneNumber: {
       type: DataTypes.STRING,
       allowNull: true,
+      validate: {
+        is: /^\+?[1-9]\d{1,14}$/, // Basic phone number validation
+      },
     },
     vehicleType: {
-      type: DataTypes.STRING, // E.g., "Car", "Bike", "Truck"
+      type: DataTypes.ENUM('Car', 'Bike', 'Truck', 'Scooter'),
       allowNull: true,
     },
     vehicleDetails: {
-      type: DataTypes.JSONB, // Example: { make: 'Toyota', model: 'Camry', plate: 'XYZ-1234' }
+      type: DataTypes.JSONB,
       allowNull: true,
     },
     deliveryRadius: {
-      type: DataTypes.FLOAT, // Radius in miles or kilometers
+      type: DataTypes.FLOAT,
       allowNull: true,
+      validate: {
+        min: 0,
+      },
     },
     driverStatus: {
-      type: DataTypes.STRING,
-      defaultValue: 'available', // Status could be 'available', 'on-delivery', 'unavailable'
+      type: DataTypes.ENUM('available', 'on-delivery', 'unavailable'),
+      defaultValue: 'available',
       allowNull: false,
     },
     isActive: {
@@ -39,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: true,
     },
     assignedOrders: {
-      type: DataTypes.JSONB, // Track assigned orders with additional details
+      type: DataTypes.JSONB,
       allowNull: true,
     },
     lastDeliveryDate: {
@@ -48,7 +54,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     locationId: {
       type: DataTypes.INTEGER,
-      allowNull: true, // Optional, if the driver is linked to a specific location
+      allowNull: true,
       references: {
         model: 'Locations',
         key: 'id',
@@ -57,23 +63,38 @@ module.exports = (sequelize, DataTypes) => {
     },
     commissionRate: {
       type: DataTypes.FLOAT,
-      allowNull: true, // Optionally track commission rates for drivers
+      allowNull: true,
+      validate: {
+        min: 0,
+        max: 100,
+      },
     },
+  }, {
+    tableName: 'DeliveryDrivers',
+    timestamps: true,
   });
 
   DeliveryDriver.associate = (models) => {
     DeliveryDriver.belongsTo(models.User, { foreignKey: 'userId' });
-    DeliveryDriver.belongsToMany(models.CateringOrder, {
-      through: 'CateringOrderAssignments',
-      foreignKey: 'driverId',
-    });
-    DeliveryDriver.belongsToMany(models.Location, { through: 'DriverLocations', foreignKey: 'driverId' });
-    DeliveryDriver.hasMany(models.CateringOrderAssignments, { foreignKey: 'driverId' });
-
-    // Optional: Associate drivers with reviews or ratings if needed
-    DeliveryDriver.hasMany(models.DriverRating, { foreignKey: 'driverId' });
+    if (models.CateringOrder) {
+      DeliveryDriver.belongsToMany(models.CateringOrder, {
+        through: 'CateringOrderAssignments',
+        foreignKey: 'driverId',
+      });
+    }
+    if (models.Location) {
+      DeliveryDriver.belongsToMany(models.Location, { 
+        through: 'DriverLocations', 
+        foreignKey: 'driverId' 
+      });
+    }
+    if (models.CateringOrderAssignments) {
+      DeliveryDriver.hasMany(models.CateringOrderAssignments, { foreignKey: 'driverId' });
+    }
+    if (models.DriverRating) {
+      DeliveryDriver.hasMany(models.DriverRating, { foreignKey: 'driverId' });
+    }
   };
 
   return DeliveryDriver;
 };
-

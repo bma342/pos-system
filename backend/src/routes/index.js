@@ -1,13 +1,92 @@
 const express = require('express');
 const router = express.Router();
 
-const authRoutes = require('./authRoutes');
-const toastRoutes = require('./toastRoutes'); // Add this line
+const routes = {
+  auth: require('./authRoutes'),
+  toast: require('./toastRoutes'),
+  posProfiles: require('./corePosProfileRoutes'),
+  cateringMenus: require('./cateringMenuRoutes'),
+  cateringMenuItems: require('./cateringMenuItemRoutes'),
+  cateringOrders: require('./cateringOrderRoutes'),
+  cateringOrderAssignments: require('./cateringOrderAssignmentsRoutes'),
+  cateringOrderCustomizations: require('./cateringOrderCustomizationRoutes'),
+  cateringOrderFees: require('./cateringOrderFeesRoutes'),
+  cateringOrderItems: require('./cateringOrderItemRoutes'),
+  cateringOrderLocations: require('./cateringOrderLocationRoutes'),
+  cateringOrderModifiers: require('./cateringOrderModifierRoutes'),
+  cateringSettings: require('./cateringSettingsRoutes'),
+  clients: require('./clientRoutes'),
+  clientPreferences: require('./clientPreferencesRoutes'),
+  clientProfiles: require('./clientProfileRoutes'),
+  clientSettings: require('./clientSettingsRoutes'),
+  clientLocations: require('./clientLocationsRoutes'),
+  commissaryKitchens: require('./commissaryKitchenRoutes'),
+  commissaryLocations: require('./commissaryLocationRoutes'),
+  coreposProfiles: require('./coreposProfilesRoutes'),
+  dataWalls: require('./dataWallRoutes'),
+  deliveryDrivers: require('./deliveryDriverRoutes'),
+  discountItems: require('./discountItemRoutes'),
+  discounts: require('./discountRoutes'),
+  driverLocations: require('./driverLocationsRoutes'),
+  dropoffSchedules: require('./dropoffScheduleRoutes'),
+  featureManagement: require('./featureManagementRoutes'),
+  globalMenus: require('./globalMenuRoutes'),
+  globalSettings: require('./globalSettingRoutes'),
+  guestDiscounts: require('./guestDiscountsRoutes'),
+  guestLoyaltyPrograms: require('./guestLoyaltyProgramRoutes'),
+  guestProfiles: require('./guestProfileRoutes'),
+  guestRewards: require('./guestRewardsRoutes'),
+  guests: require('./guestRoutes'),
+  houseAccountLocations: require('./houseAccountLocationsRoutes'),
+  houseAccounts: require('./houseAccountRoutes'),
+  houseAccountUsers: require('./houseAccountUserRoutes'),
+  imageUploads: require('./imageUploadRoutes'),
+  inventory: require('./inventoryRoutes'),
+  invoices: require('./invoiceRoutes'),
+  itemModifiers: require('./itemModifierRoutes'),
+  itemReviews: require('./itemReviewRoutes'),
+  items: require('./itemRoutes'),
+  locationHours: require('./locationHoursRoutes'),
+  locationMenuGroups: require('./locationMenuGroupRoutes'),
+  locationMenuOverrides: require('./locationMenuOverrideRoutes'),
+  locationPosProfiles: require('./locationPosProfileRoutes'),
+  locations: require('./locationRoutes'),
+  locationTaxConfigs: require('./locationTaxConfigRoutes'),
+  loyalty: require('./loyaltyRoutes'),
+  loyaltyWallet: require('./loyaltyWalletRoutes'),
+  menuGroups: require('./menuGroupRoutes'),
+  menuItems: require('./menuItemRoutes'),
+  menus: require('./menuRoutes'),
+  modifiers: require('./modifierRoutes'),
+  orderHistory: require('./orderHistoryRoutes'),
+  orders: require('./orderRoutes'),
+  payments: require('./paymentRoutes'),
+  posIntegrationMapping: require('./posIntegrationMappingRoutes'),
+  posIntegrations: require('./posIntegrationRoutes'),
+  posIntegrationSettings: require('./posIntegrationSettingsRoutes'),
+  pos: require('./posRoutes'),
+  posSync: require('./posSyncRoutes'),
+  providerIntegrations: require('./providerIntegrationRoutes'),
+  providerPricing: require('./providerPricingRoutes'),
+  providers: require('./providerRoutes'),
+  refunds: require('./refundRoutes'),
+  reports: require('./reportRoutes'),
+  rewards: require('./rewardRoutes'),
+  roles: require('./roleRoutes'),
+  roleTemplateAssignments: require('./roleTemplateAssignmentsRoutes'),
+  secure: require('./secureRoutes'),
+  serviceFees: require('./serviceFeeRoutes'),
+  tax: require('./taxRoutes'),
+  throttleSettings: require('./throttleSettingsRoutes'),
+  tips: require('./tipRoutes'),
+  trackingPixels: require('./trackingPixelRoutes'),
+  translator: require('./translatorRoutes'),
+  users: require('./userRoutes'),
+  wallets: require('./walletRoutes')
+};
 
-// Existing routes
-router.use('/auth', authRoutes);
-
-// Add Toast routes
-router.use('/api', toastRoutes);
+Object.entries(routes).forEach(([name, route]) => {
+  router.use(`/${name.replace(/([A-Z])/g, '-$1').toLowerCase()}`, route);
+});
 
 module.exports = router;

@@ -1,32 +1,34 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-
-class PosProfileConfig extends Model {}
-
-PosProfileConfig.init({
-  posProfileId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'PosProfiles',
-      key: 'id',
+module.exports = (sequelize, DataTypes) => {
+  const PosProfileConfig = sequelize.define('PosProfileConfig', {
+    posProfileId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'PosProfiles',
+        key: 'id',
+      },
+      onDelete: 'CASCADE',
     },
-  },
-  apiEndpoint: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  contentType: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  format: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-}, {
-  sequelize,
-  modelName: 'PosProfileConfig',
-});
+    apiEndpoint: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    contentType: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    format: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+  }, {
+    tableName: 'PosProfileConfigs',
+    timestamps: true,
+  });
 
-module.exports = PosProfileConfig;
+  PosProfileConfig.associate = (models) => {
+    PosProfileConfig.belongsTo(models.PosProfile, { foreignKey: 'posProfileId' });
+  };
+
+  return PosProfileConfig;
+};

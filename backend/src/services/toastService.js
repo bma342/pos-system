@@ -51,13 +51,17 @@ class ToastService {
   async handleMenusUpdated(payload) {
     try {
       const { restaurantGuid, publishedDate } = payload;
-      const menuData = await this.getMenu(restaurantGuid);
+      const menuData = await this.getMenu(restaurantGuid); // Fetch menu data
+
+      // Log the received menu data for debugging
+      logger.info(`Received menu data: ${JSON.stringify(menuData)}`);
 
       // Process and store the menu data in the database
       await db.Menu.update({ updatedAt: publishedDate }, {
-        where: { restaurantGuid }
+        where: { restaurantGuid },
       });
 
+      // Additional processing or storage logic for menuData can be added here
       logger.info(`Successfully updated menu for restaurant ${restaurantGuid}`);
     } catch (error) {
       logger.error(`Error handling menus_updated webhook:`, error);

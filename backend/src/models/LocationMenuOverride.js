@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     applyUplift: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false, // Ensure uplift is optional and not applied when using points
+      defaultValue: false,
     },
     roundingOption: {
       type: DataTypes.ENUM('none', 'up', 'down', 'nearest'),
@@ -52,36 +52,49 @@ module.exports = (sequelize, DataTypes) => {
     },
     startDate: {
       type: DataTypes.DATE,
-      allowNull: true, // Optional: define start date for the override
+      allowNull: true,
     },
     endDate: {
       type: DataTypes.DATE,
-      allowNull: true, // Optional: define end date for the override
+      allowNull: true,
     },
   });
 
   LocationMenuOverride.associate = (models) => {
     LocationMenuOverride.belongsTo(models.Location, { foreignKey: 'locationId' });
     LocationMenuOverride.belongsTo(models.MenuItem, { foreignKey: 'menuItemId' });
-    LocationMenuOverride.belongsTo(models.ProviderIntegration, { foreignKey: 'providerId' }); // Association with ProviderIntegration
-
-    // Add custom logic for uplift and rounding
-    LocationMenuOverride.addHook('beforeSave', async (override, options) => {
-      if (override.applyUplift && override.upliftPercentage) {
-        override.price += override.price * (override.upliftPercentage / 100);
-      }
-
-      if (override.roundingOption && override.roundingOption !== 'none') {
-        if (override.roundingOption === 'up') {
-          override.price = Math.ceil(override.price);
-        } else if (override.roundingOption === 'down') {
-          override.price = Math.floor(override.price);
-        } else if (override.roundingOption === 'nearest') {
-          override.price = Math.round(override.price);
-        }
-      }
-    });
+    LocationMenuOverride.belongsTo(models.ProviderIntegration, { foreignKey: 'providerId' });
   };
+
+  LocationMenuOverride.addHook('beforeSave', async (override, options) => {
+    if (override.applyUplift && override.upliftPercentage) {
+      override.price = override.price + (override.price * (override.upliftPercentage / 100));
+    }
+
+    if (override.roundingOption && override.roundingOption !== 'none') {
+      switch (override.roundingOption) {
+        case 'up':
+          override.price = Math.ceil(override.price);
+          break;
+        case 'down':
+          override.price = Math.floor(override.price);
+          break;
+        case 'nearest':
+          override.price = Math.round(override.price);
+          break;
+      }
+    }
+
+    // Log the price change
+    if (override.changed('price')) {
+      await sequelize.models.PriceChangeLog.create({
+        overrideId: override.id,
+        oldPrice: override.previous('price'),
+        newPrice: override.price,
+        changeReason: 'Uplift and rounding applied'
+      }, { transaction: options.transaction });
+    }
+  });
 
   return LocationMenuOverride;
 };

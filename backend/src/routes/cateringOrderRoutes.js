@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 const CateringOrder = require('../models/CateringOrder');
 
 // Get all catering orders for a guest

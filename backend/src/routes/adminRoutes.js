@@ -3,6 +3,8 @@ const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 const roleController = require('../controllers/roleController');
 const permissionController = require('../controllers/permissionController');
 
+const router = express.Router();
+
 // Role and Permission Routes
 router.get('/roles', authenticateToken, authorizeRoles('Admin'), roleController.getAllRoles);
 router.post('/roles', authenticateToken, authorizeRoles('Super Admin'), roleController.createRole);

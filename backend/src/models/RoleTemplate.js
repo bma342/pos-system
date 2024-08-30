@@ -1,5 +1,24 @@
+'use strict';
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  const RoleTemplate = sequelize.define('RoleTemplate', {
+  class RoleTemplate extends Model {
+    static associate(models) {
+      RoleTemplate.belongsToMany(models.Role, {
+        through: models.RoleTemplateAssignments,
+        foreignKey: 'roleTemplateId',
+        otherKey: 'roleId',
+        as: 'AssignedRoles',
+      });
+      RoleTemplate.belongsTo(models.Client, { 
+        foreignKey: 'clientId', 
+        allowNull: true,
+        as: 'Client',
+      });
+    }
+  }
+
+  RoleTemplate.init({
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -11,24 +30,18 @@ module.exports = (sequelize, DataTypes) => {
     },
     isEditable: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true, // Determines if the client admin can edit the template
+      defaultValue: true,
     },
     isPredefined: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false, // Predefined templates controlled by business admin
+      defaultValue: false,
     },
+  }, {
+    sequelize,
+    modelName: 'RoleTemplate',
+    tableName: 'RoleTemplates',
+    timestamps: true,
   });
-
-  RoleTemplate.associate = (models) => {
-    // RoleTemplate to Role association (Many-to-Many)
-    RoleTemplate.belongsToMany(models.Role, {
-      through: 'RoleTemplateAssignments',
-      foreignKey: 'roleTemplateId',
-    });
-
-    // RoleTemplate belongs to a Client for tenant isolation
-    RoleTemplate.belongsTo(models.Client, { foreignKey: 'clientId', allowNull: false });
-  };
 
   return RoleTemplate;
 };

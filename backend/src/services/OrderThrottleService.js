@@ -6,7 +6,7 @@ class OrderThrottleService {
     const { throttleSettings } = location;
 
     // Logic to determine the new ready time based on sales volume, item count, etc.
-    if (/* conditions met */) {
+    if (throttleSettings && throttleSettings.orderThreshold) { // Assuming some condition to adjust time
       location.readyTime += 10; // Example adjustment
     }
 

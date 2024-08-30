@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     posProvider: {
       type: DataTypes.STRING,
-      allowNull: false, // e.g., 'Square', 'Toast', 'Revel'
+      allowNull: false,
     },
     posApiKey: {
       type: DataTypes.STRING,
@@ -19,44 +19,73 @@ module.exports = (sequelize, DataTypes) => {
     locationId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'Locations',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
     },
     syncEnabled: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true, // Whether synchronization is enabled for this profile
+      defaultValue: true,
     },
     syncSchedule: {
       type: DataTypes.STRING,
-      defaultValue: 'daily', // e.g., 'hourly', 'daily'
+      defaultValue: 'daily',
     },
     roundingOption: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false, // Whether to apply rounding to prices
+      defaultValue: false,
     },
     flatUpliftPercentage: {
       type: DataTypes.FLOAT,
-      allowNull: true, // Optional flat uplift percentage for prices
+      allowNull: true,
     },
     enableInventorySync: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true, // Whether inventory sync is enabled
+      defaultValue: true,
     },
+  }, {
+    tableName: 'PosProfiles',
+    timestamps: true,
   });
 
   PosProfile.associate = (models) => {
-    PosProfile.belongsTo(models.Location, { foreignKey: 'locationId' });
-
-    // Association with POS-related sync histories
-    PosProfile.hasMany(models.PosSyncHistory, { foreignKey: 'posProfileId', as: 'syncHistory' });
+    if (models.Location) PosProfile.belongsTo(models.Location, { foreignKey: 'locationId' });
+    if (models.PosSyncHistory) PosProfile.hasMany(models.PosSyncHistory, { foreignKey: 'posProfileId', as: 'syncHistory' });
   };
 
-  // Hooks to manage sensitive operations like key updates or sync settings
-  PosProfile.addHook('beforeSave', (profile) => {
-    // Example: Additional validation or logging before saving changes
+  PosProfile.addHook('beforeSave', async (profile, options) => {
+    // Validate that the associated location exists
+    const location = await sequelize.models.Location.findByPk(profile.locationId, { transaction: options.transaction });
+    if (!location) {
+      throw new Error(`Location with id ${profile.locationId} does not exist`);
+    }
+
+    // Encrypt sensitive data
+    if (profile.changed('posApiKey')) {
+      profile.posApiKey = await sequelize.models.Encryption.encrypt(profile.posApiKey);
+    }
+    if (profile.changed('posSecretKey')) {
+      profile.posSecretKey = await sequelize.models.Encryption.encrypt(profile.posSecretKey);
+    }
+
+    // Log the change
+    if (profile.changed()) {
+      await sequelize.models.PosProfileChangeLog.create({
+        profileId: profile.id,
+        changes: profile.changed().reduce((acc, field) => {
+          if (field !== 'posApiKey' && field !== 'posSecretKey') {
+            acc[field] = {
+              oldValue: profile.previous(field),
+              newValue: profile[field]
+            };
+          } else {
+            acc[field] = {
+              oldValue: '[REDACTED]',
+              newValue: '[REDACTED]'
+            };
+          }
+          return acc;
+        }, {}),
+        changeReason: 'POS Profile updated'
+      }, { transaction: options.transaction });
+    }
   });
 
   return PosProfile;

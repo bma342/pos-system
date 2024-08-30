@@ -10,7 +10,7 @@ exports.getMenus = async (req, res) => {
     res.status(200).json(menus);
   } catch (error) {
     logger.error(`Error fetching menus for client ID ${req.user.clientId}: ${error.message}`);
-    res.status(500).json({ message: 'Error fetching menus', error });
+    res.status(500).json({ message: 'Error fetching menus', error: error.message });
   }
 };
 
@@ -24,70 +24,76 @@ exports.getMenuById = async (req, res) => {
     res.status(200).json(menu);
   } catch (error) {
     logger.error(`Error fetching menu ID ${req.params.id}: ${error.message}`);
-    res.status(500).json({ message: 'Error fetching menu', error });
+    res.status(500).json({ message: 'Error fetching menu', error: error.message });
   }
 };
 
 // Create a new menu
 exports.createMenu = async (req, res) => {
+  const transaction = await db.sequelize.transaction();
   try {
-    const menu = await menuService.createMenu(req.body, req.user.clientId);
+    const menu = await menuService.createMenu(req.body, req.user.clientId, transaction);
+    await syncEngine.syncMenus(req.body.locationId, transaction);
+    await transaction.commit();
     logger.info(`Menu created and synced for client ID ${req.user.clientId}`);
-    
-    // Trigger POS sync after creation
-    await syncEngine.syncMenus(req.body.locationId);
     res.status(201).json(menu);
   } catch (error) {
+    await transaction.rollback();
     logger.error(`Error creating menu: ${error.message}`);
-    res.status(500).json({ message: 'Error creating menu', error });
+    res.status(500).json({ message: 'Error creating menu', error: error.message });
   }
 };
 
 // Update an existing menu
 exports.updateMenu = async (req, res) => {
+  const transaction = await db.sequelize.transaction();
   try {
-    const menu = await menuService.updateMenu(req.params.id, req.body, req.user.clientId);
+    const menu = await menuService.updateMenu(req.params.id, req.body, req.user.clientId, transaction);
+    await syncEngine.syncMenus(req.body.locationId, transaction);
+    await transaction.commit();
     logger.info(`Menu ID ${req.params.id} updated and synced for client ID ${req.user.clientId}`);
-    
-    // Trigger POS sync after update
-    await syncEngine.syncMenus(req.body.locationId);
     res.status(200).json(menu);
   } catch (error) {
+    await transaction.rollback();
     logger.error(`Error updating menu ID ${req.params.id}: ${error.message}`);
-    res.status(500).json({ message: 'Error updating menu', error });
+    res.status(500).json({ message: 'Error updating menu', error: error.message });
   }
 };
 
 // Delete a menu
 exports.deleteMenu = async (req, res) => {
+  const transaction = await db.sequelize.transaction();
   try {
-    await menuService.deleteMenu(req.params.id, req.user.clientId);
+    await menuService.deleteMenu(req.params.id, req.user.clientId, transaction);
+    await syncEngine.syncMenus(req.body.locationId, transaction);
+    await transaction.commit();
     logger.info(`Menu ID ${req.params.id} deleted and synced for client ID ${req.user.clientId}`);
-    
-    // Trigger POS sync after deletion
-    await syncEngine.syncMenus(req.body.locationId);
     res.status(204).send();
   } catch (error) {
+    await transaction.rollback();
     logger.error(`Error deleting menu ID ${req.params.id}: ${error.message}`);
-    res.status(500).json({ message: 'Error deleting menu', error });
+    res.status(500).json({ message: 'Error deleting menu', error: error.message });
   }
 };
 
 // Add or update a menu item with A/B testing capabilities
 exports.upsertMenuItem = async (req, res) => {
+  const transaction = await db.sequelize.transaction();
   try {
-    const menuItem = await menuService.upsertMenuItem(req.body, req.user.clientId);
-    
-    // Handle A/B test creation if flagged
+    const menuItem = await menuService.upsertMenuItem(req.body, req.user.clientId, transaction);
+
     if (req.body.isABTest) {
-      await menuService.createABTest(req.body, req.user.clientId);
+      await menuService.createABTest(req.body, req.user.clientId, transaction);
     }
-    
-    // Trigger POS sync after upsert
-    await syncEngine.syncMenuItems(req.body.locationId);
+
+    await syncEngine.syncMenuItems(req.body.locationId, transaction);
+    await transaction.commit();
     res.status(200).json(menuItem);
   } catch (error) {
+    await transaction.rollback();
     logger.error(`Error upserting menu item: ${error.message}`);
-    res.status(500).json({ message: 'Error adding/updating menu item', error });
+    res.status(500).json({ message: 'Error adding/updating menu item', error: error.message });
   }
 };
+
+module.exports = exports;

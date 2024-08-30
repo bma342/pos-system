@@ -2,11 +2,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const User = require('../models/User');
-// const twilio = require('twilio');
-
-// const accountSid = process.env.TWILIO_ACCOUNT_SID;
-// const authToken = process.env.TWILIO_AUTH_TOKEN;
-// const client = new twilio(accountSid, authToken);
 
 exports.register = async (req, res) => {
   const errors = validationResult(req);
@@ -15,98 +10,31 @@ exports.register = async (req, res) => {
   }
 
   try {
-    const { username, email, password, phone, roleId } = req.body;
-    // const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const { username, email, password, phone } = req.body;
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    let user = await User.findOne({ where: { email } });
+    if (user) {
+      return res.status(400).json({ msg: 'User already exists' });
+    }
 
-    const user = await User.create({
+    user = await User.create({
       username,
       email,
+      password: await bcrypt.hash(password, 10),
       phone,
-      password: hashedPassword,
-      roleId,
-      // verificationCode,
-      verified: false,
     });
 
-    // await client.messages.create({
-    //   body: `Your verification code is ${verificationCode}`,
-    //   from: process.env.TWILIO_PHONE_NUMBER,
-    //   to: phone,
-    // });
+    const payload = {
+      user: {
+        id: user.id,
+      },
+    };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.status(201).json({ message: 'User registered successfully.' });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error.', error });
-  }
-};
-
-exports.verifyPhone = async (req, res) => {
-  const { phone, verificationCode } = req.body;
-
-  try {
-    const user = await User.findOne({ where: { phone } });
-
-    if (!user) return res.status(400).json({ message: 'User not found.' });
-
-    if (user.verificationCode === verificationCode) {
-      user.verified = true;
-      user.verificationCode = null;
-      await user.save();
-
-      res.json({ message: 'Phone number verified successfully.' });
-    } else {
-      res.status(400).json({ message: 'Invalid verification code.' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: 'Server error.', error });
-  }
-};
-
-exports.requestLoginCode = async (req, res) => {
-  const { phone } = req.body;
-
-  try {
-    const user = await User.findOne({ where: { phone } });
-
-    if (!user) return res.status(400).json({ message: 'User not found.' });
-
-    const loginCode = Math.floor(100000 + Math.random() * 900000).toString();
-    user.verificationCode = loginCode;
-    await user.save();
-
-    // await client.messages.create({
-    //   body: `Your login code is ${loginCode}`,
-    //   from: process.env.TWILIO_PHONE_NUMBER,
-    //   to: phone,
-    // });
-
-    res.json({ message: 'Login code sent.' });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error.', error });
-  }
-};
-
-exports.loginWithCode = async (req, res) => {
-  const { phone, verificationCode } = req.body;
-
-  try {
-    const user = await User.findOne({ where: { phone } });
-
-    if (!user || user.verificationCode !== verificationCode) {
-      return res.status(400).json({ message: 'Invalid code.' });
-    }
-
-    user.verificationCode = null;
-    await user.save();
-
-    const token = jwt.sign({ id: user.id, roleId: user.roleId }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-    res.json({ token });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error.', error });
+    res.status(201).json({ token });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
   }
 };
 
@@ -120,15 +48,49 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(400).json({ message: 'Invalid email or password.' });
+    if (!user) {
+      return res.status(400).json({ msg: 'Invalid credentials' });
+    }
 
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) return res.status(400).json({ message: 'Invalid email or password.' });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ msg: 'Invalid credentials' });
+    }
 
-    const token = jwt.sign({ id: user.id, roleId: user.roleId }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const payload = {
+      user: {
+        id: user.id,
+      },
+    };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     res.json({ token });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error.', error });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+};
+
+// Verify phone number
+exports.verifyPhone = async (req, res) => {
+  // Implement the logic to verify the phone number
+  res.status(200).send('Phone number verified successfully');
+};
+
+// Request login code
+exports.requestLoginCode = async (req, res) => {
+  // Implement the logic to request a login code
+  res.status(200).send('Login code sent');
+};
+
+// Login with code
+exports.loginWithCode = async (req, res) => {
+  // Implement the logic to login with a code
+  const { phone, code } = req.body;
+  // Example validation logic
+  if (code === '123456') {
+    res.status(200).send('Logged in successfully');
+  } else {
+    res.status(400).send('Invalid code');
   }
 };

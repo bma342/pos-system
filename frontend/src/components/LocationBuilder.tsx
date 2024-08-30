@@ -10,6 +10,13 @@ const LocationBuilder: React.FC = () => {
     name: '',
     address: '',
     gpsCoordinates: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    phoneNumber: '',
+    email: '',
+    latitude: 0, // Added latitude
+    longitude: 0, // Added longitude
   });
 
   const handleSave = () => {
@@ -47,6 +54,46 @@ const LocationBuilder: React.FC = () => {
               ...prev,
               gpsCoordinates: e.target.value,
             }))
+          }
+        />
+        <input
+          type="text"
+          placeholder="City"
+          value={location.city || ''}
+          onChange={(e) =>
+            setLocation((prev) => ({ ...prev, city: e.target.value }))
+          }
+        />
+        <input
+          type="text"
+          placeholder="State"
+          value={location.state || ''}
+          onChange={(e) =>
+            setLocation((prev) => ({ ...prev, state: e.target.value }))
+          }
+        />
+        <input
+          type="text"
+          placeholder="Zip Code"
+          value={location.zipCode || ''}
+          onChange={(e) =>
+            setLocation((prev) => ({ ...prev, zipCode: e.target.value }))
+          }
+        />
+        <input
+          type="text"
+          placeholder="Phone Number"
+          value={location.phoneNumber || ''}
+          onChange={(e) =>
+            setLocation((prev) => ({ ...prev, phoneNumber: e.target.value }))
+          }
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={location.email || ''}
+          onChange={(e) =>
+            setLocation((prev) => ({ ...prev, email: e.target.value }))
           }
         />
         <button type="button" onClick={handleSave}>

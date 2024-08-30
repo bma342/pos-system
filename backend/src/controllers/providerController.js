@@ -17,8 +17,9 @@ exports.getProviders = async (req, res) => {
 exports.createProvider = async (req, res) => {
   try {
     const providerData = req.body;
-    const newProvider = await providerService.createProvider(req.user.clientId, providerData);
-    logger.info(`Provider created: ${newProvider.name} for Client ID ${req.user.clientId}`);
+    const clientId = req.user.clientId;
+    const newProvider = await providerService.createProvider(clientId, providerData);
+    logger.info(`Provider created: ${newProvider.name} for Client ID ${clientId}`);
     res.status(201).json(newProvider);
   } catch (error) {
     logger.error(`Error creating provider for Client ID ${req.user.clientId}: ${error.message}`);
@@ -35,7 +36,7 @@ exports.updateProvider = async (req, res) => {
     logger.info(`Provider updated: ID ${providerId}`);
     res.status(200).json(updatedProvider);
   } catch (error) {
-    logger.error(`Error updating provider (ID: ${providerId}): ${error.message}`);
+    logger.error(`Error updating provider (ID: ${req.params.providerId}): ${error.message}`);
     res.status(500).json({ message: 'Error updating provider', error });
   }
 };
@@ -48,7 +49,7 @@ exports.deleteProvider = async (req, res) => {
     logger.info(`Provider deleted: ID ${providerId}`);
     res.status(204).send();
   } catch (error) {
-    logger.error(`Error deleting provider (ID: ${providerId}): ${error.message}`);
+    logger.error(`Error deleting provider (ID: ${req.params.providerId}): ${error.message}`);
     res.status(500).json({ message: 'Error deleting provider', error });
   }
 };
@@ -60,8 +61,7 @@ exports.syncProviderData = async (req, res) => {
     await providerService.syncProviderData(providerId);
     res.status(200).json({ message: 'Provider data synced successfully' });
   } catch (error) {
-    logger.error(`Error syncing provider data (ID: ${providerId}): ${error.message}`);
+    logger.error(`Error syncing provider data (ID: ${req.params.providerId}): ${error.message}`);
     res.status(500).json({ message: 'Error syncing provider data', error });
   }
 };
-

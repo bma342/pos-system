@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
     profileName: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true, // Unique name for each core POS profile (e.g., "Toast", "Square")
+      unique: true,
     },
     integrationSettingsId: {
       type: DataTypes.INTEGER,
@@ -15,26 +15,41 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE',
     },
     defaultAPISettings: {
-      type: DataTypes.JSONB, // Store default settings for the POS provider (e.g., API base URL, headers)
+      type: DataTypes.JSONB,
       allowNull: true,
     },
     translationMapping: {
-      type: DataTypes.JSONB, // Mapping from our system fields to the POS provider's fields
+      type: DataTypes.JSONB,
       allowNull: true,
     },
     hardcodedSettings: {
-      type: DataTypes.JSONB, // Store any hardcoded values needed for specific integrations
+      type: DataTypes.JSONB,
       allowNull: true,
     },
     isActive: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true, // Control if this profile should be used
+      defaultValue: true,
     },
+  }, {
+    indexes: [
+      {
+        unique: true,
+        fields: ['profileName']
+      },
+      {
+        fields: ['integrationSettingsId']
+      }
+    ]
   });
 
   CorePOSProfile.associate = (models) => {
-    CorePOSProfile.belongsTo(models.PosIntegrationSettings, { foreignKey: 'integrationSettingsId', onDelete: 'CASCADE' });
-    CorePOSProfile.hasMany(models.LocationPOSProfile, { foreignKey: 'corePOSProfileId' }); // Associate with location-specific profiles
+    CorePOSProfile.belongsTo(models.PosIntegrationSettings, { 
+      foreignKey: 'integrationSettingsId', 
+      onDelete: 'CASCADE' 
+    });
+    CorePOSProfile.hasMany(models.LocationPOSProfile, { 
+      foreignKey: 'corePOSProfileId' 
+    });
   };
 
   return CorePOSProfile;

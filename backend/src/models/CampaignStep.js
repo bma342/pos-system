@@ -1,41 +1,33 @@
 module.exports = (sequelize, DataTypes) => {
   const CampaignStep = sequelize.define('CampaignStep', {
+    campaignId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'Campaigns',
+        key: 'id'
+      }
+    },
+    stepNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
     stepType: {
-      type: DataTypes.STRING, // e.g., 'email', 'sms', 'pushNotification'
-      allowNull: false,
-    },
-    status: {
-      type: DataTypes.STRING,
-      defaultValue: 'pending', // 'pending', 'inProgress', 'completed'
-    },
-    scheduledTime: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    executedTime: {
-      type: DataTypes.DATE,
-      allowNull: true,
+      type: DataTypes.ENUM('email', 'sms', 'push_notification'),
+      allowNull: false
     },
     content: {
-      type: DataTypes.TEXT, // Stores the message or email content
-      allowNull: false,
+      type: DataTypes.TEXT,
+      allowNull: false
     },
-    audienceSegment: {
-      type: DataTypes.JSONB, // Stores any specific audience targeting details for this step
-      allowNull: true,
-    },
-    marketingCampaignId: {
+    delayDays: {
       type: DataTypes.INTEGER,
-      references: {
-        model: 'MarketingCampaigns',
-        key: 'id',
-      },
-      allowNull: false,
-    },
+      defaultValue: 0
+    }
   });
 
   CampaignStep.associate = (models) => {
-    CampaignStep.belongsTo(models.MarketingCampaign, { foreignKey: 'marketingCampaignId' });
+    CampaignStep.belongsTo(models.Campaign, { foreignKey: 'campaignId' });
   };
 
   return CampaignStep;

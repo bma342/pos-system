@@ -1,72 +1,45 @@
-const db = require('../models');
+const { Order, Location, MenuItem } = require('../models');
 
-exports.createOrder = async (req, res) => {
-  try {
-    const { guestId, locationId, items, paymentMethod, serviceFee, tipAmount, loyaltyPointsUsed } = req.body;
+class OrderController {
+  static async cancelOrder(req, res) {
+    try {
+      const { orderId } = req.params;
+      const order = await Order.findByPk(orderId);
 
-    // Calculate total amount
-    const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0) + serviceFee + tipAmount;
+      if (!order) {
+        return res.status(404).json({ message: 'Order not found.' });
+      }
 
-    // Create the order
-    const order = await db.Order.create({
-      guestId,
-      locationId,
-      totalAmount,
-      paymentMethod,
-      serviceFee,
-      tipAmount,
-      loyaltyPointsUsed,
-    });
+      if (req.user.role === 'manager' || req.user.role === 'admin') {
+        await order.update({ isCancelled: true, cancelledAt: new Date(), status: 'cancelled' });
+        return res.status(200).json({ message: 'Order cancelled successfully.' });
+      } else {
+        if (order.canBeCancelledByGuest()) {
+          await order.update({ isCancelled: true, cancelledAt: new Date(), status: 'cancelled' });
+          return res.status(200).json({ message: 'Order cancelled successfully.' });
+        } else {
+          return res.status(400).json({ message: 'Order cannot be cancelled within the prep time.' });
+        }
+      }
+    } catch (error) {
+      return res.status(500).json({ message: 'Internal server error', error });
+    }
+  }
 
-    // Add ordered items
-    for (const item of items) {
-      await db.MenuItem.create({
-        ...item,
-        orderId: order.id,
+  static async getOrderHistory(req, res) {
+    try {
+      const guestId = req.user.id;
+      const orders = await Order.findAll({
+        where: { guestId },
+        order: [['orderDate', 'DESC']],
+        include: [{ model: Location }, { model: MenuItem }]
       });
+
+      return res.status(200).json(orders);
+    } catch (error) {
+      return res.status(500).json({ message: 'Failed to fetch order history', error });
     }
-
-    res.status(201).json(order);
-  } catch (error) {
-    res.status(500).json({ message: 'Error creating order', error });
   }
-};
+}
 
-exports.getOrderById = async (req, res) => {
-  try {
-    const order = await db.Order.findByPk(req.params.orderId, {
-      include: [{ model: db.MenuItem }, { model: db.Guest }],
-    });
-
-    if (!order) return res.status(404).json({ message: 'Order not found' });
-
-    res.json(order);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching order', error });
-  }
-};
-
-exports.cancelOrder = async (req, res) => {
-  try {
-    const order = await db.Order.findByPk(req.params.orderId);
-
-    if (!order) return res.status(404).json({ message: 'Order not found' });
-    if (order.isCancelled) return res.status(400).json({ message: 'Order is already cancelled' });
-
-    const currentTime = new Date();
-    const orderTime = new Date(order.orderDate);
-    const cutoffTime = new Date(orderTime.getTime() - order.cancellationCutoff * 60 * 60 * 1000);
-
-    if (currentTime > cutoffTime) {
-      return res.status(400).json({ message: `Cannot cancel order. Cancellations require at least ${order.cancellationCutoff} hours' notice.` });
-    }
-
-    order.isCancelled = true;
-    order.cancelledAt = currentTime;
-    await order.save();
-
-    res.json({ message: 'Order cancelled successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
-  }
-};
+module.exports = OrderController;

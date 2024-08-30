@@ -1,4 +1,4 @@
-const { AuditLog } = require('../models');
+const { AuditLog, Op } = require('../models');
 const logger = require('../logger');
 
 // Function to create an audit log entry

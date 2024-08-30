@@ -2,25 +2,22 @@ const ClientService = require('../services/clientService');
 const logger = require('../services/logger');
 const { check, validationResult } = require('express-validator');
 
-// Validation middleware for client creation
 const validateClient = [
   check('name').notEmpty().withMessage('Name is required'),
   check('email').isEmail().withMessage('Valid email is required'),
   check('phoneNumber').optional().isMobilePhone().withMessage('Valid phone number is required'),
 ];
 
-// Fetch all clients
 exports.getAllClients = async (req, res) => {
   try {
     const clients = await ClientService.getAllClients();
     res.status(200).json(clients);
   } catch (error) {
     logger.error(`Error fetching all clients: ${error.message}`);
-    res.status(500).json({ message: 'Error fetching all clients', error });
+    res.status(500).json({ message: 'Error fetching all clients', error: error.message });
   }
 };
 
-// Fetch client by ID
 exports.getClientById = async (req, res) => {
   try {
     const client = await ClientService.getClientById(req.params.id);
@@ -28,11 +25,10 @@ exports.getClientById = async (req, res) => {
     res.status(200).json(client);
   } catch (error) {
     logger.error(`Error fetching client by ID (${req.params.id}): ${error.message}`);
-    res.status(500).json({ message: 'Error fetching client details', error });
+    res.status(500).json({ message: 'Error fetching client details', error: error.message });
   }
 };
 
-// Create a new client
 exports.createClient = [
   ...validateClient,
   async (req, res) => {
@@ -49,15 +45,19 @@ exports.createClient = [
       res.status(201).json(client);
     } catch (error) {
       logger.error(`Error creating client: ${error.message}`);
-      res.status(500).json({ message: 'Error creating client', error });
+      res.status(500).json({ message: 'Error creating client', error: error.message });
     }
   }
 ];
 
-// Update client details
 exports.updateClient = [
   ...validateClient,
   async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
       const client = await ClientService.updateClient(req.params.id, req.body);
       if (!client) return res.status(404).json({ message: 'Client not found' });
@@ -66,12 +66,11 @@ exports.updateClient = [
       res.json(client);
     } catch (error) {
       logger.error(`Error updating client (${req.params.id}): ${error.message}`);
-      res.status(500).json({ message: 'Error updating client', error });
+      res.status(500).json({ message: 'Error updating client', error: error.message });
     }
   }
 ];
 
-// Delete a client
 exports.deleteClient = async (req, res) => {
   try {
     const client = await ClientService.deleteClient(req.params.id);
@@ -81,22 +80,25 @@ exports.deleteClient = async (req, res) => {
     res.json({ message: 'Client deleted successfully' });
   } catch (error) {
     logger.error(`Error deleting client (${req.params.id}): ${error.message}`);
-    res.status(500).json({ message: 'Error deleting client', error });
+    res.status(500).json({ message: 'Error deleting client', error: error.message });
   }
 };
 
-// Fetch client theme settings
 exports.getClientTheme = async (req, res) => {
   try {
     const subdomain = req.headers['x-subdomain'];
+    if (!subdomain) {
+      return res.status(400).json({ message: 'Subdomain header is missing' });
+    }
     const theme = await ClientService.getClientTheme(subdomain);
     if (!theme) return res.status(404).json({ message: 'Client not found' });
 
     logger.info(`Client theme fetched (Subdomain: ${subdomain})`);
     res.json(theme);
   } catch (error) {
-    logger.error(`Error fetching client theme (Subdomain: ${subdomain}): ${error.message}`);
-    res.status(500).json({ message: 'Error fetching client theme', error });
+    logger.error(`Error fetching client theme (Subdomain: ${req.headers['x-subdomain']}): ${error.message}`);
+    res.status(500).json({ message: 'Error fetching client theme', error: error.message });
   }
 };
 
+module.exports = exports;

@@ -1,5 +1,6 @@
 const PosProfile = require('../models/PosProfile');
 
+// Sync order with the POS system
 exports.syncOrder = async (req, res) => {
   const { locationId, orderData } = req.body;
 
@@ -26,11 +27,11 @@ exports.syncOrder = async (req, res) => {
 function generatePayload(posProfile, orderData) {
   switch (posProfile.posName) {
     case 'Stripe':
-      return { /* Stripe-specific payload structure */ };
+      return { /* Stripe-specific payload structure with orderData */ orderData };
     case 'WorldPay':
-      return { /* WorldPay-specific payload structure */ };
+      return { /* WorldPay-specific payload structure with orderData */ orderData };
     default:
-      return { /* Default payload structure */ };
+      return { /* Default payload structure with orderData */ orderData };
   }
 }
 
@@ -39,4 +40,3 @@ async function sendToThirdParty(posName, payload) {
   // Implement API call logic here
   return { success: true, posName, payload };
 }
-

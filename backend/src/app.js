@@ -7,28 +7,58 @@ const RedisStore = require('connect-redis').default;
 const Redis = require('ioredis');
 const { authenticateToken } = require('./middleware/auth');
 const errorHandler = require('./middleware/errorHandler');
-const logger = require('./utils/logger');
 const sanitizeMiddleware = require('./middleware/sanitizeMiddleware');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const subdomainMiddleware = require('./middleware/subdomainMiddleware');
-const sequelize = require('./config/database');
+const routes = require('./routes');
 
 const app = express();
 
-// Test and synchronize the database connection
-sequelize.authenticate()
-  .then(() => {
-    console.log('Database connected...');
-    return sequelize.sync({ alter: true });
-  })
-  .then(() => console.log('Database synchronized...'))
-  .catch(err => {
-    console.error('Error connecting to or synchronizing the database:', err);
-    console.error('Error details:', JSON.stringify(err, null, 2));
-  });
+console.log('Initializing middleware...');
 
-// Swagger configuration
+app.use(helmet());
+app.use(cors({
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      `https://${process.env.DOMAIN}`,
+      ...process.env.ALLOWED_SUBDOMAINS.split(',').map(sub => `https://${sub}.${process.env.DOMAIN}`),
+    ];
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
+app.use(express.json());
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+}));
+
+console.log('Setting up Redis session store...');
+const redisClient = new Redis(process.env.REDIS_URL);
+redisClient.on('error', (err) => console.error('Redis connection error:', err));
+app.use(session({
+  store: new RedisStore({ client: redisClient }),
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: true,
+    httpOnly: true,
+    sameSite: 'none',
+  }
+}));
+
+console.log('Setting up middleware...');
+app.use(sanitizeMiddleware);
+app.use(subdomainMiddleware);
+app.use(authenticateToken);
+
+console.log('Configuring Swagger...');
 const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
@@ -38,64 +68,38 @@ const swaggerOptions = {
       description: 'API documentation for the POS system',
     },
     servers: [
-      { url: process.env.API_URL || 'https://localhost:5000', description: 'API Server' },
+      { url: `https://${process.env.DOMAIN}`, description: 'API Server' },
     ],
   },
-  apis: ['./routes/*.js'], // Updated path for routes
+  apis: ['./routes/*.js'],
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Security middleware
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
-app.use(rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-}));
+console.log('Loading routes...');
+app.use('/api', routes);
 
-// Redis session store
-const redisClient = new Redis(process.env.REDIS_URL);
-app.use(session({
-  store: new RedisStore({ client: redisClient }),
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: process.env.NODE_ENV === 'production' }
-}));
+// New routes
+const cateringMenuRoutes = require('./routes/cateringMenuRoutes');
+const cateringMenuItemRoutes = require('./routes/cateringMenuItemRoutes');
+const cateringOrderRoutes = require('./routes/cateringOrderRoutes');
+const cateringOrderAssignmentsRoutes = require('./routes/cateringOrderAssignmentsRoutes');
+const cateringOrderCustomizationRoutes = require('./routes/cateringOrderCustomizationRoutes');
 
-// Logging middleware
-app.use((req, res, next) => {
-  logger.info(`${req.method} ${req.url}`);
-  next();
-});
+app.use('/api/catering-menus', cateringMenuRoutes);
+app.use('/api/catering-menu-items', cateringMenuItemRoutes);
+app.use('/api/catering-orders', cateringOrderRoutes);
+app.use('/api/catering-order-assignments', cateringOrderAssignmentsRoutes);
+app.use('/api/catering-order-customizations', cateringOrderCustomizationRoutes);
 
-// Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy' });
 });
 
-// Subdomain middleware for client-based routing
-app.use(subdomainMiddleware);
-
-// Import and use existing routes
-const authRoutes = require('./routes/authRoutes');
-const clientRoutes = require('./routes/clientRoutes');
-const locationRoutes = require('./routes/locationRoutes');
-const userRoutes = require('./routes/userRoutes');
-const orderRoutes = require('./routes/orderRoutes');
-// Add other routes here as needed
-
-app.use('/api/auth', authRoutes);
-app.use('/api/clients', authenticateToken, clientRoutes);
-app.use('/api/locations', authenticateToken, locationRoutes);
-app.use('/api/users', authenticateToken, userRoutes);
-app.use('/api/orders', authenticateToken, orderRoutes);
-// Register additional routes here
-
-// Error handling middleware
 app.use(errorHandler);
 
+console.log('App initialized successfully.');
+
 module.exports = app;
+
