@@ -1,54 +1,80 @@
-const db = require('../models');
-const logger = require('../services/logger');
-const csvWriter = require('csv-writer').createObjectCsvWriter;
+const { Order, User, MenuItem } = require('../models');
+const { Op } = require('sequelize');
 
-class AnalyticsService {
-  // Capture A/B test data
-  async captureABTestData(testData) {
-    try {
-      const { testId, metricName, metricValue, testGroup, clientId } = testData;
-      await db.Analytics.create({
-        clientId,
-        testId,
-        metricType: 'menuImageABTest',
-        testGroup,
-        metricName,
-        metricValue,
-      });
-      logger.info(`A/B test data captured: Test ID ${testId} for Client ID ${clientId}`);
-    } catch (error) {
-      logger.error(`Error capturing A/B test data: ${error.message}`);
-      throw error;
-    }
-  }
-
-  // Generate report and export as CSV
-  async generateReport(reportType, clientId) {
-    try {
-      let data;
-      if (reportType === 'orders') {
-        data = await db.Order.findAll({ where: { clientId } });
-      } else if (reportType === 'payments') {
-        data = await db.Payment.findAll({ where: { clientId } });
-      } else if (reportType === 'abTests') {
-        data = await db.Analytics.findAll({ where: { clientId, metricType: 'menuImageABTest' } });
+const getRevenueData = async (startDate, endDate) => {
+  const revenue = await Order.sum('total', {
+    where: {
+      createdAt: {
+        [Op.between]: [startDate, endDate]
       }
-
-      const filePath = `/tmp/${reportType}_report_${Date.now()}.csv`;
-      const writer = csvWriter({
-        path: filePath,
-        header: Object.keys(data[0].dataValues).map((key) => ({ id: key, title: key })),
-      });
-
-      await writer.writeRecords(data.map((entry) => entry.dataValues));
-
-      logger.info(`Report generated: ${filePath} for Client ID ${clientId}`);
-      return filePath;
-    } catch (error) {
-      logger.error(`Error generating report for Client ID ${clientId}: ${error.message}`);
-      throw error;
     }
-  }
-}
+  });
 
-module.exports = new AnalyticsService();
+  return { revenue };
+};
+
+const getCustomerMetrics = async () => {
+  const totalCustomers = await User.count();
+  const newCustomers = await User.count({
+    where: {
+      createdAt: {
+        [Op.gte]: new Date(new Date().setDate(new Date().getDate() - 30))
+      }
+    }
+  });
+
+  return { totalCustomers, newCustomers };
+};
+
+const getRealtimeMetrics = async () => {
+  const currentDate = new Date();
+  const startOfDay = new Date(currentDate.setHours(0,0,0,0));
+
+  const ordersToday = await Order.count({
+    where: {
+      createdAt: {
+        [Op.gte]: startOfDay
+      }
+    }
+  });
+
+  const revenueToday = await Order.sum('total', {
+    where: {
+      createdAt: {
+        [Op.gte]: startOfDay
+      }
+    }
+  });
+
+  const topSellingItems = await MenuItem.findAll({
+    attributes: [
+      'id',
+      'name',
+      [sequelize.fn('SUM', sequelize.col('OrderItems.quantity')), 'totalSold']
+    ],
+    include: [{
+      model: OrderItem,
+      attributes: [],
+      where: {
+        createdAt: {
+          [Op.gte]: startOfDay
+        }
+      }
+    }],
+    group: ['MenuItem.id'],
+    order: [[sequelize.literal('totalSold'), 'DESC']],
+    limit: 5
+  });
+
+  return {
+    ordersToday,
+    revenueToday,
+    topSellingItems
+  };
+};
+
+module.exports = {
+  getRevenueData,
+  getCustomerMetrics,
+  getRealtimeMetrics
+};

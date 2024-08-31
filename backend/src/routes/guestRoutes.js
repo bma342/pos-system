@@ -1,65 +1,26 @@
 const express = require('express');
+const guestController = require('../controllers/guestController');
+const { authenticate } = require('../middleware/auth');
+const authorize = require('../middleware/authorize');
+
 const router = express.Router();
-const { authenticateToken, authorizeRoles } = require('../middleware/auth');
-const Guest = require('../models/Guest');
+
+// Apply authentication middleware to all routes
+router.use(authenticate);
 
 // Get all guests
-router.get('/', authenticateToken, authorizeRoles(1, 2), async (req, res) => {
-  try {
-    const guests = await Guest.findAll();
-    const guestsWithEngagementScore = guests.map(guest => ({
-      ...guest.toJSON(),
-      engagementScore: guest.engagementScore, // Include engagement score
-    }));
-
-    res.json(guestsWithEngagementScore);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching guests', error });
-  }
-});
+router.get('/', authorize(['admin', 'manager']), guestController.getAllGuests);
 
 // Get a specific guest
-router.get('/:id', authenticateToken, authorizeRoles(1, 2), async (req, res) => {
-  try {
-    const guest = await Guest.findByPk(req.params.id);
-    if (!guest) return res.status(404).json({ message: 'Guest not found' });
+router.get('/:id', authorize(['admin', 'manager']), guestController.getGuestById);
 
-    res.json({
-      ...guest.toJSON(),
-      engagementScore: guest.engagementScore, // Include engagement score
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching guest', error });
-  }
-});
+// Create a new guest
+router.post('/', authorize(['admin', 'manager']), guestController.createGuest);
 
-// Update a guest profile
-router.put('/:id', authenticateToken, authorizeRoles(1, 2), async (req, res) => {
-  try {
-    const guest = await Guest.findByPk(req.params.id);
-    if (!guest) return res.status(404).json({ message: 'Guest not found' });
+// Update a guest
+router.put('/:id', authorize(['admin', 'manager']), guestController.updateGuest);
 
-    await guest.update(req.body);
-    res.json({
-      ...guest.toJSON(),
-      engagementScore: guest.engagementScore, // Include updated engagement score
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Error updating guest profile', error });
-  }
-});
-
-// Delete a guest profile
-router.delete('/:id', authenticateToken, authorizeRoles(1, 2), async (req, res) => {
-  try {
-    const guest = await Guest.findByPk(req.params.id);
-    if (!guest) return res.status(404).json({ message: 'Guest not found' });
-
-    await guest.destroy();
-    res.json({ message: 'Guest deleted successfully.' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error deleting guest profile', error });
-  }
-});
+// Delete a guest
+router.delete('/:id', authorize(['admin']), guestController.deleteGuest);
 
 module.exports = router;

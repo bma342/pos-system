@@ -1,53 +1,32 @@
 const express = require('express');
+const { authenticate } = require('../middleware/auth');
+const authorize = require('../middleware/authorize');
+const cateringController = require('../controllers/cateringController');
+
 const router = express.Router();
-const { authenticateToken, authorizeRoles } = require('../middleware/auth');
-const Catering = require('../models/Catering');
 
-// Get all catering events for a location
-router.get('/location/:locationId', authenticateToken, authorizeRoles(1, 2), async (req, res) => {
-  try {
-    const events = await Catering.findAll({ where: { locationId: req.params.locationId } });
-    res.json(events);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching catering events', error });
-  }
-});
+// Apply authentication middleware to all routes
+router.use(authenticate);
 
-// Create a new catering event
-router.post('/', authenticateToken, authorizeRoles(1, 2), async (req, res) => {
-  try {
-    const { eventName, date, numberOfGuests, specialInstructions, locationId } = req.body;
-    const event = await Catering.create({ eventName, date, numberOfGuests, specialInstructions, locationId });
-    res.status(201).json(event);
-  } catch (error) {
-    res.status(500).json({ message: 'Error creating catering event', error });
-  }
-});
+// Get catering menu for a specific location
+router.get('/location/:locationId', authorize(['admin', 'manager']), cateringController.getCateringMenu);
 
-// Update a catering event
-router.put('/:id', authenticateToken, authorizeRoles(1, 2), async (req, res) => {
-  try {
-    const event = await Catering.findByPk(req.params.id);
-    if (!event) return res.status(404).json({ message: 'Event not found' });
+// Create a new catering order
+router.post('/order', authorize(['admin', 'manager', 'user']), cateringController.createCateringOrder);
 
-    await event.update(req.body);
-    res.json(event);
-  } catch (error) {
-    res.status(500).json({ message: 'Error updating event', error });
-  }
-});
+// Get catering order details
+router.get('/order/:orderId', authorize(['admin', 'manager', 'user']), cateringController.getCateringOrderDetails);
 
-// Delete a catering event
-router.delete('/:id', authenticateToken, authorizeRoles(1, 2), async (req, res) => {
-  try {
-    const event = await Catering.findByPk(req.params.id);
-    if (!event) return res.status(404).json({ message: 'Event not found' });
+// Update catering order status
+router.put('/order/:orderId/status', authorize(['admin', 'manager']), cateringController.updateCateringOrderStatus);
 
-    await event.destroy();
-    res.json({ message: 'Event deleted successfully.' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error deleting event', error });
-  }
-});
+// Get all catering orders for a client
+router.get('/orders', authorize(['admin', 'manager']), cateringController.getAllCateringOrders);
+
+// Create or update catering menu item
+router.post('/menu-item', authorize(['admin']), cateringController.upsertCateringMenuItem);
+
+// Delete catering menu item
+router.delete('/menu-item/:itemId', authorize(['admin']), cateringController.deleteCateringMenuItem);
 
 module.exports = router;

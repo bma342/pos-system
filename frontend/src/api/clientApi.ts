@@ -1,5 +1,10 @@
 import axios from 'axios';
-import { Client } from '../types';
+import {
+  Client,
+  ClientPreferences,
+  ClientBranding,
+} from '../types/clientTypes';
+import apiClient from './apiClient';
 
 export const fetchClientId = async (): Promise<number | null> => {
   try {
@@ -35,4 +40,44 @@ export const deleteClient = async (clientId: number): Promise<boolean> => {
     console.error('Error deleting client:', error);
     return false;
   }
+};
+
+export const fetchClientBranding = async (): Promise<ClientBranding> => {
+  try {
+    const response = await apiClient.get('/api/client-branding');
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch client branding');
+  }
+};
+
+export const updateClientBranding = async (
+  brandingData: ClientBranding
+): Promise<ClientBranding> => {
+  try {
+    const response = await apiClient.put('/api/client-branding', brandingData);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to update client branding');
+  }
+};
+
+export const createClient = async (clientData: Partial<Client>) => {
+  try {
+    const response = await apiClient.post<Client>('/api/clients', clientData);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to create client');
+  }
+};
+
+export const updateClientPreferences = async (
+  clientId: string,
+  preferences: Partial<ClientPreferences>
+): Promise<Client> => {
+  const response = await axios.put<Client>(
+    `/api/clients/${clientId}/preferences`,
+    preferences
+  );
+  return response.data;
 };

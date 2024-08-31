@@ -1,21 +1,35 @@
-module.exports = (sequelize, DataTypes) => {
-  const DiscountItem = sequelize.define('DiscountItem', {
-    discountId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Discounts',
-        key: 'id',
-      },
-    },
-    itemId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Items',
-        key: 'id',
-      },
-    },
-  });
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
 
-  return DiscountItem;
+class DiscountItem extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+DiscountItem.attributes = attributes = {
+  discountId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Discounts', key: 'id' }
+  },
+  menuItemId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'MenuItems', key: 'id' }
+  },
+  isExcluded: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
+  }
 };
 
+module.exports = (sequelize) => {
+  DiscountItem.init(DiscountItem.attributes, {
+    sequelize,
+    modelName: 'DiscountItem',
+    tableName: 'discountitems', // Adjust this if needed
+  });
+  return DiscountItem
+};

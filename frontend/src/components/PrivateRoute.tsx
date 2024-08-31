@@ -1,35 +1,30 @@
 import React from 'react';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import {
-  selectIsAuthenticated,
-  selectPermissions,
-} from '../redux/slices/authSlice';
+import { RootState } from '../redux/store';
 
 interface PrivateRouteProps {
-  requiredPermissions?: string[];
+  children: React.ReactElement;
+  requiredRole?: string;
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({
-  requiredPermissions = [],
+  children,
+  requiredRole,
 }) => {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const userPermissions = useSelector(selectPermissions);
-  const location = useLocation();
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  const hasRequiredPermissions = requiredPermissions.every((permission) =>
-    userPermissions.includes(permission)
+  const { isAuthenticated, user } = useSelector(
+    (state: RootState) => state.auth
   );
 
-  if (requiredPermissions.length > 0 && !hasRequiredPermissions) {
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (requiredRole && user?.role !== requiredRole) {
     return <Navigate to="/unauthorized" replace />;
   }
 
-  return <Outlet />;
+  return children;
 };
 
 export default PrivateRoute;

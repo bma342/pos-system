@@ -1,26 +1,30 @@
-module.exports = (sequelize, DataTypes) => {
-  const RolePermission = sequelize.define('RolePermission', {
-    roleId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Roles',
-        key: 'id',
-      },
-    },
-    permissionId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Permissions',
-        key: 'id',
-      },
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class RolePermission extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+RolePermission.attributes = attributes = {
+  roleId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Roles', key: 'id' }
+  },
+  permissionId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Permissions', key: 'id' }
+  }
+};
+
+module.exports = (sequelize) => {
+  RolePermission.init(RolePermission.attributes, {
+    sequelize,
+    modelName: 'RolePermission',
+    tableName: 'rolepermissions', // Adjust this if needed
   });
-
-  RolePermission.associate = (models) => {
-    // RolePermission association back to Roles and Permissions
-    RolePermission.belongsTo(models.Role, { foreignKey: 'roleId' });
-    RolePermission.belongsTo(models.Permission, { foreignKey: 'permissionId' });
-  };
-
-  return RolePermission;
+  return RolePermission
 };

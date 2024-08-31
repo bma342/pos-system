@@ -1,40 +1,65 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../types';
-import { loginUser } from '../redux/slices/authSlice';
+import { TextField, Button, Typography, Box } from '@mui/material';
+import { useAuth } from '../contexts/AuthContext';
 
 const Login: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const [credentials, setCredentials] = useState({
-    email: '',
-    password: '',
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const { login } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    dispatch(loginUser(credentials));
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    try {
+      await login(email, password);
+    } catch (err) {
+      setError('Failed to log in. Please check your credentials.');
+    }
   };
 
   return (
-    <form onSubmit={handleLogin}>
-      <input
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{ maxWidth: 300, margin: 'auto' }}
+    >
+      <Typography variant="h4" component="h1" gutterBottom>
+        Login
+      </Typography>
+      <TextField
+        label="Email"
         type="email"
-        placeholder="Email"
-        value={credentials.email}
-        onChange={(e) =>
-          setCredentials({ ...credentials, email: e.target.value })
-        }
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        fullWidth
+        margin="normal"
+        required
       />
-      <input
+      <TextField
+        label="Password"
         type="password"
-        placeholder="Password"
-        value={credentials.password}
-        onChange={(e) =>
-          setCredentials({ ...credentials, password: e.target.value })
-        }
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        fullWidth
+        margin="normal"
+        required
       />
-      <button type="submit">Login</button>
-    </form>
+      <Button
+        type="submit"
+        variant="contained"
+        color="primary"
+        fullWidth
+        sx={{ mt: 2 }}
+      >
+        Log In
+      </Button>
+      {error && (
+        <Typography color="error" sx={{ mt: 2 }}>
+          {error}
+        </Typography>
+      )}
+    </Box>
   );
 };
 

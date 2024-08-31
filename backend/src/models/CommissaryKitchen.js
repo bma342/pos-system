@@ -1,35 +1,46 @@
-module.exports = (sequelize, DataTypes) => {
-  const CommissaryKitchen = sequelize.define('CommissaryKitchen', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    address: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    locationId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Locations',
-        key: 'id',
-      },
-      allowNull: false,
-    },
-    isActive: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
-    },
-    syncFlag: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true, // Flag to indicate this kitchen is part of POS sync for catering
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class CommissaryKitchen extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+CommissaryKitchen.attributes = attributes = {
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Clients', key: 'id' }
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  address: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
+  capacity: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  operatingHours: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  }
+};
+
+module.exports = (sequelize) => {
+  CommissaryKitchen.init(CommissaryKitchen.attributes, {
+    sequelize,
+    modelName: 'CommissaryKitchen',
+    tableName: 'commissarykitchens', // Adjust this if needed
   });
-
-  CommissaryKitchen.associate = (models) => {
-    CommissaryKitchen.belongsTo(models.Location, { foreignKey: 'locationId' });
-    CommissaryKitchen.hasMany(models.CateringOrder, { foreignKey: 'commissaryKitchenId' }); // Link orders handled by this kitchen
-  };
-
-  return CommissaryKitchen;
+  return CommissaryKitchen
 };

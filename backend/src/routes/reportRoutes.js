@@ -1,66 +1,26 @@
 const express = require('express');
+const reportController = require('../controllers/reportController');
+const { authenticate } = require('../middleware/auth');
+const authorize = require('../middleware/authorize');
+
 const router = express.Router();
-const { authenticateToken, authorizeRoles } = require('../middleware/auth');
-const ReportService = require('../services/ReportService');
 
-// Sales Summary Report
-router.get('/sales-summary', authenticateToken, authorizeRoles(1, 2), async (req, res) => {
-  try {
-    const { locationId, startDate, endDate } = req.query;
-    if (!locationId || !startDate || !endDate) {
-      return res.status(400).json({ message: 'Missing required query parameters: locationId, startDate, endDate' });
-    }
+// Apply authentication middleware to all routes
+router.use(authenticate);
 
-    const summary = await ReportService.getSalesSummary({ locationId, startDate, endDate });
-    res.json(summary);
-  } catch (error) {
-    res.status(500).json({ message: 'Error generating sales summary report', error: error.message });
-  }
-});
+// Generate report
+router.post('/generate', authorize(['admin', 'manager']), reportController.generateReport);
 
-// Guest Activity Report
-router.get('/guest-activity', authenticateToken, authorizeRoles(1, 2), async (req, res) => {
-  try {
-    const { locationId, guestId, startDate, endDate } = req.query;
-    if (!locationId || !guestId || !startDate || !endDate) {
-      return res.status(400).json({ message: 'Missing required query parameters: locationId, guestId, startDate, endDate' });
-    }
+// Get report by ID
+router.get('/:id', authorize(['admin', 'manager']), reportController.getReportById);
 
-    const activity = await ReportService.getGuestActivity({ locationId, guestId, startDate, endDate });
-    res.json(activity);
-  } catch (error) {
-    res.status(500).json({ message: 'Error generating guest activity report', error: error.message });
-  }
-});
+// Get all reports for a client
+router.get('/client/:clientId', authorize(['admin', 'manager']), reportController.getClientReports);
 
-// Inventory Report
-router.get('/inventory', authenticateToken, authorizeRoles(1, 2), async (req, res) => {
-  try {
-    const { locationId, startDate, endDate } = req.query;
-    if (!locationId || !startDate || !endDate) {
-      return res.status(400).json({ message: 'Missing required query parameters: locationId, startDate, endDate' });
-    }
+// Update report
+router.put('/:id', authorize(['admin']), reportController.updateReport);
 
-    const inventoryReport = await ReportService.getInventoryReport({ locationId, startDate, endDate });
-    res.json(inventoryReport);
-  } catch (error) {
-    res.status(500).json({ message: 'Error generating inventory report', error: error.message });
-  }
-});
-
-// Loyalty Performance Report
-router.get('/loyalty-performance', authenticateToken, authorizeRoles(1, 2), async (req, res) => {
-  try {
-    const { locationId, startDate, endDate } = req.query;
-    if (!locationId || !startDate || !endDate) {
-      return res.status(400).json({ message: 'Missing required query parameters: locationId, startDate, endDate' });
-    }
-
-    const loyaltyReport = await ReportService.getLoyaltyPerformanceReport({ locationId, startDate, endDate });
-    res.json(loyaltyReport);
-  } catch (error) {
-    res.status(500).json({ message: 'Error generating loyalty performance report', error: error.message });
-  }
-});
+// Delete report
+router.delete('/:id', authorize(['admin']), reportController.deleteReport);
 
 module.exports = router;

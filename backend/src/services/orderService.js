@@ -1,126 +1,113 @@
-const db = require('../models');
-const logger = require('../services/logger');
+const { Counter, Histogram } = require('prom-client');
+const { Order } = require('../models/Order');
+const { MenuItem } = require('../models/MenuItem');
+const { calculatePrepTime, formatEstimatedTime, checkInventory } = require('./orderPrepService');
+const { emitDashboardUpdate, emitNewOrder } = require('./dashboardService'); // Changed from './dashboardService1' to './dashboardService'
+const { emitOrderUpdate } = require('../socket');
+const { io } = require('../socket');
+const { sendNotification } = require('../utils/notificationService');
 
-class OrderService {
-  async createOrder(orderData) {
-    try {
-      // Deconstruct order details from the payload
-      const {
-        guestId,
-        locationId,
-        items,
-        paymentMethod,
-        serviceFee,
-        tipAmount,
-        loyaltyPointsUsed,
-        schedulingDetails,
-        specialInstructions,
-        cateringDetails,
-      } = orderData;
+const orderCounter = new Counter({
+  name: 'pos_orders_total',
+  help: 'Total number of orders'
+});
 
-      // Calculate total amount including service fee, discounts, etc.
-      const totalAmount = items.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        serviceFee + tipAmount
-      );
+const orderValueHistogram = new Histogram({
+  name: 'pos_order_value',
+  help: 'Distribution of order values'
+});
 
-      // Create the order
-      const newOrder = await db.Order.create({
-        guestId,
-        locationId,
-        totalAmount,
-        paymentMethod,
-        serviceFee,
-        tipAmount,
-        loyaltyPointsUsed,
-        schedulingDetails,
-        specialInstructions,
-        cateringDetails,
+const createOrder = async (orderData) => {
+  // Check inventory
+  const inventoryAvailable = await checkInventory(orderData.items);
+  if (!inventoryAvailable) {
+    throw new Error('Some items are out of stock');
+  }
+
+  // Calculate prep time
+  const prepTime = await calculatePrepTime(orderData);
+  const estimatedTime = formatEstimatedTime(prepTime, orderData.scheduledTime);
+
+  // Create order
+  const order = await Order.create({
+    ...orderData,
+    estimatedPickupTime: estimatedTime,
+  });
+
+  // Update inventory
+  for (const item of orderData.items) {
+    const menuItem = await MenuItem.findByPk(item.menuItemId);
+    if (menuItem) {
+      await menuItem.update({
+        onlineInventoryOffset: menuItem.onlineInventoryOffset - item.quantity,
       });
-
-      // Add ordered items
-      for (const item of items) {
-        await db.OrderItem.create({
-          ...item,
-          orderId: newOrder.id,
-        });
-      }
-
-      // Log the order creation
-      logger.info(`Order created: ID ${newOrder.id} for guest ID ${guestId}`);
-
-      return newOrder;
-    } catch (error) {
-      logger.error(`Error creating order: ${error.message}`);
-      throw error;
     }
   }
 
-  // Method to update order status (e.g., from pending to completed)
-  async updateOrderStatus(orderId, status) {
-    try {
-      const order = await db.Order.findByPk(orderId);
-      if (!order) throw new Error('Order not found');
+  // Emit updates
+  emitNewOrder(order);
+  emitDashboardUpdate();
 
-      order.status = status;
-      await order.save();
+  return order;
+};
 
-      // Hook for additional logic (e.g., triggering notifications)
-      this.onOrderStatusChange(order);
+// ... other order-related functions ...
 
-      return order;
-    } catch (error) {
-      logger.error(`Error updating order status: ${error.message}`);
-      throw error;
-    }
+const getActiveOrders = async () => {
+  return await Order.findAll({
+    where: {
+      status: ['pending', 'in-progress'],
+    },
+    order: [['promiseTime', 'ASC']],
+  });
+};
+
+const cancelOrder = async (orderId) => {
+  const order = await Order.findByPk(orderId);
+  if (!order) {
+    throw new Error('Order not found');
   }
-
-  // Hook to handle order status change logic
-  onOrderStatusChange(order) {
-    if (order.status === 'completed') {
-      logger.info(`Order completed: ID ${order.id}`);
-      // Example: trigger guest notification or POS sync
-    }
+  await order.update({ status: 'cancelled' });
+  
+  // Notify guest
+  await sendNotification(order.guestId, 'Your order has been cancelled');
+  
+  // Notify provider (if applicable)
+  if (order.providerId) {
+    await sendNotification(order.providerId, `Order #${order.id} has been cancelled`);
   }
-
-  // Method to cancel an order
-  async cancelOrder(orderId) {
-    try {
-      const order = await db.Order.findByPk(orderId);
-      if (!order) throw new Error('Order not found');
-
-      if (order.status === 'cancelled') {
-        throw new Error('Order is already cancelled');
-      }
-
-      order.status = 'cancelled';
-      order.cancelledAt = new Date();
-      await order.save();
-
-      logger.info(`Order cancelled: ID ${order.id}`);
-      return order;
-    } catch (error) {
-      logger.error(`Error cancelling order: ${error.message}`);
-      throw error;
-    }
+  
+  // Notify driver (if applicable)
+  if (order.driverId) {
+    await sendNotification(order.driverId, `Order #${order.id} has been cancelled`);
   }
+  
+  emitOrderUpdate(order);
+};
 
-  // Method to retrieve order details by ID
-  async getOrderById(orderId) {
-    try {
-      const order = await db.Order.findByPk(orderId, {
-        include: [{ model: db.OrderItem }, { model: db.Guest }],
-      });
-
-      if (!order) throw new Error('Order not found');
-
-      return order;
-    } catch (error) {
-      logger.error(`Error retrieving order: ${error.message}`);
-      throw error;
-    }
+const markItemOutOfStock = async (itemId) => {
+  const menuItem = await MenuItem.findByPk(itemId);
+  if (!menuItem) {
+    throw new Error('Menu item not found');
   }
-}
+  await menuItem.update({ isAvailable: false });
+  
+  // Emit event to update all channels
+  io.emit('menu-item-update', { itemId, isAvailable: false });
+  
+  // Update third-party delivery services
+  await updateThirdPartyMenus(itemId, false);
+};
 
-module.exports = new OrderService();
+const updateThirdPartyMenus = async (itemId, isAvailable) => {
+  // Implement logic to update menus on third-party delivery services
+  // This might involve calling APIs for services like DoorDash, Uber Eats, etc.
+};
 
+module.exports = {
+  createOrder,
+  getActiveOrders,
+  cancelOrder,
+  markItemOutOfStock,
+  updateThirdPartyMenus
+};

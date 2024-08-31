@@ -1,18 +1,46 @@
 const express = require('express');
-const { authenticateToken, authorizeRoles } = require('../middleware/auth');
-const roleController = require('../controllers/roleController');
-const permissionController = require('../controllers/permissionController');
+const adminController = require('../controllers/adminController');
+const { authenticate } = require('../middleware/auth');
+const authorize = require('../middleware/authorize');
+const { body } = require('express-validator');
 
 const router = express.Router();
 
-// Role and Permission Routes
-router.get('/roles', authenticateToken, authorizeRoles('Admin'), roleController.getAllRoles);
-router.post('/roles', authenticateToken, authorizeRoles('Super Admin'), roleController.createRole);
-router.put('/roles/:id', authenticateToken, authorizeRoles('Super Admin'), roleController.assignPermission);
+// Apply authentication middleware to all routes
+router.use(authenticate);
 
-router.get('/permissions', authenticateToken, authorizeRoles('Admin'), permissionController.getAllPermissions);
-router.post('/permissions', authenticateToken, authorizeRoles('Super Admin'), permissionController.createPermission);
-router.put('/permissions/:id', authenticateToken, authorizeRoles('Super Admin'), permissionController.updatePermission);
-router.delete('/permissions/:id', authenticateToken, authorizeRoles('Super Admin'), permissionController.deletePermission);
+// Apply authorization middleware to all routes
+router.use(authorize(['clientAdmin', 'superAdmin']));
+
+// Dashboard data
+router.get('/dashboard', adminController.getDashboardData);
+
+// User management
+router.get('/users', adminController.getUsers);
+router.post('/users', [
+  body('username').isString().notEmpty(),
+  body('email').isEmail(),
+  body('password').isLength({ min: 6 }),
+  body('role').isIn(['user', 'admin', 'clientAdmin', 'superAdmin'])
+], adminController.createUser);
+router.put('/users/:id', [
+  body('username').optional().isString(),
+  body('email').optional().isEmail(),
+  body('password').optional().isLength({ min: 6 }),
+  body('role').optional().isIn(['user', 'admin', 'clientAdmin', 'superAdmin'])
+], adminController.updateUser);
+router.delete('/users/:id', adminController.deleteUser);
+
+// System logs
+router.get('/logs', adminController.getSystemLogs);
+
+// System health
+router.get('/health', adminController.getSystemHealth);
+
+// Database operations
+router.post('/backup', adminController.backupDatabase);
+router.post('/restore', [
+  body('backupId').isString().notEmpty()
+], adminController.restoreDatabase);
 
 module.exports = router;

@@ -1,96 +1,68 @@
-module.exports = (sequelize, DataTypes) => {
-  const MenuItem = sequelize.define('MenuItem', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    basePrice: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-    },
-    pointsPrice: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    posItemId: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    imageUrl: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    isGlobal: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-    abTestGroup: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    showReviews: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
-    },
-    clientId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Clients',
-        key: 'id'
-      },
-    },
-    isFeatured: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-    isAvailable: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
-    },
-    allergens: {
-      type: DataTypes.JSONB,
-      allowNull: true,
-    },
-    dietaryLabels: {
-      type: DataTypes.JSONB,
-      allowNull: true,
-    },
-    tags: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: true,
-    },
-  }, {
-    tableName: 'MenuItems',
-    timestamps: true,
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class MenuItem extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+MenuItem.attributes = attributes = {
+  menuId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Menus', key: 'id' }
+  },
+  menuGroupId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: { model: 'MenuGroups', key: 'id' }
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  price: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false
+  },
+  imageUrl: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  isAvailable: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  calories: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  allergens: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  tags: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  displayOrder: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  }
+};
+
+module.exports = (sequelize) => {
+  MenuItem.init(MenuItem.attributes, {
+    sequelize,
+    modelName: 'MenuItem',
+    tableName: 'menuitems', // Adjust this if needed
   });
-
-  MenuItem.associate = (models) => {
-    MenuItem.belongsTo(models.MenuGroup, { foreignKey: 'menuGroupId', constraints: false });
-    MenuItem.hasMany(models.LocationMenuOverride, { foreignKey: 'menuItemId', constraints: false });
-    MenuItem.belongsToMany(models.Modifier, {
-      through: 'MenuItemModifier',
-      foreignKey: 'menuItemId',
-      otherKey: 'modifierId',
-      constraints: false
-    });
-    MenuItem.hasMany(models.MenuItemModifier, { foreignKey: 'menuItemId', constraints: false });
-    MenuItem.hasMany(models.MenuItemSizeModifier, { foreignKey: 'menuItemId', as: 'sizeModifiers', constraints: false });
-    MenuItem.hasMany(models.ABTest, { foreignKey: 'menuItemId', constraints: false });
-    MenuItem.hasMany(models.MenuItemAnalytics, { foreignKey: 'menuItemId', constraints: false });
-    MenuItem.hasMany(models.ItemReview, { foreignKey: 'menuItemId', constraints: false });
-    MenuItem.belongsTo(models.Client, { foreignKey: 'clientId', constraints: false });
-    MenuItem.belongsToMany(models.ProviderIntegration, {
-      through: 'ItemProviderMapping',
-      foreignKey: 'menuItemId',
-      otherKey: 'providerId',
-      constraints: false
-    });
-  };
-
-  return MenuItem;
+  return MenuItem
 };

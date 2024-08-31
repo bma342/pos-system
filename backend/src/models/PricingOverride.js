@@ -1,51 +1,51 @@
-module.exports = (sequelize, DataTypes) => {
-  const PricingOverride = sequelize.define('PricingOverride', {
-    menuItemId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'MenuItems',
-        key: 'id',
-      },
-      allowNull: false,
-    },
-    locationId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Locations',
-        key: 'id',
-      },
-      allowNull: false,
-    },
-    provider: {
-      type: DataTypes.STRING,
-      allowNull: false, // e.g., "DoorDash", "UberEats"
-    },
-    upliftPercentage: {
-      type: DataTypes.FLOAT,
-      allowNull: true, // The percentage increase specific to this provider
-    },
-    flatOverridePrice: {
-      type: DataTypes.FLOAT,
-      allowNull: true, // Optionally provide a flat price for this provider
-    },
-    roundingEnabled: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false, // Whether to apply rounding to the final price
-    },
-    effectiveDateStart: {
-      type: DataTypes.DATE,
-      allowNull: true, // When the override starts
-    },
-    effectiveDateEnd: {
-      type: DataTypes.DATE,
-      allowNull: true, // When the override ends
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class PricingOverride extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+PricingOverride.attributes = attributes = {
+  menuItemId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'MenuItems', key: 'id' }
+  },
+  locationId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Locations', key: 'id' }
+  },
+  price: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false
+  },
+  startDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  endDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  reason: {
+    type: DataTypes.STRING,
+    allowNull: true
+  }
+};
+
+module.exports = (sequelize) => {
+  PricingOverride.init(PricingOverride.attributes, {
+    sequelize,
+    modelName: 'PricingOverride',
+    tableName: 'pricingoverrides', // Adjust this if needed
   });
-
-  PricingOverride.associate = (models) => {
-    PricingOverride.belongsTo(models.MenuItem, { foreignKey: 'menuItemId' });
-    PricingOverride.belongsTo(models.Location, { foreignKey: 'locationId' });
-  };
-
-  return PricingOverride;
+  return PricingOverride
 };

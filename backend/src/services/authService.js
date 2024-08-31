@@ -1,32 +1,22 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const speakeasy = require 'speakeasy';
+const { User } = require '../models';
 
-exports.register = async (userData) => {
-  const { username, email, password, phone, roleId } = userData;
-
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-
-  const user = await User.create({
-    username,
-    email,
-    phone,
-    password: hashedPassword,
-    roleId,
-  });
-
-  return user;
+const generateTwoFactorSecret = () => {
+  return speakeasy.generateSecret({ length: 32 });
 };
 
-exports.login = async (email, password) => {
-  const user = await User.findOne({ where: { email } });
-  if (!user) throw new Error('Invalid email or password.');
+const verifyTwoFactor = (token, secret) => {
+  return speakeasy.totp.verify({
+    secret,
+    encoding: 'base32',
+    token,
+  });
+};
 
-  const validPassword = await bcrypt.compare(password, user.password);
-  if (!validPassword) throw new Error('Invalid email or password.');
+const enableTwoFactor = async (userId, secret) => {
+  await User.update({ twoFactorSecret, twoFactorEnabled }, { where: { id } });
+};
 
-  const token = jwt.sign({ id: user.id, roleId: user.roleId }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-  return { user, token };
+const disableTwoFactor = async (userId) => {
+  await User.update({ twoFactorSecret, twoFactorEnabled }, { where: { id } });
 };

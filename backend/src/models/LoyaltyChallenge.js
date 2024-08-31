@@ -1,67 +1,59 @@
-module.exports = (sequelize, DataTypes) => {
-  const LoyaltyChallenge = sequelize.define('LoyaltyChallenge', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    description: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    conditions: {
-      type: DataTypes.JSONB, // Define conditions like { itemCount: 10, timeframe: '1 month', minSpend: 50 }
-      allowNull: false,
-    },
-    rewardConfig: {
-      type: DataTypes.JSONB, // Define rewards like { reward: "Free Smoothie", points: 100, discount: 10% }
-      allowNull: false,
-    },
-    challengeType: {
-      type: DataTypes.STRING, // e.g., 'purchase-based', 'engagement-based'
-      allowNull: false,
-      defaultValue: 'purchase-based',
-    },
-    startDate: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    endDate: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    status: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: 'active', // Could be 'active', 'completed', 'archived'
-    },
-    participantCount: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-    },
-    locationId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Locations',
-        key: 'id',
-      },
-    },
-    clientId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Clients',
-        key: 'id',
-      },
-    },
-  });
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
 
-  LoyaltyChallenge.associate = (models) => {
-    LoyaltyChallenge.belongsTo(models.Location, { foreignKey: 'locationId' });
-    LoyaltyChallenge.belongsTo(models.Client, { foreignKey: 'clientId' });
-    LoyaltyChallenge.hasMany(models.LoyaltyReward, { foreignKey: 'loyaltyChallengeId' });
-    LoyaltyChallenge.hasMany(models.LoyaltyChallengeProgress, { foreignKey: 'loyaltyChallengeId' });
-  };
+class LoyaltyChallenge extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
 
-  return LoyaltyChallenge;
+LoyaltyChallenge.attributes = attributes = {
+  loyaltyId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Loyalties', key: 'id' }
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  type: {
+    type: DataTypes.ENUM('purchase', 'visit', 'referral', 'social', 'custom'),
+    allowNull: false
+  },
+  goal: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  reward: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    comment: 'Points awarded for completing the challenge'
+  },
+  startDate: {
+    type: DataTypes.DATE,
+    allowNull: false
+  },
+  endDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  }
 };
 
+module.exports = (sequelize) => {
+  LoyaltyChallenge.init(LoyaltyChallenge.attributes, {
+    sequelize,
+    modelName: 'LoyaltyChallenge',
+    tableName: 'loyaltychallenges', // Adjust this if needed
+  });
+  return LoyaltyChallenge
+};

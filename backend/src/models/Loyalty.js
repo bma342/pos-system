@@ -1,22 +1,51 @@
-module.exports = (sequelize, DataTypes) => {
-  const Loyalty = sequelize.define('Loyalty', {
-    clientId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    pointMultiplier: {
-      type: DataTypes.FLOAT,
-      defaultValue: 1.0, // Points per dollar spent
-    },
-    tiers: {
-      type: DataTypes.JSONB, // Example: [{ name: 'Gold', requiredPoints: 1000 }, { name: 'Platinum', requiredPoints: 5000 }]
-      allowNull: true,
-    },
-    expirationPolicy: {
-      type: DataTypes.JSONB, // Example: { type: 'rolling', duration: 365 } for points expiration in days
-      allowNull: true,
-    },
-  });
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
 
-  return Loyalty;
+class Loyalty extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+Loyalty.attributes = attributes = {
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Clients', key: 'id' }
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  pointsPerDollar: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+    defaultValue: 1
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  startDate: {
+    type: DataTypes.DATE,
+    allowNull: false
+  },
+  endDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  }
+};
+
+module.exports = (sequelize) => {
+  Loyalty.init(Loyalty.attributes, {
+    sequelize,
+    modelName: 'Loyalty',
+    tableName: 'loyaltys', // Adjust this if needed
+  });
+  return Loyalty
 };

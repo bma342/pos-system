@@ -1,47 +1,27 @@
-'use strict';
-const { Model } = require('sequelize');
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
 
-module.exports = (sequelize, DataTypes) => {
-  class RoleTemplateAssignments extends Model {
-    static associate(models) {
-      RoleTemplateAssignments.belongsTo(models.Client, { foreignKey: 'clientId' });
-      RoleTemplateAssignments.belongsTo(models.Role, { foreignKey: 'roleId' });
-      RoleTemplateAssignments.belongsTo(models.RoleTemplate, { foreignKey: 'roleTemplateId' });
-    }
+class RoleTemplateAssignments extends BaseModel {
+  static modelAttributes(DataTypes) {
+    return {
+      roleId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'Roles',
+          key: 'id'
+        }
+      },
+      roleTemplateId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'RoleTemplates',
+          key: 'id'
+        }
+      }
+    };
   }
+}
 
-  RoleTemplateAssignments.init({
-    roleId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Roles',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-      allowNull: false,
-    },
-    roleTemplateId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'RoleTemplates',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-      allowNull: false,
-    },
-    clientId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Clients',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-      allowNull: false,
-    },
-  }, {
-    sequelize,
-    modelName: 'RoleTemplateAssignments',
-  });
-
-  return RoleTemplateAssignments;
-};
+module.exports = RoleTemplateAssignments;

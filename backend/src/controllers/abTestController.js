@@ -1,72 +1,101 @@
-const { ABTest, MenuItem, Client } = require('../models');
+const { validationResult } = require('express-validator');
+const abTestService = require('../services/abTestService');
+const logger = require('../utils/logger');
+const { AppError } = require('../utils/errorHandler');
 
-exports.getAllABTests = async (req, res) => {
-  try {
-    const abTests = await ABTest.findAll({
-      where: { clientId: req.user.clientId },
-      include: [{ model: MenuItem }, { model: Client }]
-    });
-    res.json(abTests);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching AB tests', error: error.message });
+const validateRequest = (req) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    throw new AppError('Validation failed', 400, errors.array());
   }
 };
 
-exports.createABTest = async (req, res) => {
+const createABTest = async (req, res, next) => {
   try {
-    const newABTest = await ABTest.create({ ...req.body, clientId: req.user.clientId });
-    res.status(201).json(newABTest);
+    validateRequest(req);
+    const abTest = await abTestService.createABTest(req.body);
+    logger.info(`A/B Test created with ID: ${abTest.id}`);
+    res.status(201).json(abTest);
   } catch (error) {
-    res.status(400).json({ message: 'Error creating AB test', error: error.message });
+    logger.error('Error creating A/B Test:', error);
+    next(error);
   }
 };
 
-exports.getABTest = async (req, res) => {
+const getABTest = async (req, res, next) => {
   try {
-    const abTest = await ABTest.findOne({
-      where: { id: req.params.id, clientId: req.user.clientId },
-      include: [{ model: MenuItem }, { model: Client }]
-    });
-    if (abTest) {
-      res.json(abTest);
-    } else {
-      res.status(404).json({ message: 'AB test not found' });
+    const abTest = await abTestService.getABTest(req.params.id);
+    if (!abTest) {
+      throw new AppError('A/B Test not found', 404);
     }
+    res.json(abTest);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching AB test', error: error.message });
+    logger.error(`Error fetching A/B Test with ID ${req.params.id}:`, error);
+    next(error);
   }
 };
 
-exports.updateABTest = async (req, res) => {
+const updateABTest = async (req, res, next) => {
   try {
-    const [updated] = await ABTest.update(req.body, {
-      where: { id: req.params.id, clientId: req.user.clientId }
-    });
-    if (updated) {
-      const updatedABTest = await ABTest.findOne({
-        where: { id: req.params.id },
-        include: [{ model: MenuItem }, { model: Client }]
-      });
-      res.json(updatedABTest);
-    } else {
-      res.status(404).json({ message: 'AB test not found' });
-    }
+    validateRequest(req);
+    const updatedABTest = await abTestService.updateABTest(req.params.id, req.body);
+    logger.info(`A/B Test updated with ID: ${req.params.id}`);
+    res.json(updatedABTest);
   } catch (error) {
-    res.status(400).json({ message: 'Error updating AB test', error: error.message });
+    logger.error(`Error updating A/B Test with ID ${req.params.id}:`, error);
+    next(error);
   }
 };
 
-exports.deleteABTest = async (req, res) => {
+const deleteABTest = async (req, res, next) => {
   try {
-    const deleted = await ABTest.destroy({
-      where: { id: req.params.id, clientId: req.user.clientId }
-    });
-    if (deleted) {
-      res.status(204).send();
-    } else {
-      res.status(404).json({ message: 'AB test not found' });
-    }
+    await abTestService.deleteABTest(req.params.id);
+    logger.info(`A/B Test deleted with ID: ${req.params.id}`);
+    res.status(204).send();
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting AB test', error: error.message });
+    logger.error(`Error deleting A/B Test with ID ${req.params.id}:`, error);
+    next(error);
   }
+};
+
+const getABTestResults = async (req, res, next) => {
+  try {
+    const results = await abTestService.getABTestResults(req.params.id);
+    res.json(results);
+  } catch (error) {
+    logger.error(`Error fetching A/B Test results for ID ${req.params.id}:`, error);
+    next(error);
+  }
+};
+
+const startABTest = async (req, res, next) => {
+  try {
+    const startedTest = await abTestService.startABTest(req.params.id);
+    logger.info(`A/B Test started with ID: ${req.params.id}`);
+    res.json(startedTest);
+  } catch (error) {
+    logger.error(`Error starting A/B Test with ID ${req.params.id}:`, error);
+    next(error);
+  }
+};
+
+const stopABTest = async (req, res, next) => {
+  try {
+    const stoppedTest = await abTestService.stopABTest(req.params.id);
+    logger.info(`A/B Test stopped with ID: ${req.params.id}`);
+    res.json(stoppedTest);
+  } catch (error) {
+    logger.error(`Error stopping A/B Test with ID ${req.params.id}:`, error);
+    next(error);
+  }
+};
+
+module.exports = {
+  createABTest,
+  getABTest,
+  updateABTest,
+  deleteABTest,
+  getABTestResults,
+  startABTest,
+  stopABTest
 };

@@ -1,30 +1,46 @@
-module.exports = (sequelize, DataTypes) => {
-  const FeatureManagement = sequelize.define('FeatureManagement', {
-    clientId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    loyaltyEnabled: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-    orderAggregationEnabled: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-    onlineOrderingEnabled: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-    reportingEnabled: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class FeatureManagement extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+FeatureManagement.attributes = attributes = {
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Clients', key: 'id' }
+  },
+  featureName: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  isEnabled: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
+  },
+  configuration: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  startDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  endDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  }
+};
+
+module.exports = (sequelize) => {
+  FeatureManagement.init(FeatureManagement.attributes, {
+    sequelize,
+    modelName: 'FeatureManagement',
+    tableName: 'featuremanagements', // Adjust this if needed
   });
-
-  FeatureManagement.associate = (models) => {
-    FeatureManagement.belongsTo(models.Client, { foreignKey: 'clientId' });
-  };
-
-  return FeatureManagement;
+  return FeatureManagement
 };

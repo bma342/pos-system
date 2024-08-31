@@ -1,126 +1,83 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../../types';
-import axios from 'axios';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-export interface Client {
-  id: number;
+interface Client {
+  id: string;
   name: string;
   email: string;
-  // Add other client properties as needed
+  phone: string;
+  address: string;
+  subscriptionPlan: string;
+  status: 'active' | 'inactive' | 'suspended';
 }
 
 interface ClientState {
   clients: Client[];
   selectedClient: Client | null;
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  loading: boolean;
   error: string | null;
 }
 
 const initialState: ClientState = {
   clients: [],
   selectedClient: null,
-  status: 'idle',
+  loading: false,
   error: null,
 };
-
-export const fetchClients = createAsyncThunk(
-  'clients/fetchClients',
-  async () => {
-    const response = await axios.get<Client[]>('/api/clients');
-    return response.data;
-  }
-);
-
-export const fetchClientById = createAsyncThunk(
-  'clients/fetchClientById',
-  async (clientId: number) => {
-    const response = await axios.get<Client>(`/api/clients/${clientId}`);
-    return response.data;
-  }
-);
-
-export const updateClientDetails = createAsyncThunk(
-  'clients/updateClientDetails',
-  async ({
-    clientId,
-    clientData,
-  }: {
-    clientId: number;
-    clientData: Partial<Client>;
-  }) => {
-    const response = await axios.put<Client>(
-      `/api/clients/${clientId}`,
-      clientData
-    );
-    return response.data;
-  }
-);
-
-export const deleteClient = createAsyncThunk(
-  'clients/deleteClient',
-  async (clientId: number) => {
-    await axios.delete(`/api/clients/${clientId}`);
-  }
-);
 
 const clientSlice = createSlice({
   name: 'client',
   initialState,
   reducers: {
-    updateClientStatus: (
-      state,
-      action: PayloadAction<'idle' | 'loading' | 'succeeded' | 'failed'>
-    ) => {
-      state.status = action.payload;
+    fetchClientsStart(state) {
+      state.loading = true;
+      state.error = null;
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchClients.pending, (state) => {
-        state.status = 'loading';
-      })
-      .addCase(
-        fetchClients.fulfilled,
-        (state, action: PayloadAction<Client[]>) => {
-          state.status = 'succeeded';
-          state.clients = action.payload;
-        }
-      )
-      .addCase(fetchClients.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message || 'Failed to fetch clients';
-      })
-      .addCase(
-        fetchClientById.fulfilled,
-        (state, action: PayloadAction<Client>) => {
-          state.selectedClient = action.payload;
-        }
-      )
-      .addCase(
-        updateClientDetails.fulfilled,
-        (state, action: PayloadAction<Client>) => {
-          const index = state.clients.findIndex(
-            (client) => client.id === action.payload.id
-          );
-          if (index >= 0) {
-            state.clients[index] = action.payload;
-          }
-        }
-      )
-      .addCase(deleteClient.fulfilled, (state, action) => {
-        state.clients = state.clients.filter(
-          (client) => client.id !== action.meta.arg
-        );
-      });
+    fetchClientsSuccess(state, action: PayloadAction<Client[]>) {
+      state.clients = action.payload;
+      state.loading = false;
+    },
+    fetchClientsFailure(state, action: PayloadAction<string>) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    selectClient(state, action: PayloadAction<string>) {
+      state.selectedClient =
+        state.clients.find((client) => client.id === action.payload) || null;
+    },
+    updateClientStart(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    updateClientSuccess(state, action: PayloadAction<Client>) {
+      const index = state.clients.findIndex(
+        (client) => client.id === action.payload.id
+      );
+      if (index !== -1) {
+        state.clients[index] = action.payload;
+      }
+      if (
+        state.selectedClient &&
+        state.selectedClient.id === action.payload.id
+      ) {
+        state.selectedClient = action.payload;
+      }
+      state.loading = false;
+    },
+    updateClientFailure(state, action: PayloadAction<string>) {
+      state.loading = false;
+      state.error = action.payload;
+    },
   },
 });
 
-export const { updateClientStatus } = clientSlice.actions;
-
-export const selectClient = (state: RootState) => state.client.clients;
-export const selectClientStatus = (state: RootState) => state.client.status;
-export const selectClientError = (state: RootState) => state.client.error;
-export const selectSelectedClient = (state: RootState) =>
-  state.client.selectedClient;
+export const {
+  fetchClientsStart,
+  fetchClientsSuccess,
+  fetchClientsFailure,
+  selectClient,
+  updateClientStart,
+  updateClientSuccess,
+  updateClientFailure,
+} = clientSlice.actions;
 
 export default clientSlice.reducer;

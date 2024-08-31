@@ -1,61 +1,64 @@
-const { ClientSettings } = require('../models');
-const logger = require('../services/logger');
+const { Request, Response } = require 'express';
+const { ClientSettings, Location } = require '../models';
 
-exports.getAllClientSettings = async (req, res) => {
+const updateGlobalTwoFactorSetting = async (req, res) => {
   try {
-    const settings = await ClientSettings.findAll();
-    res.status(200).json(settings);
+    const { twoFactorRequired } = req.body;
+    const clientId = req.user.clientId;
+
+    await ClientSettings.update({ twoFactorRequired }, { where: { clientId } });
+
+    res.json({ message: 'Global 2FA setting updated successfully' });
   } catch (error) {
-    logger.error(`Error fetching client settings: ${error.message}`);
-    res.status(500).json({ message: 'Error fetching client settings', error });
+    res.status(500).json({ message: 'Error updating global 2FA setting' });
   }
 };
 
-exports.getClientSettingById = async (req, res) => {
+const updateLocationTwoFactorException = async (req, res) => {
   try {
-    const setting = await ClientSettings.findByPk(req.params.id);
-    if (!setting) return res.status(404).json({ message: 'Client setting not found' });
-    res.status(200).json(setting);
+    const { locationId, twoFactorException } = req.body;
+    const clientId = req.user.clientId;
+
+    const location = await Location.findOne({ where: { id, clientId } });
+    if (!location) {
+      return res.status(404).json({ message: 'Location not found' });
+    }
+
+    await location.update({ twoFactorException });
+
+    res.json({ message: 'Location 2FA exception updated successfully' });
   } catch (error) {
-    logger.error(`Error fetching client setting by ID (${req.params.id}): ${error.message}`);
-    res.status(500).json({ message: 'Error fetching client setting', error });
+    res.status(500).json({ message: 'Error updating location 2FA exception' });
   }
 };
 
-exports.createClientSetting = async (req, res) => {
+const updateGlobalPaymentGateways = async (req, res) => {
   try {
-    const newSetting = await ClientSettings.create(req.body);
-    logger.info(`Client setting created: ${newSetting.id}`);
-    res.status(201).json(newSetting);
+    const { defaultPaymentGateways } = req.body;
+    const clientId = req.user.clientId;
+
+    await ClientSettings.update({ defaultPaymentGateways }, { where: { clientId } });
+
+    res.json({ message: 'Global payment gateway settings updated successfully' });
   } catch (error) {
-    logger.error(`Error creating client setting: ${error.message}`);
-    res.status(500).json({ message: 'Error creating client setting', error });
+    res.status(500).json({ message: 'Error updating global payment gateway settings' });
   }
 };
 
-exports.updateClientSetting = async (req, res) => {
+const updateLocationPaymentGatewayExceptions = async (req, res) => {
   try {
-    const [updated] = await ClientSettings.update(req.body, { where: { id: req.params.id } });
-    if (!updated) return res.status(404).json({ message: 'Client setting not found' });
+    const { locationId, paymentGatewayExceptions } = req.body;
+    const clientId = req.user.clientId;
 
-    const updatedSetting = await ClientSettings.findByPk(req.params.id);
-    logger.info(`Client setting updated: ${req.params.id}`);
-    res.status(200).json(updatedSetting);
+    const location = await Location.findOne({ where: { id, clientId } });
+    if (!location) {
+      return res.status(404).json({ message: 'Location not found' });
+    }
+
+    await location.update({ paymentGatewayExceptions });
+
+    res.json({ message: 'Location payment gateway exceptions updated successfully' });
   } catch (error) {
-    logger.error(`Error updating client setting: ${error.message}`);
-    res.status(500).json({ message: 'Error updating client setting', error });
-  }
-};
-
-exports.deleteClientSetting = async (req, res) => {
-  try {
-    const deleted = await ClientSettings.destroy({ where: { id: req.params.id } });
-    if (!deleted) return res.status(404).json({ message: 'Client setting not found' });
-
-    logger.info(`Client setting deleted: ${req.params.id}`);
-    res.status(204).send();
-  } catch (error) {
-    logger.error(`Error deleting client setting: ${error.message}`);
-    res.status(500).json({ message: 'Error deleting client setting', error });
+    res.status(500).json({ message: 'Error updating location payment gateway exceptions' });
   }
 };

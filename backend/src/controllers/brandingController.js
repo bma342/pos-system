@@ -1,55 +1,74 @@
-const path = require('path');
-const fs = require('fs');
-const BrandingService = require('../services/brandingService');
+const brandingService = require('../services/brandingService');
+const { AppError } = require('../utils/errorHandler');
+const logger = require('../utils/logger');
 
-exports.getBrandingProfiles = async (req, res) => {
+const getBrandingProfiles = async (req, res, next) => {
   try {
-    const profiles = await BrandingService.getBrandingProfiles(req.params.clientId);
-    res.json(profiles);
+    const { clientId } = req.params;
+    const profiles = await brandingService.getBrandingProfiles(clientId);
+    res.status(200).json(profiles);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching branding profiles', error });
+    logger.error(`Error fetching branding profiles for client ${req.params.clientId}:`, error);
+    next(new AppError('Error fetching branding profiles', 500));
   }
 };
 
-exports.saveBrandingProfile = async (req, res) => {
+const getBrandingProfileById = async (req, res, next) => {
   try {
-    const profileData = { ...req.body, clientId: req.params.clientId };
-    const profile = await BrandingService.saveBrandingProfile(profileData);
+    const { id } = req.params;
+    const profile = await brandingService.getBrandingProfileById(id);
+    if (!profile) {
+      return next(new AppError('Branding profile not found', 404));
+    }
     res.status(200).json(profile);
   } catch (error) {
-    res.status(500).json({ message: 'Error saving branding profile', error });
+    logger.error(`Error fetching branding profile ${req.params.id}:`, error);
+    next(new AppError('Error fetching branding profile', 500));
   }
 };
 
-exports.scheduleBrandingProfile = async (req, res) => {
+const createBrandingProfile = async (req, res, next) => {
   try {
-    const { profileId, schedule } = req.body;
-    const result = await BrandingService.scheduleBrandingProfile(profileId, schedule);
-    res.status(200).json({ message: 'Branding profile scheduled successfully', result });
+    const newProfile = await brandingService.createBrandingProfile(req.body);
+    logger.info(`New branding profile created: ${newProfile.id}`);
+    res.status(201).json(newProfile);
   } catch (error) {
-    res.status(500).json({ message: 'Error scheduling branding profile', error });
+    logger.error('Error creating branding profile:', error);
+    next(new AppError('Error creating branding profile', 500));
   }
 };
 
-exports.uploadLogo = async (req, res) => {
+const updateBrandingProfile = async (req, res, next) => {
   try {
-    if (!req.files || !req.files.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+    const { id } = req.params;
+    const updatedProfile = await brandingService.updateBrandingProfile(id, req.body);
+    if (!updatedProfile) {
+      return next(new AppError('Branding profile not found', 404));
     }
-
-    const logoFile = req.files.file;
-    const uploadPath = path.join(__dirname, '../../uploads/branding', logoFile.name);
-
-    // Ensure directory exists
-    fs.mkdirSync(path.dirname(uploadPath), { recursive: true });
-
-    logoFile.mv(uploadPath, (err) => {
-      if (err) return res.status(500).json({ message: 'Failed to upload file', err });
-
-      const logoUrl = `/uploads/branding/${logoFile.name}`;
-      res.status(200).json({ url: logoUrl });
-    });
+    logger.info(`Branding profile updated: ${id}`);
+    res.status(200).json(updatedProfile);
   } catch (error) {
-    res.status(500).json({ message: 'Error uploading logo', error });
+    logger.error(`Error updating branding profile ${req.params.id}:`, error);
+    next(new AppError('Error updating branding profile', 500));
   }
+};
+
+const deleteBrandingProfile = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await brandingService.deleteBrandingProfile(id);
+    logger.info(`Branding profile deleted: ${id}`);
+    res.status(204).send();
+  } catch (error) {
+    logger.error(`Error deleting branding profile ${req.params.id}:`, error);
+    next(new AppError('Error deleting branding profile', 500));
+  }
+};
+
+module.exports = {
+  getBrandingProfiles,
+  getBrandingProfileById,
+  createBrandingProfile,
+  updateBrandingProfile,
+  deleteBrandingProfile
 };

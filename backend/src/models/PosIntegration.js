@@ -1,64 +1,62 @@
-module.exports = (sequelize, DataTypes) => {
-  const PosIntegration = sequelize.define('PosIntegration', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    apiBaseUrl: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    clientId: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    clientSecret: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    contentType: {
-      type: DataTypes.STRING,
-      defaultValue: 'application/json',
-    },
-    roundingOption: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-    flatUpliftPercentage: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
-    },
-    syncFrequency: {
-      type: DataTypes.STRING,
-      defaultValue: 'daily',
-    },
-    syncMenu: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
-    },
-    syncInventory: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
-    },
-    syncOrders: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
-    },
-    locationId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-  }, {
-    tableName: 'PosIntegrations',
-    timestamps: true,
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class PosIntegration extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+PosIntegration.attributes = attributes = {
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Clients', key: 'id' }
+  },
+  posType: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  apiKey: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  apiSecret: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  accessToken: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  refreshToken: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  tokenExpiresAt: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  lastSyncDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  settings: {
+    type: DataTypes.JSON,
+    allowNull: true
+  }
+};
+
+module.exports = (sequelize) => {
+  PosIntegration.init(PosIntegration.attributes, {
+    sequelize,
+    modelName: 'PosIntegration',
+    tableName: 'posintegrations', // Adjust this if needed
   });
-
-  PosIntegration.associate = (models) => {
-    if (models.Location) PosIntegration.belongsTo(models.Location, { foreignKey: 'locationId' });
-    if (models.MenuSyncHistory) PosIntegration.hasMany(models.MenuSyncHistory, { foreignKey: 'posIntegrationId' });
-    if (models.InventorySyncHistory) PosIntegration.hasMany(models.InventorySyncHistory, { foreignKey: 'posIntegrationId' });
-    if (models.OrderSyncHistory) PosIntegration.hasMany(models.OrderSyncHistory, { foreignKey: 'posIntegrationId' });
-  };
-
-  return PosIntegration;
+  return PosIntegration
 };

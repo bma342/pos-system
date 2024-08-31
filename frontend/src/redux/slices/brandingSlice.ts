@@ -1,9 +1,6 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { BrandingProfile, RootState, BrandingState } from '../../types';
-import {
-  fetchBrandingProfiles as apiFetchBrandingProfiles,
-  saveBrandingProfile as apiSaveBrandingProfile,
-} from '../../api/brandingApi';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { BrandingState, BrandingProfile } from '../../types';
+import { brandingService } from '../../services/brandingService';
 
 const initialState: BrandingState = {
   profiles: [],
@@ -12,23 +9,31 @@ const initialState: BrandingState = {
 };
 
 export const fetchBrandingProfiles = createAsyncThunk(
-  'branding/fetchBrandingProfiles',
-  async (clientId: number) => {
-    return await apiFetchBrandingProfiles(clientId);
+  'branding/fetchProfiles',
+  async () => {
+    return await brandingService.getBrandingProfiles();
   }
 );
 
-export const addBrandingProfile = createAsyncThunk(
-  'branding/addBrandingProfile',
-  async (profile: Omit<BrandingProfile, 'id'>) => {
-    return await apiSaveBrandingProfile(profile as BrandingProfile);
+export const createBrandingProfile = createAsyncThunk(
+  'branding/createProfile',
+  async (profileData: Partial<BrandingProfile>) => {
+    return await brandingService.createBrandingProfile(profileData);
   }
 );
 
 export const updateBrandingProfile = createAsyncThunk(
-  'branding/updateBrandingProfile',
-  async (profile: BrandingProfile) => {
-    return await apiSaveBrandingProfile(profile);
+  'branding/updateProfile',
+  async (profileData: BrandingProfile) => {
+    return await brandingService.updateBrandingProfile(profileData);
+  }
+);
+
+export const deleteBrandingProfile = createAsyncThunk(
+  'branding/deleteProfile',
+  async (id: number) => {
+    await brandingService.deleteBrandingProfile(id);
+    return id;
   }
 );
 
@@ -41,40 +46,31 @@ const brandingSlice = createSlice({
       .addCase(fetchBrandingProfiles.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(
-        fetchBrandingProfiles.fulfilled,
-        (state, action: PayloadAction<BrandingProfile[]>) => {
-          state.status = 'succeeded';
-          state.profiles = action.payload;
-        }
-      )
+      .addCase(fetchBrandingProfiles.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.profiles = action.payload;
+      })
       .addCase(fetchBrandingProfiles.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message || null;
       })
-      .addCase(
-        addBrandingProfile.fulfilled,
-        (state, action: PayloadAction<BrandingProfile>) => {
-          state.profiles.push(action.payload);
+      .addCase(createBrandingProfile.fulfilled, (state, action) => {
+        state.profiles.push(action.payload);
+      })
+      .addCase(updateBrandingProfile.fulfilled, (state, action) => {
+        const index = state.profiles.findIndex(
+          (profile) => profile.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.profiles[index] = action.payload;
         }
-      )
-      .addCase(
-        updateBrandingProfile.fulfilled,
-        (state, action: PayloadAction<BrandingProfile>) => {
-          const index = state.profiles.findIndex(
-            (profile) => profile.id === action.payload.id
-          );
-          if (index !== -1) {
-            state.profiles[index] = action.payload;
-          }
-        }
-      );
+      })
+      .addCase(deleteBrandingProfile.fulfilled, (state, action) => {
+        state.profiles = state.profiles.filter(
+          (profile) => profile.id !== action.payload
+        );
+      });
   },
 });
-
-export const selectBrandingProfiles = (state: RootState) =>
-  state.branding.profiles;
-export const selectBrandingStatus = (state: RootState) => state.branding.status;
-export const selectBrandingError = (state: RootState) => state.branding.error;
 
 export default brandingSlice.reducer;

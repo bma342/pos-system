@@ -1,47 +1,54 @@
-module.exports = (sequelize, DataTypes) => {
-  const MenuAnalytics = sequelize.define('MenuAnalytics', {
-    menuItemId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'MenuItems',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    clicks: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-    },
-    views: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-    },
-    addToCartRate: {
-      type: DataTypes.FLOAT,
-      allowNull: true, // Percentage of views that convert to "Add to Cart"
-    },
-    purchaseRate: {
-      type: DataTypes.FLOAT,
-      allowNull: true, // Percentage of "Add to Cart" that convert to purchase
-    },
-    averageSpend: {
-      type: DataTypes.FLOAT,
-      allowNull: true, // Average spend for this item
-    },
-    abTestGroup: {
-      type: DataTypes.STRING, // 'A' or 'B' for A/B testing groups
-      allowNull: true,
-    },
-    timestamp: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class MenuAnalytics extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+MenuAnalytics.attributes = attributes = {
+  menuId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Menus', key: 'id' }
+  },
+  locationId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Locations', key: 'id' }
+  },
+  date: {
+    type: DataTypes.DATEONLY,
+    allowNull: false
+  },
+  views: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  orders: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  revenue: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    defaultValue: 0
+  },
+  averageOrderValue: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    defaultValue: 0
+  }
+};
+
+module.exports = (sequelize) => {
+  MenuAnalytics.init(MenuAnalytics.attributes, {
+    sequelize,
+    modelName: 'MenuAnalytics',
+    tableName: 'menuanalyticss', // Adjust this if needed
   });
-
-  MenuAnalytics.associate = (models) => {
-    MenuAnalytics.belongsTo(models.MenuItem, { foreignKey: 'menuItemId', onDelete: 'CASCADE' });
-  };
-
-  return MenuAnalytics;
+  return MenuAnalytics
 };

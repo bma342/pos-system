@@ -1,58 +1,72 @@
-const db = require('../models');
+const walletService = require('../services/walletService');
+const { AppError } = require('../utils/errorHandler');
+const logger = require('../utils/logger');
 
-const getWalletBalance = async (req, res) => {
+exports.getWalletBalance = async (req, res, next) => {
   try {
-    const wallet = await db.Wallet.findOne({
-      where: { guestId: req.user.id, clientId: req.user.clientId }, // Ensure client isolation
-    });
-
-    if (!wallet) return res.status(404).json({ message: 'Wallet not found' });
-
-    res.status(200).json({ balance: wallet.balance });
+    const { userId } = req.user;
+    const balance = await walletService.getWalletBalance(userId);
+    res.status(200).json({ balance });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to retrieve wallet balance', error });
+    logger.error('Error fetching wallet balance:', error);
+    next(new AppError('Failed to fetch wallet balance', 500));
   }
 };
 
-const addDiscountToWallet = async (req, res) => {
+exports.addFunds = async (req, res, next) => {
   try {
-    const { discountId } = req.body;
-
-    const discount = await db.Discount.findOne({
-      where: { id: discountId, clientId: req.user.clientId }, // Ensure discount belongs to the correct client
-    });
-
-    if (!discount) return res.status(404).json({ message: 'Discount not found' });
-
-    const wallet = await db.Wallet.findOne({
-      where: { guestId: req.user.id, clientId: req.user.clientId }, // Ensure wallet belongs to the correct client
-    });
-
-    if (!wallet) return res.status(404).json({ message: 'Wallet not found' });
-
-    await wallet.addDiscount(discount);
-    res.status(200).json({ message: 'Discount added to wallet' });
+    const { userId } = req.user;
+    const { amount } = req.body;
+    const updatedBalance = await walletService.addFunds(userId, amount);
+    res.status(200).json({ message: 'Funds added successfully', balance: updatedBalance });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to add discount to wallet', error });
+    logger.error('Error adding funds to wallet:', error);
+    next(new AppError('Failed to add funds to wallet', 500));
   }
 };
 
-const getWalletDiscounts = async (req, res) => {
+exports.withdrawFunds = async (req, res, next) => {
   try {
-    const wallet = await db.Wallet.findOne({
-      where: { guestId: req.user.id, clientId: req.user.clientId }, // Ensure wallet belongs to the correct client
-      include: [{
-        model: db.Discount,
-        where: { clientId: req.user.clientId }, // Ensure discounts belong to the correct client
-      }],
-    });
-
-    if (!wallet) return res.status(404).json({ message: 'Wallet not found' });
-
-    res.status(200).json(wallet.Discounts);
+    const { userId } = req.user;
+    const { amount } = req.body;
+    const updatedBalance = await walletService.withdrawFunds(userId, amount);
+    res.status(200).json({ message: 'Funds withdrawn successfully', balance: updatedBalance });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to retrieve wallet discounts', error });
+    logger.error('Error withdrawing funds from wallet:', error);
+    next(new AppError('Failed to withdraw funds from wallet', 500));
   }
 };
 
-module.exports = { getWalletBalance, addDiscountToWallet, getWalletDiscounts };
+exports.getTransactionHistory = async (req, res, next) => {
+  try {
+    const { userId } = req.user;
+    const transactions = await walletService.getTransactionHistory(userId);
+    res.status(200).json(transactions);
+  } catch (error) {
+    logger.error('Error fetching transaction history:', error);
+    next(new AppError('Failed to fetch transaction history', 500));
+  }
+};
+
+exports.transferFunds = async (req, res, next) => {
+  try {
+    const { userId } = req.user;
+    const { recipientId, amount } = req.body;
+    const result = await walletService.transferFunds(userId, recipientId, amount);
+    res.status(200).json(result);
+  } catch (error) {
+    logger.error('Error transferring funds:', error);
+    next(new AppError('Failed to transfer funds', 500));
+  }
+};
+
+exports.getWalletDetails = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const walletDetails = await walletService.getWalletDetails(userId);
+    res.status(200).json(walletDetails);
+  } catch (error) {
+    logger.error('Error fetching wallet details:', error);
+    next(new AppError('Failed to fetch wallet details', 500));
+  }
+};

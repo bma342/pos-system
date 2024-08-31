@@ -1,68 +1,77 @@
 const Refund = require('../models/Refund');
+const { AppError } = require('../utils/errorHandler');
+const logger = require('../utils/logger');
 
-// Get all refunds
-exports.getAllRefunds = async (req, res) => {
-    try {
-        const refunds = await Refund.findAll();
-        res.json(refunds);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching refunds', error });
-    }
-};
-
-// Create a new refund
-exports.createRefund = async (req, res) => {
+// Process a refund
+exports.processRefund = async (req, res, next) => {
     try {
         const newRefund = await Refund.create(req.body);
+        logger.info(`Refund processed successfully: ${newRefund.id}`);
         res.status(201).json(newRefund);
     } catch (error) {
-        res.status(400).json({ message: 'Error creating refund', error });
+        logger.error('Error processing refund:', error);
+        next(new AppError('Failed to process refund', 500));
     }
 };
 
 // Get a single refund by ID
-exports.getRefundById = async (req, res) => {
+exports.getRefundById = async (req, res, next) => {
     try {
         const refund = await Refund.findByPk(req.params.id);
-        if (refund) {
-            res.json(refund);
-        } else {
-            res.status(404).json({ message: 'Refund not found' });
+        if (!refund) {
+            return next(new AppError('Refund not found', 404));
         }
+        res.status(200).json(refund);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching refund', error });
+        logger.error(`Error fetching refund ${req.params.id}:`, error);
+        next(error);
     }
 };
 
-// Update a refund by ID
-exports.updateRefund = async (req, res) => {
+// Get all refunds for a specific order
+exports.getRefundsByOrder = async (req, res, next) => {
     try {
-        const [updated] = await Refund.update(req.body, {
-            where: { id: req.params.id }
-        });
-        if (updated) {
-            const updatedRefund = await Refund.findByPk(req.params.id);
-            res.json(updatedRefund);
-        } else {
-            res.status(404).json({ message: 'Refund not found' });
-        }
+        const refunds = await Refund.findAll({ where: { orderId: req.params.orderId } });
+        res.status(200).json(refunds);
     } catch (error) {
-        res.status(400).json({ message: 'Error updating refund', error });
+        logger.error(`Error fetching refunds for order ${req.params.orderId}:`, error);
+        next(error);
     }
 };
 
-// Delete a refund by ID
-exports.deleteRefund = async (req, res) => {
+// Update the status of a refund
+exports.updateRefundStatus = async (req, res, next) => {
     try {
-        const deleted = await Refund.destroy({
-            where: { id: req.params.id }
-        });
-        if (deleted) {
-            res.status(204).send();
-        } else {
-            res.status(404).json({ message: 'Refund not found' });
+        const [updated] = await Refund.update(
+            { status: req.body.status },
+            { where: { id: req.params.id } }
+        );
+        if (!updated) {
+            return next(new AppError('Refund not found', 404));
         }
+        const updatedRefund = await Refund.findByPk(req.params.id);
+        res.status(200).json(updatedRefund);
     } catch (error) {
-        res.status(500).json({ message: 'Error deleting refund', error });
+        logger.error(`Error updating refund status ${req.params.id}:`, error);
+        next(error);
+    }
+};
+
+// Cancel a refund
+exports.cancelRefund = async (req, res, next) => {
+    try {
+        const refund = await Refund.findByPk(req.params.id);
+        if (!refund) {
+            return next(new AppError('Refund not found', 404));
+        }
+        if (refund.status === 'cancelled') {
+            return next(new AppError('Refund is already cancelled', 400));
+        }
+        refund.status = 'cancelled';
+        await refund.save();
+        res.status(200).json(refund);
+    } catch (error) {
+        logger.error(`Error cancelling refund ${req.params.id}:`, error);
+        next(error);
     }
 };

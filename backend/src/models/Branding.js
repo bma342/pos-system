@@ -1,48 +1,45 @@
-module.exports = (sequelize, DataTypes) => {
-  const Branding = sequelize.define('Branding', {
-    primaryColor: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    secondaryColor: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    tertiaryColor: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    fontColor: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    secondaryFontColor: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    fontFamily: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      defaultValue: 'Arial',
-    },
-    buttonShape: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      defaultValue: 'rounded', // Options: 'rounded', 'sharp'
-    },
-    logoUrl: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    backgroundUrl: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    faviconUrl: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-  });
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
 
-  return Branding;
+class Branding extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+Branding.attributes = attributes = {
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Clients', key: 'id' }
+  },
+  logoUrl: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  primaryColor: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  secondaryColor: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  fontFamily: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  customCss: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  }
+};
+
+module.exports = (sequelize) => {
+  Branding.init(Branding.attributes, {
+    sequelize,
+    modelName: 'Branding',
+    tableName: 'brandings', // Adjust this if needed
+  });
+  return Branding
 };

@@ -1,14 +1,27 @@
 const express = require('express');
+const { body } = require('express-validator');
+const ABTestController = require('../controllers/abTestController');
+const { authenticate } = require('../middleware/auth');
+const authorize = require('../middleware/authorize');
+
 const router = express.Router();
-const abTestController = require('../controllers/abTestController');
-const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 
-router.use(authenticateToken);
+router.use(authenticate);
 
-router.get('/', authorizeRoles(1, 2), abTestController.getAllABTests);
-router.post('/', authorizeRoles(1, 2), abTestController.createABTest);
-router.get('/:id', authorizeRoles(1, 2), abTestController.getABTest);
-router.put('/:id', authorizeRoles(1, 2), abTestController.updateABTest);
-router.delete('/:id', authorizeRoles(1, 2), abTestController.deleteABTest);
+router.post('/', 
+  authorize(['admin']),
+  [
+    body('name').notEmpty().withMessage('Name is required'),
+    // Add other validation rules as needed
+  ],
+  ABTestController.createABTest
+);
+
+router.get('/:id', authorize(['admin']), ABTestController.getABTest);
+router.put('/:id', authorize(['admin']), ABTestController.updateABTest);
+router.delete('/:id', authorize(['admin']), ABTestController.deleteABTest);
+router.get('/:id/results', authorize(['admin']), ABTestController.getABTestResults);
+router.post('/:id/start', authorize(['admin']), ABTestController.startABTest);
+router.post('/:id/stop', authorize(['admin']), ABTestController.stopABTest);
 
 module.exports = router;

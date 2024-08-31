@@ -1,24 +1,55 @@
-const User = require('../models/User');
-const { createAuditLog } = require('../services/auditLogService');
+const userService = require('../services/userService');
 
-exports.getAllUsers = async (req, res) => {
+const getAllUsers = async (req, res, next) => {
   try {
-    const users = await User.findAll();
+    const users = await userService.getAllUsers();
     res.json(users);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching users', error });
+    next(error);
   }
 };
 
-exports.updateUser = async (req, res) => {
+const getUserById = async (req, res, next) => {
   try {
-    const user = await User.findByPk(req.params.id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    await user.update(req.body);
-    await createAuditLog('User Updated', { userId: user.id }, req.user.id);
+    const user = await userService.getUserById(req.params.id);
     res.json(user);
   } catch (error) {
-    res.status(500).json({ message: 'Error updating user', error });
+    next(error);
   }
 };
+
+const createUser = async (req, res, next) => {
+  try {
+    const newUser = await userService.createUser(req.body);
+    res.status(201).json(newUser);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateUser = async (req, res, next) => {
+  try {
+    const updatedUser = await userService.updateUser(req.params.id, req.body);
+    res.json(updatedUser);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteUser = async (req, res, next) => {
+  try {
+    await userService.deleteUser(req.params.id);
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  getAllUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser
+};
+

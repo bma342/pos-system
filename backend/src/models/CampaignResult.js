@@ -1,40 +1,37 @@
-module.exports = (sequelize, DataTypes) => {
-  const CampaignResult = sequelize.define('CampaignResult', {
-    campaignId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Campaigns',
-        key: 'id'
-      }
-    },
-    impressions: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0
-    },
-    clicks: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0
-    },
-    conversions: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0
-    },
-    revenue: {
-      type: DataTypes.DECIMAL(10, 2),
-      defaultValue: 0
-    },
-    date: {
-      type: DataTypes.DATEONLY,
-      allowNull: false
-    }
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class CampaignResult extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+CampaignResult.attributes = attributes = {
+  campaignId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Campaigns', key: 'id' }
+  },
+  metric: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  value: {
+    type: DataTypes.FLOAT,
+    allowNull: false
+  },
+  date: {
+    type: DataTypes.DATE,
+    allowNull: false
+  }
+};
+
+module.exports = (sequelize) => {
+  CampaignResult.init(CampaignResult.attributes, {
+    sequelize,
+    modelName: 'CampaignResult',
+    tableName: 'campaignresults', // Adjust this if needed
   });
-
-  CampaignResult.associate = (models) => {
-    if (models.Campaign) {
-      CampaignResult.belongsTo(models.Campaign, { foreignKey: 'campaignId' });
-    }
-  };
-
-  return CampaignResult;
+  return CampaignResult
 };

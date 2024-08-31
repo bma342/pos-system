@@ -1,31 +1,27 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Card, CardContent, Typography, Button } from '@mui/material';
+import { Location } from '../types/locationTypes';
 
-interface LocationProps {
-  location: {
-    id: number;
-    name: string;
-    address: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    phoneNumber: string;
-    email: string;
-  };
+interface LocationCardProps {
+  location: Location;
+  onSelect: (location: Location) => void;
 }
 
-const LocationCard: React.FC<LocationProps> = ({ location }) => {
+const LocationCard: React.FC<LocationCardProps> = ({ location, onSelect }) => {
   return (
-    <div className="location-card">
-      <h2>{location.name}</h2>
-      <p>{location.address}</p>
-      <p>{`${location.city}, ${location.state} ${location.zipCode}`}</p>
-      <p>Phone: {location.phoneNumber}</p>
-      <p>Email: {location.email}</p>
-      <Link to={`/client/${location.id}/order`}>Place Order</Link>
-      <Link to={`/client/${location.id}/loyalty`}>Loyalty Program</Link>
-    </div>
+    <Card>
+      <CardContent>
+        <Typography variant="h5" component="div">
+          {location.name}
+        </Typography>
+        <Typography color="text.secondary">{location.address}</Typography>
+        <Typography variant="body2">{location.phoneNumber}</Typography>
+        <Button onClick={() => onSelect(location)}>Select</Button>
+      </CardContent>
+    </Card>
   );
 };
+
+LocationCard.displayName = 'LocationCard';
 
 export default LocationCard;

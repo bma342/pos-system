@@ -2,109 +2,120 @@ const Role = require('../models/Role');
 const Permission = require('../models/Permission');
 const RoleTemplate = require('../models/RoleTemplate');
 const { createAuditLog } = require('../services/auditLogService');
+const roleService = require('../services/roleService');
+const { AppError } = require('../utils/errorHandler');
+const logger = require('../utils/logger');
 
-exports.createRole = async (req, res) => {
+exports.createRole = async (req, res, next) => {
   try {
-    const role = await Role.create(req.body);
-    await createAuditLog('Role Created', { role: role.name }, req.user.id);
+    const role = await roleService.createRole(req.body);
     res.status(201).json(role);
   } catch (error) {
-    res.status(500).json({ message: 'Error creating role', error });
+    logger.error('Error creating role:', error);
+    next(new AppError('Failed to create role', 500));
   }
 };
 
-exports.assignPermission = async (req, res) => {
+exports.assignPermission = async (req, res, next) => {
   try {
-    const { roleId, permissionId } = req.body;
-    const role = await Role.findByPk(roleId);
-    const permission = await Permission.findByPk(permissionId);
-
-    if (!role || !permission) {
-      return res.status(404).json({ message: 'Role or Permission not found' });
-    }
-
-    await role.addPermission(permission);
-    await createAuditLog('Permission Assigned', { role: role.name, permission: permission.name }, req.user.id);
-    res.json({ message: 'Permission assigned to role successfully' });
+    await roleService.assignPermission(req.body.roleId, req.body.permissionId);
+    res.status(200).json({ message: 'Permission assigned successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Error assigning permission', error });
+    logger.error('Error assigning permission:', error);
+    next(error);
   }
 };
 
-exports.getAllRoles = async (req, res) => {
+exports.getAllRoles = async (req, res, next) => {
   try {
-    const roles = await Role.findAll({
-      include: [{ model: Permission }, { model: RoleTemplate }],
-    });
-    res.json(roles);
+    const roles = await roleService.getAllRoles();
+    res.status(200).json(roles);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching roles', error });
+    logger.error('Error fetching all roles:', error);
+    next(new AppError('Failed to fetch roles', 500));
   }
 };
 
-exports.getAllPermissions = async (req, res) => {
+exports.getAllPermissions = async (req, res, next) => {
   try {
-    const permissions = await Permission.findAll();
-    res.json(permissions);
+    const permissions = await roleService.getAllPermissions();
+    res.status(200).json(permissions);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching permissions', error });
+    logger.error('Error fetching all permissions:', error);
+    next(new AppError('Failed to fetch permissions', 500));
   }
 };
 
 // Update role template assignments
-exports.assignRoleTemplate = async (req, res) => {
+exports.assignRoleTemplate = async (req, res, next) => {
   try {
-    const { roleId, roleTemplateId } = req.body;
-    const role = await Role.findByPk(roleId);
-    const roleTemplate = await RoleTemplate.findByPk(roleTemplateId);
+    await roleService.assignRoleTemplate(req.body.roleId, req.body.roleTemplateId);
+    res.status(200).json({ message: 'Role template assigned successfully' });
+  } catch (error) {
+    logger.error('Error assigning role template:', error);
+    next(error);
+  }
+};
 
-    if (!role || !roleTemplate) {
-      return res.status(404).json({ message: 'Role or Role Template not found' });
+exports.getRoleById = async (req, res, next) => {
+  try {
+    const role = await roleService.getRoleById(req.params.id);
+    if (!role) {
+      return next(new AppError('Role not found', 404));
     }
-
-    await role.addRoleTemplate(roleTemplate);
-    await createAuditLog('Role Template Assigned', { role: role.name, roleTemplate: roleTemplate.name }, req.user.id);
-    res.json({ message: 'Role template assigned successfully' });
+    res.status(200).json(role);
   } catch (error) {
-    res.status(500).json({ message: 'Error assigning role template', error });
+    logger.error(`Error fetching role ${req.params.id}:`, error);
+    next(error);
   }
 };
 
-exports.getRoleById = async (req, res) => {
+exports.updateRole = async (req, res, next) => {
   try {
-    const role = await Role.findByPk(req.params.id, {
-      include: [{ model: Permission }, { model: RoleTemplate }],
-    });
-    if (!role) return res.status(404).json({ message: 'Role not found' });
-
-    res.json(role);
+    const updatedRole = await roleService.updateRole(req.params.id, req.body);
+    res.status(200).json(updatedRole);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching role', error });
+    logger.error(`Error updating role ${req.params.id}:`, error);
+    next(error);
   }
 };
 
-exports.updateRole = async (req, res) => {
+exports.deleteRole = async (req, res, next) => {
   try {
-    const role = await Role.findByPk(req.params.id);
-    if (!role) return res.status(404).json({ message: 'Role not found' });
-
-    await role.update(req.body);
-    await createAuditLog('Role Updated', { role: role.name }, req.user.id);
-    res.json(role);
+    await roleService.deleteRole(req.params.id);
+    res.status(204).send();
   } catch (error) {
-    res.status(500).json({ message: 'Error updating role', error });
+    logger.error(`Error deleting role ${req.params.id}:`, error);
+    next(error);
   }
 };
 
-exports.deleteRole = async (req, res) => {
+exports.assignRole = async (req, res, next) => {
   try {
-    const role = await Role.findByPk(req.params.id);
-    if (!role) return res.status(404).json({ message: 'Role not found' });
-
-    await role.destroy();
-    await createAuditLog('Role Deleted', { role: role.name }, req.user.id);
-    res.json({ message: 'Role deleted successfully' });
+    await roleService.assignRole(req.body.userId, req.body.roleId);
+    res.status(200).json({ message: 'Role assigned successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting role', error });
+    logger.error('Error assigning role:', error);
+    next(error);
+  }
+};
+
+exports.removeRole = async (req, res, next) => {
+  try {
+    await roleService.removeRole(req.body.userId, req.body.roleId);
+    res.status(200).json({ message: 'Role removed successfully' });
+  } catch (error) {
+    logger.error('Error removing role:', error);
+    next(error);
+  }
+};
+
+exports.getUserRoles = async (req, res, next) => {
+  try {
+    const roles = await roleService.getUserRoles(req.params.userId);
+    res.status(200).json(roles);
+  } catch (error) {
+    logger.error(`Error fetching roles for user ${req.params.userId}:`, error);
+    next(error);
   }
 };

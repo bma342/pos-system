@@ -1,67 +1,61 @@
-const { Category } = require('../models');
+const categoryService = require('../services/categoryService');
+const { AppError } = require('../utils/errorHandler');
+const logger = require('../utils/logger');
 
-exports.getAllCategories = async (req, res) => {
+const getAllCategories = async (req, res, next) => {
   try {
-    const categories = await Category.findAll({ where: { clientId: req.user.clientId } });
-    res.json(categories);
+    const categories = await categoryService.getAllCategories(req.user.clientId);
+    res.status(200).json(categories);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching categories', error: error.message });
+    logger.error('Error fetching categories:', error);
+    next(new AppError('Error fetching categories', 500));
   }
 };
 
-exports.createCategory = async (req, res) => {
+const getCategoryById = async (req, res, next) => {
   try {
-    const newCategory = await Category.create({ ...req.body, clientId: req.user.clientId });
+    const category = await categoryService.getCategoryById(req.params.id, req.user.clientId);
+    res.status(200).json(category);
+  } catch (error) {
+    logger.error(`Error fetching category ${req.params.id}:`, error);
+    next(error);
+  }
+};
+
+const createCategory = async (req, res, next) => {
+  try {
+    const newCategory = await categoryService.createCategory(req.body, req.user.clientId);
     res.status(201).json(newCategory);
   } catch (error) {
-    res.status(400).json({ message: 'Error creating category', error: error.message });
+    logger.error('Error creating category:', error);
+    next(error);
   }
 };
 
-exports.getCategory = async (req, res) => {
+const updateCategory = async (req, res, next) => {
   try {
-    const category = await Category.findOne({ 
-      where: { id: req.params.id, clientId: req.user.clientId }
-    });
-    if (category) {
-      res.json(category);
-    } else {
-      res.status(404).json({ message: 'Category not found' });
-    }
+    const updatedCategory = await categoryService.updateCategory(req.params.id, req.body, req.user.clientId);
+    res.status(200).json(updatedCategory);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching category', error: error.message });
+    logger.error(`Error updating category ${req.params.id}:`, error);
+    next(error);
   }
 };
 
-exports.updateCategory = async (req, res) => {
+const deleteCategory = async (req, res, next) => {
   try {
-    const [updated] = await Category.update(req.body, {
-      where: { id: req.params.id, clientId: req.user.clientId }
-    });
-    if (updated) {
-      const updatedCategory = await Category.findOne({ 
-        where: { id: req.params.id, clientId: req.user.clientId }
-      });
-      res.json(updatedCategory);
-    } else {
-      res.status(404).json({ message: 'Category not found' });
-    }
+    await categoryService.deleteCategory(req.params.id, req.user.clientId);
+    res.status(204).send();
   } catch (error) {
-    res.status(400).json({ message: 'Error updating category', error: error.message });
+    logger.error(`Error deleting category ${req.params.id}:`, error);
+    next(error);
   }
 };
 
-exports.deleteCategory = async (req, res) => {
-  try {
-    const deleted = await Category.destroy({
-      where: { id: req.params.id, clientId: req.user.clientId }
-    });
-    if (deleted) {
-      res.status(204).send();
-    } else {
-      res.status(404).json({ message: 'Category not found' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: 'Error deleting category', error: error.message });
-  }
+module.exports = {
+  getAllCategories,
+  getCategoryById,
+  createCategory,
+  updateCategory,
+  deleteCategory
 };

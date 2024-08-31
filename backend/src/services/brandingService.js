@@ -1,45 +1,67 @@
-const BrandingProfile = require('../models/BrandingProfile');
+const { BrandingProfile } = require('../models');
+const { AppError } = require('../utils/errorHandler');
+const logger = require('../utils/logger');
 
-class BrandingService {
-  async getBrandingProfiles(clientId) {
-    try {
-      return await BrandingProfile.findAll({ where: { clientId } });
-    } catch (error) {
-      throw new Error('Error fetching branding profiles: ' + error.message);
-    }
+const getBrandingProfiles = async (clientId) => {
+  if (!clientId) {
+    throw new AppError('Client ID is required', 400);
   }
+  return await BrandingProfile.findAll({ where: { clientId } });
+};
 
-  async saveBrandingProfile(profileData) {
-    try {
-      const { id, clientId, name, colors, logo } = profileData;
-      let profile;
-
-      if (id) {
-        profile = await BrandingProfile.findByPk(id);
-        if (profile) {
-          return await profile.update({ name, colors, logo });
-        }
-      } else {
-        return await BrandingProfile.create({ clientId, name, colors, logo });
-      }
-    } catch (error) {
-      throw new Error('Error saving branding profile: ' + error.message);
-    }
+const getBrandingProfileById = async (id) => {
+  if (!id) {
+    throw new AppError('Profile ID is required', 400);
   }
-
-  async scheduleBrandingProfile(profileId, scheduleData) {
-    try {
-      const profile = await BrandingProfile.findByPk(profileId);
-      if (!profile) {
-        throw new Error('Branding profile not found');
-      }
-
-      profile.schedule = scheduleData;
-      return await profile.save();
-    } catch (error) {
-      throw new Error('Error scheduling branding profile: ' + error.message);
-    }
+  const profile = await BrandingProfile.findByPk(id);
+  if (!profile) {
+    throw new AppError('Branding profile not found', 404);
   }
-}
+  return profile;
+};
 
-module.exports = new BrandingService();
+const createBrandingProfile = async (profileData) => {
+  if (!profileData || !profileData.clientId) {
+    throw new AppError('Invalid profile data', 400);
+  }
+  try {
+    return await BrandingProfile.create(profileData);
+  } catch (error) {
+    logger.error('Error creating branding profile:', error);
+    throw new AppError('Failed to create branding profile', 500);
+  }
+};
+
+const updateBrandingProfile = async (id, profileData) => {
+  if (!id || !profileData) {
+    throw new AppError('Invalid update data', 400);
+  }
+  const profile = await getBrandingProfileById(id);
+  try {
+    return await profile.update(profileData);
+  } catch (error) {
+    logger.error(`Error updating branding profile ${id}:`, error);
+    throw new AppError('Failed to update branding profile', 500);
+  }
+};
+
+const deleteBrandingProfile = async (id) => {
+  if (!id) {
+    throw new AppError('Profile ID is required', 400);
+  }
+  const profile = await getBrandingProfileById(id);
+  try {
+    await profile.destroy();
+  } catch (error) {
+    logger.error(`Error deleting branding profile ${id}:`, error);
+    throw new AppError('Failed to delete branding profile', 500);
+  }
+};
+
+module.exports = {
+  getBrandingProfiles,
+  getBrandingProfileById,
+  createBrandingProfile,
+  updateBrandingProfile,
+  deleteBrandingProfile
+};

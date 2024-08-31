@@ -1,47 +1,36 @@
-'use strict';
-const { Model } = require('sequelize');
+const BaseModel = require('./BaseModel');
 
-module.exports = (sequelize, DataTypes) => {
-  class RoleTemplate extends Model {
-    static associate(models) {
-      RoleTemplate.belongsToMany(models.Role, {
-        through: models.RoleTemplateAssignments,
-        foreignKey: 'roleTemplateId',
-        otherKey: 'roleId',
-        as: 'AssignedRoles',
-      });
-      RoleTemplate.belongsTo(models.Client, { 
-        foreignKey: 'clientId', 
-        allowNull: true,
-        as: 'Client',
-      });
-    }
+class RoleTemplate extends BaseModel {
+  static associate(models) {
+    this.belongsToMany(models.Role, {
+      through: models.RoleTemplateAssignments, // Make sure this model exists
+      foreignKey: 'roleTemplateId',
+      otherKey: 'roleId',
+      as: 'AssignedRoles'
+    });
   }
 
-  RoleTemplate.init({
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    description: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    isEditable: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
-    },
-    isPredefined: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-  }, {
-    sequelize,
-    modelName: 'RoleTemplate',
-    tableName: 'RoleTemplates',
-    timestamps: true,
-  });
+  static modelAttributes(DataTypes) {
+    return {
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      description: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      isEditable: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+      },
+      isPredefined: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
+    };
+  }
+}
 
-  return RoleTemplate;
-};
+module.exports = RoleTemplate;

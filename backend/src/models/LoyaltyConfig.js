@@ -1,42 +1,47 @@
-module.exports = (sequelize, DataTypes) => {
-  const LoyaltyConfig = sequelize.define('LoyaltyConfig', {
-    clientId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Clients',
-        key: 'id',
-      },
-    },
-    tierName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    tierThreshold: {
-      type: DataTypes.INTEGER,
-      allowNull: false, // Points required to reach this tier
-    },
-    pointsPerDollar: {
-      type: DataTypes.FLOAT,
-      defaultValue: 1.0, // Points earned per dollar spent
-    },
-    reward: {
-      type: DataTypes.JSONB, // Configurable rewards, e.g., { discount: 10, freeItem: "Smoothie" }
-      allowNull: true,
-    },
-    brandablePointsName: {
-      type: DataTypes.STRING,
-      defaultValue: 'Points',
-    },
-    doublePointsDays: {
-      type: DataTypes.JSONB, // Example: { start: "2024-09-01", end: "2024-09-07", locations: ["Store1", "Store2"] }
-      allowNull: true,
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class LoyaltyConfig extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+LoyaltyConfig.attributes = attributes = {
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Clients', key: 'id' }
+  },
+  pointsPerDollar: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+    defaultValue: 1
+  },
+  pointsExpirationMonths: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  tierSystem: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  bonusRules: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  }
+};
+
+module.exports = (sequelize) => {
+  LoyaltyConfig.init(LoyaltyConfig.attributes, {
+    sequelize,
+    modelName: 'LoyaltyConfig',
+    tableName: 'loyaltyconfigs', // Adjust this if needed
   });
-
-  LoyaltyConfig.associate = (models) => {
-    LoyaltyConfig.belongsTo(models.Client, { foreignKey: 'clientId' });
-  };
-
-  return LoyaltyConfig;
+  return LoyaltyConfig
 };

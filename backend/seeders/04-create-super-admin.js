@@ -3,7 +3,7 @@
 const bcrypt = require('bcrypt');
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
+  up: async (queryInterface) => {
     const transaction = await queryInterface.sequelize.transaction();
 
     try {
@@ -63,7 +63,7 @@ module.exports = {
     }
   },
 
-  down: async (queryInterface, Sequelize) => {
+  down: async (queryInterface) => {
     const transaction = await queryInterface.sequelize.transaction();
 
     try {

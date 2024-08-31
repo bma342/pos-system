@@ -1,33 +1,21 @@
-module.exports = (sequelize, DataTypes) => {
-  const ClientProfile = sequelize.define('ClientProfile', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    branding: {
-      type: DataTypes.JSONB, // Stores branding information like colors, fonts, logos, etc.
-      allowNull: true,
-    },
-    contactEmail: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    contactPhone: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    website: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-  });
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
 
-  ClientProfile.associate = (models) => {
-    ClientProfile.hasMany(models.Location, { foreignKey: 'clientId' });
-    ClientProfile.hasMany(models.Menu, { foreignKey: 'clientId' });
-    ClientProfile.hasMany(models.User, { foreignKey: 'clientId' });
-  };
+class ClientProfile extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
 
-  return ClientProfile;
+ClientProfile.attributes = {
+  // Define attributes here
 };
 
+module.exports = (sequelize) => {
+  ClientProfile.init(ClientProfile.attributes, {
+    sequelize,
+    modelName: 'ClientProfile',
+    tableName: 'clientprofiles', // Adjust this if needed
+  });
+  return ClientProfile
+};

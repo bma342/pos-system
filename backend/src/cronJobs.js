@@ -1,5 +1,5 @@
 const cron = require('node-cron');
-const CateringService = require('./services/CateringService');
+const CateringService = require('./services/cateringService');
 const logger = require('./utils/logger');
 
 // Schedule guest orders based on their scheduled time

@@ -1,69 +1,60 @@
-'use strict';
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
 
-module.exports = (sequelize, DataTypes) => {
-  const PosIntegrationSettings = sequelize.define('PosIntegrationSettings', {
-    providerName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    apiUrl: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    apiVersion: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      defaultValue: 'v1',
-    },
-    clientId: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    clientSecret: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    requestHeaders: {
-      type: DataTypes.JSONB,
-      allowNull: true,
-    },
-    requestMethod: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: 'POST',
-    },
-    authType: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    endpointMappings: {
-      type: DataTypes.JSONB,
-      allowNull: true,
-    },
-    syncFrequency: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      defaultValue: 'daily',
-    },
-    errorHandling: {
-      type: DataTypes.JSONB,
-      allowNull: true,
-    },
-    isActive: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
-    },
-  }, {
-    tableName: 'PosIntegrationSettings'
+class PosIntegrationSettings extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+PosIntegrationSettings.attributes = attributes = {
+  posIntegrationId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'PosIntegrations', key: 'id' }
+  },
+  syncFrequency: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 60, // in minutes
+    comment: 'How often to sync with POS system in minutes'
+  },
+  autoSync: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  syncItems: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  syncCategories: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  syncModifiers: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  syncOrders: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  customSettings: {
+    type: DataTypes.JSON,
+    allowNull: true
+  }
+};
+
+module.exports = (sequelize) => {
+  PosIntegrationSettings.init(PosIntegrationSettings.attributes, {
+    sequelize,
+    modelName: 'PosIntegrationSettings',
+    tableName: 'posintegrationsettingss', // Adjust this if needed
   });
-
-  PosIntegrationSettings.associate = function(models) {
-    PosIntegrationSettings.hasMany(models.CorePOSProfiles, {
-      foreignKey: 'integrationSettingsId',
-      as: 'coreProfiles'
-    });
-  };
-
-  return PosIntegrationSettings;
+  return PosIntegrationSettings
 };

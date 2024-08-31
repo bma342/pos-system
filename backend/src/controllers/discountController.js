@@ -1,51 +1,101 @@
-const db = require('../models');
-const logger = require('../services/logger');
-const { authorizeRoles } = require('../middleware/auth');
+const discountService = require('../services/discountService');
+const { AppError } = require('../utils/errorHandler');
+const logger = require('../utils/logger');
 
-const createDiscount = [
-  authorizeRoles('Admin', 'Manager'), // Ensure only Admins or Managers can create discounts
-  async (req, res) => {
-    try {
-      const { name, type, value, conditions, locationId, isGlobal, maxUsesPerGuest } = req.body;
-
-      // Data validation checks
-      if (!name || !type || !value) {
-        return res.status(422).json({ message: 'Name, type, and value are required fields.' });
-      }
-
-      const discount = await db.Discount.create({
-        name,
-        type,
-        value,
-        conditions,
-        locationId,
-        isGlobal,
-        maxUsesPerGuest,
-        status: 'active',
-      });
-
-      logger.info(`Discount ${discount.name} created by User ${req.user.id} at IP ${req.ip}`);
-      res.status(201).json(discount);
-    } catch (error) {
-      logger.error(`Error creating discount: ${error.message}`, { userId: req.user.id, ip: req.ip });
-      res.status(500).json({ message: 'Failed to create discount', error });
-    }
+const getAllDiscounts = async (req, res, next) => {
+  try {
+    const discounts = await discountService.getAllDiscounts(req.user.clientId);
+    res.status(200).json(discounts);
+  } catch (error) {
+    logger.error('Error fetching discounts:', error);
+    next(new AppError('Error fetching discounts', 500));
   }
-];
+};
 
-const getDiscountsByLocation = [
-  authorizeRoles('Admin', 'Manager', 'User'), // Allow Admins, Managers, and Users to view discounts
-  async (req, res) => {
-    try {
-      const { locationId } = req.params;
-      const discounts = await db.Discount.findAll({ where: { locationId } });
-      logger.info(`Discounts retrieved by User ${req.user.id} for Location ${locationId}`);
-      res.status(200).json(discounts);
-    } catch (error) {
-      logger.error(`Error retrieving discounts for Location ${req.params.locationId}: ${error.message}`, { userId: req.user.id, ip: req.ip });
-      res.status(500).json({ message: 'Failed to retrieve discounts', error });
+const getDiscountById = async (req, res, next) => {
+  try {
+    const discount = await discountService.getDiscountById(req.params.id, req.user.clientId);
+    if (!discount) {
+      return next(new AppError('Discount not found', 404));
     }
+    res.status(200).json(discount);
+  } catch (error) {
+    logger.error(`Error fetching discount ${req.params.id}:`, error);
+    next(error);
   }
-];
+};
 
-module.exports = { createDiscount, getDiscountsByLocation };
+const createDiscount = async (req, res, next) => {
+  try {
+    const { name, type, value, conditions, locationId, isGlobal, maxUsesPerGuest } = req.body;
+
+    if (!name || !type || !value) {
+      return next(new AppError('Name, type, and value are required fields.', 422));
+    }
+
+    const newDiscount = await discountService.createDiscount({
+      name,
+      type,
+      value,
+      conditions,
+      locationId,
+      isGlobal,
+      maxUsesPerGuest,
+      status: 'active',
+      clientId: req.user.clientId
+    });
+
+    logger.info(`Discount ${newDiscount.name} created by User ${req.user.id} at IP ${req.ip}`);
+    res.status(201).json(newDiscount);
+  } catch (error) {
+    logger.error(`Error creating discount: ${error.message}`, { userId: req.user.id, ip: req.ip });
+    next(new AppError('Failed to create discount', 500));
+  }
+};
+
+const updateDiscount = async (req, res, next) => {
+  try {
+    const updatedDiscount = await discountService.updateDiscount(req.params.id, req.body, req.user.clientId);
+    if (!updatedDiscount) {
+      return next(new AppError('Discount not found', 404));
+    }
+    res.status(200).json(updatedDiscount);
+  } catch (error) {
+    logger.error(`Error updating discount ${req.params.id}:`, error);
+    next(error);
+  }
+};
+
+const deleteDiscount = async (req, res, next) => {
+  try {
+    const result = await discountService.deleteDiscount(req.params.id, req.user.clientId);
+    if (!result) {
+      return next(new AppError('Discount not found', 404));
+    }
+    res.status(204).send();
+  } catch (error) {
+    logger.error(`Error deleting discount ${req.params.id}:`, error);
+    next(error);
+  }
+};
+
+const getDiscountsByLocation = async (req, res, next) => {
+  try {
+    const { locationId } = req.params;
+    const discounts = await discountService.getDiscountsByLocation(locationId, req.user.clientId);
+    logger.info(`Discounts retrieved by User ${req.user.id} for Location ${locationId}`);
+    res.status(200).json(discounts);
+  } catch (error) {
+    logger.error(`Error retrieving discounts for Location ${req.params.locationId}: ${error.message}`, { userId: req.user.id, ip: req.ip });
+    next(new AppError('Failed to retrieve discounts', 500));
+  }
+};
+
+module.exports = {
+  getAllDiscounts,
+  getDiscountById,
+  createDiscount,
+  updateDiscount,
+  deleteDiscount,
+  getDiscountsByLocation
+};

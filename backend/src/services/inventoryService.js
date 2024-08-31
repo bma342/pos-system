@@ -1,70 +1,46 @@
-const PosSyncService = require('./posSyncService');
-const { Inventory, OnlineInventory } = require('../models');
-const logger = require('../services/logger');
+const { InventoryItem } = require('../models');
+const { AppError } = require('../utils/errorHandler');
 
-class InventoryService {
-  // Sync POS inventory and apply the buffer to calculate online inventory
-  async syncAndCalculateOnlineInventory(locationId) {
-    try {
-      // Fetch POS inventory
-      const posInventory = await PosSyncService.syncInventory(locationId);
+const getInventoryItems = async () => {
+  return await InventoryItem.findAll();
+};
 
-      if (!posInventory.length) {
-        logger.warn(`No POS inventory found for location ID ${locationId}`);
-        return [];
-      }
-
-      // Fetch buffer from the database
-      const buffer = await OnlineInventory.findOne({ where: { locationId } });
-
-      // Calculate online inventory
-      const onlineInventory = posInventory.map((item) => ({
-        itemId: item.id,
-        onlineCount: Math.max(item.count - (buffer ? buffer.value : 0), 0),
-      }));
-
-      // Save online inventory to the database
-      await OnlineInventory.bulkCreate(onlineInventory, { updateOnDuplicate: ['onlineCount'] });
-
-      // Update the POS Inventory after calculating online inventory
-      await Inventory.bulkCreate(posInventory, { updateOnDuplicate: ['count'] });
-
-      logger.info(`Online inventory synced and calculated for location ID ${locationId}`);
-      return onlineInventory;
-    } catch (error) {
-      logger.error(`Error syncing and calculating online inventory for location ID ${locationId}: ${error.message}`);
-      throw error;
-    }
+const getInventoryItemById = async (id) => {
+  const item = await InventoryItem.findByPk(id);
+  if (!item) {
+    throw new AppError('Inventory item not found', 404);
   }
+  return item;
+};
 
-  // Get the online inventory for a location
-  async getOnlineInventory(locationId) {
-    try {
-      const inventory = await OnlineInventory.findAll({ where: { locationId } });
+const createInventoryItem = async (itemData) => {
+  return await InventoryItem.create(itemData);
+};
 
-      if (!inventory.length) {
-        logger.warn(`No online inventory found for location ID ${locationId}`);
-      } else {
-        logger.info(`Fetched online inventory for location ID ${locationId}`);
-      }
+const updateInventoryItem = async (id, itemData) => {
+  const item = await getInventoryItemById(id);
+  return await item.update(itemData);
+};
 
-      return inventory;
-    } catch (error) {
-      logger.error(`Error fetching online inventory for location ID ${locationId}: ${error.message}`);
-      throw error;
-    }
+const deleteInventoryItem = async (id) => {
+  const item = await getInventoryItemById(id);
+  await item.destroy();
+};
+
+const updateInventoryQuantity = async (id, quantity) => {
+  const item = await getInventoryItemById(id);
+  item.quantity += quantity;
+  if (item.quantity < 0) {
+    throw new AppError('Insufficient inventory', 400);
   }
+  return await item.save();
+};
 
-  // Set the buffer for online inventory
-  async setOnlineInventoryBuffer(locationId, buffer) {
-    try {
-      await OnlineInventory.upsert({ locationId, value: buffer });
-      logger.info(`Set online inventory buffer for location ID ${locationId}`);
-    } catch (error) {
-      logger.error(`Error setting online inventory buffer for location ID ${locationId}: ${error.message}`);
-      throw error;
-    }
-  }
-}
-
-module.exports = new InventoryService();
+module.exports = {
+  getInventoryItems,
+  getInventoryItemById,
+  createInventoryItem,
+  updateInventoryItem,
+  deleteInventoryItem,
+  updateInventoryQuantity
+};

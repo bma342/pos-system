@@ -1,54 +1,55 @@
-module.exports = (sequelize, DataTypes) => {
-  const Report = sequelize.define('Report', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    description: {
-      type: DataTypes.STRING,
-    },
-    reportType: {
-      type: DataTypes.STRING, // E.g., 'sales', 'inventory', 'loyalty'
-      allowNull: false,
-    },
-    clientId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Clients',
-        key: 'id',
-      },
-    },
-    locationId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Locations',
-        key: 'id',
-      },
-    },
-    generatedData: {
-      type: DataTypes.JSONB,
-      allowNull: false, // Stores the actual report data securely
-    },
-    executiveViewSettings: {
-      type: DataTypes.JSONB, // Customizable executive dashboard settings
-      allowNull: true,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
-  });
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
 
-  Report.associate = (models) => {
-    Report.belongsTo(models.Client, { foreignKey: 'clientId' });
-    Report.belongsTo(models.Location, { foreignKey: 'locationId' });
-    Report.belongsTo(models.ProviderIntegration, { foreignKey: 'providerIntegrationId' });
-  };
+class Report extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
 
-  return Report;
+Report.attributes = attributes = {
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Clients', key: 'id' }
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  type: {
+    type: DataTypes.ENUM('sales', 'inventory', 'customer', 'financial', 'custom'),
+    allowNull: false
+  },
+  parameters: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  schedule: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  lastRunAt: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  createdBy: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Users', key: 'id' }
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  }
 };
 
+module.exports = (sequelize) => {
+  Report.init(Report.attributes, {
+    sequelize,
+    modelName: 'Report',
+    tableName: 'reports', // Adjust this if needed
+  });
+  return Report
+};

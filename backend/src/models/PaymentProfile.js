@@ -1,62 +1,55 @@
-module.exports = (sequelize, DataTypes) => {
-  const PaymentProfile = sequelize.define('PaymentProfile', {
-    locationId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Locations',
-        key: 'id',
-      },
-    },
-    provider: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    apiKey: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    secretKey: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    sandboxMode: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
-    },
-    currency: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: 'USD',
-    },
-    transactionFeePercentage: {
-      type: DataTypes.FLOAT,
-      allowNull: true, // Optional field to store the provider’s transaction fee
-      defaultValue: 0.0,
-    },
-    additionalConfig: {
-      type: DataTypes.JSONB, // Allows storing provider-specific additional configurations
-      allowNull: true,
-    },
-    webhookUrl: {
-      type: DataTypes.STRING, // Optional: URL to receive payment status updates
-      allowNull: true,
-    },
-    providerAccountId: {
-      type: DataTypes.STRING,
-      allowNull: true, // Optional: Provider-specific account ID
-    },
-    status: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: 'active', // Can be 'active', 'disabled', etc.
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class PaymentProfile extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+PaymentProfile.attributes = attributes = {
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Clients', key: 'id' }
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Users', key: 'id' }
+  },
+  paymentType: {
+    type: DataTypes.ENUM('credit_card', 'bank_account', 'paypal', 'other'),
+    allowNull: false
+  },
+  isDefault: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
+  },
+  lastFour: {
+    type: DataTypes.STRING(4),
+    allowNull: false
+  },
+  expirationDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  tokenizedData: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
+  billingAddress: {
+    type: DataTypes.JSON,
+    allowNull: true
+  }
+};
+
+module.exports = (sequelize) => {
+  PaymentProfile.init(PaymentProfile.attributes, {
+    sequelize,
+    modelName: 'PaymentProfile',
+    tableName: 'paymentprofiles', // Adjust this if needed
   });
-
-  PaymentProfile.associate = (models) => {
-    PaymentProfile.belongsTo(models.Location, { foreignKey: 'locationId' });
-    PaymentProfile.hasMany(models.Transaction, { foreignKey: 'paymentProfileId' }); // Association with transactions
-  };
-
-  return PaymentProfile;
+  return PaymentProfile
 };

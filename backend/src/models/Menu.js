@@ -1,69 +1,51 @@
-module.exports = (sequelize, DataTypes) => {
-  const Menu = sequelize.define('Menu', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    PosGUID: {
-      type: DataTypes.STRING, // Storing POS-specific GUID
-      allowNull: true,
-    },
-    isGlobal: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false, // Indicates if this menu is global across all locations
-    },
-    upliftPercentage: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
-      defaultValue: 0, // Optional uplift percentage for the menu
-    },
-    abTestGroup: {
-      type: DataTypes.STRING, // A/B testing group (e.g., 'A', 'B')
-      allowNull: true,
-    },
-    clientId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Clients',
-        key: 'id',
-      },
-    },
-    showReviews: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true, // Allows toggling reviews visibility
-    },
-    isMiniSiteEnabled: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false, // Indicates if this menu is part of a mini-site
-    },
-    miniSiteSettings: {
-      type: DataTypes.JSONB, // JSON field to store mini-site specific settings
-      allowNull: true,
-    },
-    isArchived: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false, // Indicates if this menu is archived
-    },
-  });
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
 
-  Menu.associate = (models) => {
-    Menu.belongsTo(models.Client, { foreignKey: 'clientId' });
-    Menu.hasMany(models.MenuGroup, { foreignKey: 'menuId', as: 'menuGroups' });
-    Menu.belongsToMany(models.Location, { through: 'LocationMenu', foreignKey: 'menuId', as: 'locations' });
+class Menu extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
 
-    // A/B testing association for analytics
-    Menu.hasMany(models.MenuItemAnalytics, { foreignKey: 'menuId' });
-
-    // Association for mini-site functionality
-    Menu.hasMany(models.MiniSite, { foreignKey: 'menuId' });
-  };
-
-  return Menu;
+Menu.attributes = attributes = {
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Clients', key: 'id' }
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  startDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  endDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  type: {
+    type: DataTypes.ENUM('regular', 'seasonal', 'special'),
+    allowNull: false,
+    defaultValue: 'regular'
+  }
 };
 
+module.exports = (sequelize) => {
+  Menu.init(Menu.attributes, {
+    sequelize,
+    modelName: 'Menu',
+    tableName: 'menus', // Adjust this if needed
+  });
+  return Menu
+};

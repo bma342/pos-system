@@ -1,30 +1,46 @@
-module.exports = (sequelize, DataTypes) => {
-  const RewardSchedule = sequelize.define('RewardSchedule', {
-    rewardType: {
-      type: DataTypes.STRING,
-      allowNull: false, // e.g., 'birthday', 'anniversary', 'monthly_item'
-    },
-    description: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    rewardConfig: {
-      type: DataTypes.JSONB,
-      allowNull: false, // e.g., { item: "Free Coffee", conditions: { ... } }
-    },
-    scheduleDate: {
-      type: DataTypes.DATEONLY, // e.g., for yearly rewards like birthdays or half-birthdays
-      allowNull: true,
-    },
-    recurringType: {
-      type: DataTypes.STRING, // 'yearly', 'monthly', 'weekly'
-      allowNull: true,
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class RewardSchedule extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+RewardSchedule.attributes = attributes = {
+  rewardId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Rewards', key: 'id' }
+  },
+  dayOfWeek: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validate: {
+      min: 0,
+      max: 6
+    }
+  },
+  startTime: {
+    type: DataTypes.TIME,
+    allowNull: false
+  },
+  endTime: {
+    type: DataTypes.TIME,
+    allowNull: false
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  }
+};
+
+module.exports = (sequelize) => {
+  RewardSchedule.init(RewardSchedule.attributes, {
+    sequelize,
+    modelName: 'RewardSchedule',
+    tableName: 'rewardschedules', // Adjust this if needed
   });
-
-  RewardSchedule.associate = (models) => {
-    RewardSchedule.belongsTo(models.Guest, { foreignKey: 'guestId' });
-  };
-
-  return RewardSchedule;
+  return RewardSchedule
 };

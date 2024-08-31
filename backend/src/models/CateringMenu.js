@@ -1,32 +1,45 @@
-module.exports = (sequelize, DataTypes) => {
-  const CateringMenu = sequelize.define('CateringMenu', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    clientId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Clients',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class CateringMenu extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+CateringMenu.attributes = attributes = {
+  cateringId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Caterings', key: 'id' }
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  startDate: {
+    type: DataTypes.DATE,
+    allowNull: false
+  },
+  endDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  }
+};
+
+module.exports = (sequelize) => {
+  CateringMenu.init(CateringMenu.attributes, {
+    sequelize,
+    modelName: 'CateringMenu',
+    tableName: 'cateringmenus', // Adjust this if needed
   });
-
-  CateringMenu.associate = (models) => {
-    CateringMenu.belongsTo(models.Client, { foreignKey: 'clientId', onDelete: 'CASCADE' });
-    CateringMenu.hasMany(models.CateringMenuItem, { foreignKey: 'menuId', onDelete: 'CASCADE' });
-    CateringMenu.belongsToMany(models.Location, {
-      through: 'CateringMenuLocations',
-      foreignKey: 'menuId',
-    });
-  };
-
-  return CateringMenu;
+  return CateringMenu
 };

@@ -1,26 +1,26 @@
 const express = require('express');
+const { authenticate } = require('../middleware/auth');
+const authorize = require('../middleware/authorize');
+const invoiceController = require('../controllers/invoiceController');
+
 const router = express.Router();
-const { authenticateToken, authorizeRoles } = require('../middleware/auth');
-const InvoiceService = require('../services/InvoiceService');
 
-// Generate an invoice for a house account or catering order
-router.post('/generate', authenticateToken, authorizeRoles(1, 2), async (req, res) => {
-  try {
-    const invoice = await InvoiceService.generateInvoice(req.body);
-    res.json(invoice);
-  } catch (error) {
-    res.status(500).json({ message: 'Error generating invoice', error });
-  }
-});
+// Apply authentication middleware to all routes
+router.use(authenticate);
 
-// Retrieve stored invoices
-router.get('/:id', authenticateToken, authorizeRoles(1, 2), async (req, res) => {
-  try {
-    const invoice = await InvoiceService.getInvoice(req.params.id);
-    res.json(invoice);
-  } catch (error) {
-    res.status(500).json({ message: 'Error retrieving invoice', error });
-  }
-});
+// Generate invoice
+router.post('/generate', authorize(['admin', 'manager']), invoiceController.generateInvoice);
+
+// Get invoice by ID
+router.get('/:id', authorize(['admin', 'manager']), invoiceController.getInvoiceById);
+
+// Get all invoices for a client
+router.get('/client/:clientId', authorize(['admin', 'manager']), invoiceController.getClientInvoices);
+
+// Update invoice
+router.put('/:id', authorize(['admin']), invoiceController.updateInvoice);
+
+// Delete invoice
+router.delete('/:id', authorize(['admin']), invoiceController.deleteInvoice);
 
 module.exports = router;

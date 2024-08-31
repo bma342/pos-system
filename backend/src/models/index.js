@@ -3,36 +3,63 @@
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
+const process = require('process');
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
-const config = require('../config/config.json')[env];
+const config = require(__dirname + '/../config/config.json')[env];
 const db = {};
 
-const sequelize = config.use_env_variable
-  ? new Sequelize(process.env[config.use_env_variable], config)
-  : new Sequelize(config.database, config.username, config.password, config);
+let sequelize;
+if (config.use_env_variable) {
+  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+} else {
+  sequelize = new Sequelize(config.database, config.username, config.password, config);
+}
 
+// Function to import a model
+const importModel = (file) => {
+  const model = require(path.join(__dirname, file));
+  if (typeof model.init === 'function') {
+    model.init(sequelize);
+    db[model.name] = model;
+    console.log(`Initialized model: ${model.name}`);
+  } else {
+    console.warn(`Skipped model: ${file} (not a Sequelize model or missing init method)`);
+  }
+};
+
+// Import all models
 fs.readdirSync(__dirname)
-  .filter(file => (
-    file.indexOf('.') !== 0 &&
-    file !== basename &&
-    file.slice(-3) === '.js' &&
-    !['checkModelExports.js', 'checkModels.js', 'Logger.js'].includes(file)
-  ))
-  .forEach(file => {
-    const model = require(path.join(__dirname, file));
-    if (typeof model === 'function') {
-      db[path.parse(file).name] = model(sequelize, Sequelize.DataTypes);
-    } else if (model.name && typeof model.init === 'function') {
-      db[model.name] = model.init(sequelize, Sequelize.DataTypes);
-    } else {
-      console.warn(`Warning: ${file} does not export a valid Sequelize model`);
-    }
-  });
+  .filter(file => {
+    return (
+      file.indexOf('.') !== 0 &&
+      file !== basename &&
+      file.slice(-3) === '.js' &&
+      file.indexOf('.test.js') === -1 &&
+      file !== 'BaseModel.js'
+    );
+  })
+  .forEach(importModel);
 
-Object.values(db)
-  .filter(model => typeof model.associate === 'function')
-  .forEach(model => model.associate(db));
+// Set up associations
+Object.values(db).forEach(model => {
+  if (typeof model.associate === 'function') {
+    model.associate(db);
+    console.log(`Associations set up for: ${model.name}`);
+  } else {
+    console.log(`No associations for: ${model.name}`);
+  }
+});
+
+// Handle connection errors
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log('Database connection has been established successfully.');
+  })
+  .catch(err => {
+    console.error('Unable to connect to the database:', err);
+  });
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

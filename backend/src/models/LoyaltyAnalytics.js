@@ -1,69 +1,49 @@
-module.exports = (sequelize, DataTypes) => {
-  const LoyaltyAnalytics = sequelize.define('LoyaltyAnalytics', {
-    loyaltyProgramId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'LoyaltyPrograms',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    clientId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Clients',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    totalPointsIssued: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-      allowNull: false,
-    },
-    totalPointsRedeemed: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-      allowNull: false,
-    },
-    totalRewardsIssued: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-      allowNull: false,
-    },
-    totalSpendFromRewards: {
-      type: DataTypes.FLOAT,
-      defaultValue: 0.0,
-      allowNull: false,
-    },
-    activeMembers: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-      allowNull: false,
-    },
-    churnRate: {
-      type: DataTypes.FLOAT,
-      allowNull: true, // Calculated field based on user activity
-    },
-    engagementScore: {
-      type: DataTypes.FLOAT,
-      allowNull: true, // Custom metric that factors in points earned, rewards claimed, and member activity
-    },
-    timestamp: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class LoyaltyAnalytics extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+LoyaltyAnalytics.attributes = attributes = {
+  loyaltyId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Loyalties', key: 'id' }
+  },
+  date: {
+    type: DataTypes.DATEONLY,
+    allowNull: false
+  },
+  totalPointsEarned: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  totalPointsRedeemed: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  activeUsers: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  newEnrollments: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  }
+};
+
+module.exports = (sequelize) => {
+  LoyaltyAnalytics.init(LoyaltyAnalytics.attributes, {
+    sequelize,
+    modelName: 'LoyaltyAnalytics',
+    tableName: 'loyaltyanalyticss', // Adjust this if needed
   });
-
-  LoyaltyAnalytics.associate = (models) => {
-    LoyaltyAnalytics.belongsTo(models.LoyaltyProgram, { foreignKey: 'loyaltyProgramId' });
-    LoyaltyAnalytics.belongsTo(models.Client, { foreignKey: 'clientId' });
-
-    // Optionally, link to audit logs
-    LoyaltyAnalytics.hasMany(models.AuditLog, { foreignKey: 'loyaltyAnalyticsId' });
-  };
-
-  return LoyaltyAnalytics;
+  return LoyaltyAnalytics
 };

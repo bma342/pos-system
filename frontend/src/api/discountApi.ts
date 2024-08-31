@@ -1,54 +1,37 @@
-import apiClient from './axios';
+import { apiCall } from '../services/api';
 import { Discount } from '../types';
 
-interface DiscountSchedule {
-  startDate: string;
-  endDate: string;
-  recurrence?: 'daily' | 'weekly' | 'monthly';
-  discountId: number;
-}
+export const getDiscounts = () =>
+  apiCall<Discount[]>({ url: '/discounts', method: 'GET' });
 
-// Create a new discount
-export const createDiscount = async (
-  discountData: Partial<Discount>
-): Promise<Discount> => {
-  const response = await apiClient.post<Discount>(
-    '/api/discounts/create',
-    discountData
-  );
-  return response.data;
-};
+export const createDiscount = (discount: Omit<Discount, 'id' | 'usageCount'>) =>
+  apiCall<Discount>({ url: '/discounts', method: 'POST', data: discount });
 
-// Fetch discounts by location
-export const fetchDiscountsByLocation = async (
-  locationId: number
-): Promise<Discount[]> => {
-  const response = await apiClient.get<Discount[]>(
-    `/api/discounts/location/${locationId}`
-  );
-  return response.data;
-};
+export const updateDiscount = (id: number, discount: Partial<Discount>) =>
+  apiCall<Discount>({ url: `/discounts/${id}`, method: 'PUT', data: discount });
 
-// Update an existing discount
-export const updateDiscount = async (
-  discountId: number,
-  discountData: Partial<Discount>
-): Promise<Discount> => {
-  const response = await apiClient.put<Discount>(
-    `/api/discounts/${discountId}`,
-    discountData
-  );
-  return response.data;
-};
+export const deleteDiscount = (id: number) =>
+  apiCall<void>({ url: `/discounts/${id}`, method: 'DELETE' });
 
-// Delete a discount
-export const deleteDiscount = async (discountId: number): Promise<void> => {
-  await apiClient.delete(`/api/discounts/${discountId}`);
-};
+export const applyDiscount = (code: string, cartTotal: number) =>
+  apiCall<{ discountedTotal: number; appliedDiscount: Discount }>({
+    url: '/discounts/apply',
+    method: 'POST',
+    data: { code, cartTotal },
+  });
 
-// Schedule a discount drop
-export const scheduleDiscountDrop = async (
-  scheduleData: DiscountSchedule
-): Promise<void> => {
-  await apiClient.post('/api/discounts/schedule-drop', scheduleData);
-};
+export const syncDiscountsFromPOS = (locationId: number) =>
+  apiCall<void>({
+    url: '/discounts/sync-from-pos',
+    method: 'POST',
+    data: { locationId },
+  });
+
+export const syncDiscountsForAllLocations = () =>
+  apiCall<void>({ url: '/discounts/sync-all-locations', method: 'POST' });
+
+export const fetchDiscountsByLocation = (clientId: number) =>
+  apiCall<Discount[]>({
+    url: `/discounts/by-location/${clientId}`,
+    method: 'GET',
+  });

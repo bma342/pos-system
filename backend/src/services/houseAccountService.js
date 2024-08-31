@@ -1,79 +1,113 @@
-const db = require('../models');
-const logger = require('../services/logger');
+const { HouseAccount, Transaction } = require('../models');
+const { AppError } = require('../utils/errorHandler');
+const logger = require('../utils/logger');
 
-class HouseAccountService {
-  // Create a new house account
-  async createHouseAccount(clientId, accountDetails) {
-    try {
-      const newAccount = await db.HouseAccount.create({
-        ...accountDetails,
-        clientId,
-      });
-      logger.info(`House account created: ${newAccount.name}`);
-      return newAccount;
-    } catch (error) {
-      logger.error(`Error creating house account: ${error.message}`);
-      throw error;
+const getHouseAccountsByClient = async (clientId) => {
+  try {
+    return await HouseAccount.findAll({ where: { clientId } });
+  } catch (error) {
+    logger.error(`Error fetching house accounts for client ${clientId}:`, error);
+    throw new AppError('Failed to fetch house accounts', 500);
+  }
+};
+
+const getHouseAccountById = async (id) => {
+  try {
+    const account = await HouseAccount.findByPk(id);
+    if (!account) {
+      throw new AppError('House account not found', 404);
     }
+    return account;
+  } catch (error) {
+    logger.error(`Error fetching house account with ID ${id}:`, error);
+    throw error instanceof AppError ? error : new AppError('Failed to fetch house account', 500);
   }
+};
 
-  // Fetch all house accounts for a client
-  async getAllHouseAccounts(clientId) {
-    return await db.HouseAccount.findAll({ where: { clientId } });
+const createHouseAccount = async (accountData) => {
+  try {
+    const newAccount = await HouseAccount.create(accountData);
+    logger.info(`New house account created with ID: ${newAccount.id}`);
+    return newAccount;
+  } catch (error) {
+    logger.error('Error creating house account:', error);
+    throw new AppError('Failed to create house account', 500);
   }
+};
 
-  // Update a house account
-  async updateHouseAccount(accountId, accountDetails) {
-    try {
-      const account = await db.HouseAccount.findByPk(accountId);
-      if (!account) throw new Error('House account not found');
-      
-      await account.update(accountDetails);
-      logger.info(`House account updated: ${account.name}`);
-      return account;
-    } catch (error) {
-      logger.error(`Error updating house account: ${error.message}`);
-      throw error;
+const updateHouseAccount = async (id, accountData) => {
+  try {
+    const account = await getHouseAccountById(id);
+    const updatedAccount = await account.update(accountData);
+    logger.info(`House account updated with ID: ${id}`);
+    return updatedAccount;
+  } catch (error) {
+    logger.error(`Error updating house account with ID ${id}:`, error);
+    throw error instanceof AppError ? error : new AppError('Failed to update house account', 500);
+  }
+};
+
+const deleteHouseAccount = async (id) => {
+  try {
+    const account = await getHouseAccountById(id);
+    await account.destroy();
+    logger.info(`House account deleted with ID: ${id}`);
+    return true;
+  } catch (error) {
+    logger.error(`Error deleting house account with ID ${id}:`, error);
+    throw error instanceof AppError ? error : new AppError('Failed to delete house account', 500);
+  }
+};
+
+const addFunds = async (id, amount) => {
+  try {
+    const account = await getHouseAccountById(id);
+    account.balance += amount;
+    await account.save();
+    await Transaction.create({ houseAccountId: id, amount, type: 'credit' });
+    logger.info(`Funds added to house account ${id}: ${amount}`);
+    return account;
+  } catch (error) {
+    logger.error(`Error adding funds to house account ${id}:`, error);
+    throw error instanceof AppError ? error : new AppError('Failed to add funds', 500);
+  }
+};
+
+const deductFunds = async (id, amount) => {
+  try {
+    const account = await getHouseAccountById(id);
+    if (account.balance < amount) {
+      throw new AppError('Insufficient funds', 400);
     }
+    account.balance -= amount;
+    await account.save();
+    await Transaction.create({ houseAccountId: id, amount, type: 'debit' });
+    logger.info(`Funds deducted from house account ${id}: ${amount}`);
+    return account;
+  } catch (error) {
+    logger.error(`Error deducting funds from house account ${id}:`, error);
+    throw error instanceof AppError ? error : new AppError('Failed to deduct funds', 500);
   }
+};
 
-  // Delete a house account
-  async deleteHouseAccount(accountId) {
-    try {
-      const account = await db.HouseAccount.findByPk(accountId);
-      if (!account) throw new Error('House account not found');
-
-      await account.destroy();
-      logger.info(`House account deleted: ${account.name}`);
-    } catch (error) {
-      logger.error(`Error deleting house account: ${error.message}`);
-      throw error;
-    }
+const getTransactionHistory = async (id) => {
+  try {
+    await getHouseAccountById(id); // Ensure account exists
+    const transactions = await Transaction.findAll({ where: { houseAccountId: id } });
+    return transactions;
+  } catch (error) {
+    logger.error(`Error fetching transaction history for house account ${id}:`, error);
+    throw error instanceof AppError ? error : new AppError('Failed to fetch transaction history', 500);
   }
+};
 
-  // Generate an invoice for a house account
-  async generateInvoice(accountId) {
-    try {
-      const account = await db.HouseAccount.findByPk(accountId, {
-        include: [db.CateringOrder],
-      });
-      if (!account) throw new Error('House account not found');
-
-      // Logic to generate and format the invoice (PDF, CSV, etc.)
-      const invoiceData = {
-        accountName: account.name,
-        orders: account.CateringOrders,
-        totalAmount: account.CateringOrders.reduce((sum, order) => sum + order.amount, 0),
-      };
-
-      // Return or save the invoice
-      logger.info(`Invoice generated for account: ${account.name}`);
-      return invoiceData;
-    } catch (error) {
-      logger.error(`Error generating invoice: ${error.message}`);
-      throw error;
-    }
-  }
-}
-
-module.exports = new HouseAccountService();
+module.exports = {
+  getHouseAccountsByClient,
+  getHouseAccountById,
+  createHouseAccount,
+  updateHouseAccount,
+  deleteHouseAccount,
+  addFunds,
+  deductFunds,
+  getTransactionHistory
+};

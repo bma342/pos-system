@@ -1,55 +1,50 @@
-module.exports = (sequelize, DataTypes) => {
-  const LoyaltyProgram = sequelize.define('LoyaltyProgram', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    pointsPerDollar: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-      defaultValue: 1.0,
-    },
-    tierName: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    tierThreshold: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    bonusPointsMultiplier: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
-      defaultValue: 1.0,
-    },
-    isActive: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: true,
-    },
-    expirationPolicy: {
-      type: DataTypes.JSONB,
-      allowNull: true,
-    },
-    clientId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Clients',
-        key: 'id',
-      },
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class LoyaltyProgram extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+LoyaltyProgram.attributes = attributes = {
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Clients', key: 'id' }
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  startDate: {
+    type: DataTypes.DATE,
+    allowNull: false
+  },
+  endDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  rules: {
+    type: DataTypes.JSON,
+    allowNull: true
+  }
+};
+
+module.exports = (sequelize) => {
+  LoyaltyProgram.init(LoyaltyProgram.attributes, {
+    sequelize,
+    modelName: 'LoyaltyProgram',
+    tableName: 'loyaltyprograms', // Adjust this if needed
   });
-
-  LoyaltyProgram.associate = (models) => {
-    LoyaltyProgram.belongsTo(models.Client, { foreignKey: 'clientId' });
-    LoyaltyProgram.hasMany(models.LoyaltyChallenge, { foreignKey: 'loyaltyProgramId' });
-    LoyaltyProgram.hasMany(models.LoyaltyReward, { foreignKey: 'loyaltyProgramId' });
-    LoyaltyProgram.hasMany(models.LoyaltyTransaction, { foreignKey: 'loyaltyProgramId' });
-  };
-
-  return LoyaltyProgram;
+  return LoyaltyProgram
 };

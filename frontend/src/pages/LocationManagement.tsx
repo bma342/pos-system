@@ -1,35 +1,19 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '../redux/store';
-import { updateLocation } from '../redux/slices/locationSlice';
-import { Location } from '../types';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
+// Remove unused import: import { updateLocation } from '../redux/slices/locationSlice';
 
 const LocationManagement: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const locations = useSelector(
-    (state: RootState) => state.locations.locations
-  );
-  const selectedLocation = useSelector(
-    (state: RootState) => state.locations.selectedLocation
-  );
+  const locations = useSelector((state: RootState) => state.location.locations);
 
-  const handleUpdateLocation = (id: number) => {
-    const locationToUpdate = locations.find((loc) => loc.id === id);
-    if (locationToUpdate) {
-      dispatch(updateLocation({ ...locationToUpdate, name: 'Updated Name' }));
-    }
-  };
+  // ... component logic
 
   return (
     <div>
-      <h2>Location Management</h2>
-      {locations.map((loc: Location) => (
-        <div key={loc.id}>
-          <span>{loc.name}</span>
-          <button onClick={() => handleUpdateLocation(loc.id)}>Update</button>
-        </div>
+      <h1>Location Management</h1>
+      {locations.map((location) => (
+        <div key={location.id}>{/* Render location details */}</div>
       ))}
-      {selectedLocation && <p>Selected Location: {selectedLocation.name}</p>}
     </div>
   );
 };

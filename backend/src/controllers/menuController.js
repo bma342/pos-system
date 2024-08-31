@@ -3,8 +3,7 @@ const menuService = require('../services/menuService');
 const logger = require('../services/logger');
 const syncEngine = require('../services/posSyncService');
 
-// Fetch all menus for a client
-exports.getMenus = async (req, res) => {
+const getMenus = async (req, res) => {
   try {
     const menus = await menuService.getMenus(req.user.clientId);
     res.status(200).json(menus);
@@ -14,8 +13,7 @@ exports.getMenus = async (req, res) => {
   }
 };
 
-// Fetch a single menu by ID
-exports.getMenuById = async (req, res) => {
+const getMenuById = async (req, res) => {
   try {
     const menu = await menuService.getMenuById(req.params.id, req.user.clientId);
     if (!menu) {
@@ -28,8 +26,7 @@ exports.getMenuById = async (req, res) => {
   }
 };
 
-// Create a new menu
-exports.createMenu = async (req, res) => {
+const createMenu = async (req, res) => {
   const transaction = await db.sequelize.transaction();
   try {
     const menu = await menuService.createMenu(req.body, req.user.clientId, transaction);
@@ -44,8 +41,7 @@ exports.createMenu = async (req, res) => {
   }
 };
 
-// Update an existing menu
-exports.updateMenu = async (req, res) => {
+const updateMenu = async (req, res) => {
   const transaction = await db.sequelize.transaction();
   try {
     const menu = await menuService.updateMenu(req.params.id, req.body, req.user.clientId, transaction);
@@ -60,8 +56,7 @@ exports.updateMenu = async (req, res) => {
   }
 };
 
-// Delete a menu
-exports.deleteMenu = async (req, res) => {
+const deleteMenu = async (req, res) => {
   const transaction = await db.sequelize.transaction();
   try {
     await menuService.deleteMenu(req.params.id, req.user.clientId, transaction);
@@ -76,8 +71,7 @@ exports.deleteMenu = async (req, res) => {
   }
 };
 
-// Add or update a menu item with A/B testing capabilities
-exports.upsertMenuItem = async (req, res) => {
+const upsertMenuItem = async (req, res) => {
   const transaction = await db.sequelize.transaction();
   try {
     const menuItem = await menuService.upsertMenuItem(req.body, req.user.clientId, transaction);
@@ -96,4 +90,11 @@ exports.upsertMenuItem = async (req, res) => {
   }
 };
 
-module.exports = exports;
+module.exports = {
+  getMenus,
+  getMenuById,
+  createMenu,
+  updateMenu,
+  deleteMenu,
+  upsertMenuItem
+};

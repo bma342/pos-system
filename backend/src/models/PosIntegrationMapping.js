@@ -1,43 +1,45 @@
-module.exports = (sequelize, DataTypes) => {
-  const PosIntegrationMapping = sequelize.define('PosIntegrationMapping', {
-    integrationId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'PosIntegrationSettings',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    systemFieldName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    posFieldName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    dataType: {
-      type: DataTypes.STRING, // 'string', 'number', 'boolean', etc.
-      allowNull: false,
-    },
-    transformationRule: {
-      type: DataTypes.TEXT, // Optional transformation logic to apply before mapping (e.g., convert currency)
-      allowNull: true,
-    },
-    direction: {
-      type: DataTypes.STRING, // 'toPos' or 'fromPos' to indicate mapping direction
-      allowNull: false,
-    },
-    isRequired: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false, // Whether this field is required for successful integration
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class PosIntegrationMapping extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+PosIntegrationMapping.attributes = attributes = {
+  posIntegrationId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'PosIntegrations', key: 'id' }
+  },
+  entityType: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  localId: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  externalId: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  mappingData: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  lastSyncDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  }
+};
+
+module.exports = (sequelize) => {
+  PosIntegrationMapping.init(PosIntegrationMapping.attributes, {
+    sequelize,
+    modelName: 'PosIntegrationMapping',
+    tableName: 'posintegrationmappings', // Adjust this if needed
   });
-
-  PosIntegrationMapping.associate = (models) => {
-    PosIntegrationMapping.belongsTo(models.PosIntegrationSettings, { foreignKey: 'integrationId', onDelete: 'CASCADE' });
-  };
-
-  return PosIntegrationMapping;
+  return PosIntegrationMapping
 };

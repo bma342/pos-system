@@ -51,3 +51,14 @@ export const deleteMenu = async (
 export const syncMenus = async (clientId: number): Promise<void> => {
   await apiClient.post(`/api/clients/${clientId}/menus/sync`);
 };
+
+export const fetchMenuItems = async (locationId: string, clientId: string) => {
+  try {
+    const response = await apiClient.get(
+      `/api/clients/${clientId}/locations/${locationId}/menu-items`
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch menu items');
+  }
+};

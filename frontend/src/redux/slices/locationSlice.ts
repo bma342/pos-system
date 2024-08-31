@@ -1,77 +1,78 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { RootState, Location } from '../../types';
-import axios from 'axios';
-
-const initialState: LocationState = {
-  locations: [],
-  status: 'idle',
-  selectedLocation: null,
-  error: null,
-};
-
-interface LocationState {
-  locations: Location[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
-  error: string | null;
-  selectedLocation: Location | null; // Add this property
-}
+import { Location, LocationUpdateData } from '../../types/locationTypes';
+import locationService from '../../services/locationService';
 
 export const fetchLocations = createAsyncThunk(
   'locations/fetchLocations',
   async () => {
-    const response = await axios.get<Location[]>('/api/locations');
-    return response.data;
+    return await locationService.getLocations();
   }
 );
 
 export const updateLocation = createAsyncThunk(
   'locations/updateLocation',
-  async (location: Partial<Location> & { id: number }) => {
-    const response = await axios.put<Location>(
-      `/api/locations/${location.id}`,
-      location
-    );
-    return response.data;
+  async ({
+    locationId,
+    updateData,
+  }: {
+    locationId: string;
+    updateData: LocationUpdateData;
+  }) => {
+    return await locationService.updateLocation(locationId, updateData);
   }
 );
 
+interface LocationState {
+  locations: Location[];
+  loading: boolean;
+  error: string | null;
+}
+
+const initialState: LocationState = {
+  locations: [],
+  loading: false,
+  error: null,
+};
+
 const locationSlice = createSlice({
-  name: 'locations',
+  name: 'location',
   initialState,
-  reducers: {},
+  reducers: {
+    updateLocationStatus: (
+      state,
+      action: PayloadAction<{ locationId: string; status: string }>
+    ) => {
+      const { locationId, status } = action.payload;
+      const location = state.locations.find((loc) => loc.id === locationId);
+      if (location) {
+        location.status = status;
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchLocations.pending, (state) => {
-        state.status = 'loading';
+        state.loading = true;
+        state.error = null;
       })
-      .addCase(
-        fetchLocations.fulfilled,
-        (state, action: PayloadAction<Location[]>) => {
-          state.status = 'succeeded';
-          state.locations = action.payload;
-        }
-      )
+      .addCase(fetchLocations.fulfilled, (state, action) => {
+        state.loading = false;
+        state.locations = action.payload;
+      })
       .addCase(fetchLocations.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message || null;
+        state.loading = false;
+        state.error = action.error.message || 'Failed to fetch locations';
       })
-      .addCase(
-        updateLocation.fulfilled,
-        (state, action: PayloadAction<Location>) => {
-          const index = state.locations.findIndex(
-            (location) => location.id === action.payload.id
-          );
-          if (index !== -1) {
-            state.locations[index] = action.payload;
-          }
+      .addCase(updateLocation.fulfilled, (state, action) => {
+        const index = state.locations.findIndex(
+          (loc) => loc.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.locations[index] = action.payload;
         }
-      );
+      });
   },
 });
 
-export const selectLocations = (state: RootState) => state.locations.locations;
-export const selectLocationStatus = (state: RootState) =>
-  state.locations.status;
-export const selectLocationError = (state: RootState) => state.locations.error;
-
+export const { updateLocationStatus } = locationSlice.actions;
 export default locationSlice.reducer;

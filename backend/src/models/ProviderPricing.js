@@ -1,50 +1,58 @@
 const { DataTypes } = require('sequelize');
-const { roundToNext99 } = require('../utils/pricingUtils'); // Import the rounding utility
+const BaseModel = require('./BaseModel');
 
-module.exports = (sequelize) => {
-  const ProviderPricing = sequelize.define('ProviderPricing', {
-    provider: {
-      type: DataTypes.STRING, // e.g., 'DoorDash', 'UberEats'
-      allowNull: false,
-    },
-    upliftPercentage: {
-      type: DataTypes.FLOAT,
-      allowNull: false, // e.g., 18 for 18%
-    },
-    shouldRound: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false, // The default is not to round
-    },
-    roundedPrice: {
-      type: DataTypes.FLOAT,
-      allowNull: true, // Stores the rounded price if rounding is enabled
-    },
-  }, {
-    hooks: {
-      beforeCreate: (providerPricing) => {
-        const upliftPercentage = providerPricing.getDataValue('upliftPercentage');
-        const shouldRound = providerPricing.getDataValue('shouldRound');
+class ProviderPricing extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
 
-        if (shouldRound) {
-          providerPricing.setDataValue('roundedPrice', roundToNext99(upliftPercentage));
-        }
-      },
-      beforeUpdate: (providerPricing) => {
-        const upliftPercentage = providerPricing.getDataValue('upliftPercentage');
-        const shouldRound = providerPricing.getDataValue('shouldRound');
-
-        if (shouldRound) {
-          providerPricing.setDataValue('roundedPrice', roundToNext99(upliftPercentage));
-        }
-      },
-    },
-  });
-
-  // Associations
-  ProviderPricing.associate = (models) => {
-    ProviderPricing.belongsTo(models.MenuItem, { foreignKey: 'menuItemId' });
-  };
-
-  return ProviderPricing;
+ProviderPricing.attributes = attributes = {
+  providerId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Providers', key: 'id' }
+  },
+  planName: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  price: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false
+  },
+  billingCycle: {
+    type: DataTypes.ENUM('monthly', 'yearly', 'per-transaction'),
+    allowNull: false
+  },
+  features: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  startDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  endDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  }
 };
 
+module.exports = (sequelize) => {
+  ProviderPricing.init(ProviderPricing.attributes, {
+    sequelize,
+    modelName: 'ProviderPricing',
+    tableName: 'providerpricings', // Adjust this if needed
+  });
+  return ProviderPricing
+};

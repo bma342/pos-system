@@ -1,104 +1,102 @@
-const ClientService = require('../services/clientService');
-const logger = require('../services/logger');
-const { check, validationResult } = require('express-validator');
+const clientService = require('../services/clientService');
+const { AppError } = require('../utils/errorHandler');
+const logger = require('../utils/logger');
 
-const validateClient = [
-  check('name').notEmpty().withMessage('Name is required'),
-  check('email').isEmail().withMessage('Valid email is required'),
-  check('phoneNumber').optional().isMobilePhone().withMessage('Valid phone number is required'),
-];
-
-exports.getAllClients = async (req, res) => {
+const getAllClients = async (req, res, next) => {
   try {
-    const clients = await ClientService.getAllClients();
+    const clients = await clientService.getAllClients();
     res.status(200).json(clients);
   } catch (error) {
-    logger.error(`Error fetching all clients: ${error.message}`);
-    res.status(500).json({ message: 'Error fetching all clients', error: error.message });
+    logger.error('Error fetching all clients:', error);
+    next(new AppError('Error fetching clients', 500));
   }
 };
 
-exports.getClientById = async (req, res) => {
+const getClientById = async (req, res, next) => {
   try {
-    const client = await ClientService.getClientById(req.params.id);
-    if (!client) return res.status(404).json({ message: 'Client not found' });
+    const client = await clientService.getClientById(req.params.id);
+    if (!client) {
+      return next(new AppError('Client not found', 404));
+    }
     res.status(200).json(client);
   } catch (error) {
-    logger.error(`Error fetching client by ID (${req.params.id}): ${error.message}`);
-    res.status(500).json({ message: 'Error fetching client details', error: error.message });
+    logger.error(`Error fetching client ${req.params.id}:`, error);
+    next(new AppError('Error fetching client', 500));
   }
 };
 
-exports.createClient = [
-  ...validateClient,
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    try {
-      const { name, email, phoneNumber, address } = req.body;
-      const client = await ClientService.createClient({ name, email, phoneNumber, address });
-
-      logger.info(`Client created: ${client.name} (ID: ${client.id})`);
-      res.status(201).json(client);
-    } catch (error) {
-      logger.error(`Error creating client: ${error.message}`);
-      res.status(500).json({ message: 'Error creating client', error: error.message });
-    }
-  }
-];
-
-exports.updateClient = [
-  ...validateClient,
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    try {
-      const client = await ClientService.updateClient(req.params.id, req.body);
-      if (!client) return res.status(404).json({ message: 'Client not found' });
-
-      logger.info(`Client updated: ${client.name} (ID: ${client.id})`);
-      res.json(client);
-    } catch (error) {
-      logger.error(`Error updating client (${req.params.id}): ${error.message}`);
-      res.status(500).json({ message: 'Error updating client', error: error.message });
-    }
-  }
-];
-
-exports.deleteClient = async (req, res) => {
+const createClient = async (req, res, next) => {
   try {
-    const client = await ClientService.deleteClient(req.params.id);
-    if (!client) return res.status(404).json({ message: 'Client not found' });
-
-    logger.info(`Client deleted: ${client.name} (ID: ${client.id})`);
-    res.json({ message: 'Client deleted successfully' });
+    const newClient = await clientService.createClient(req.body);
+    logger.info(`New client created: ${newClient.id}`);
+    res.status(201).json(newClient);
   } catch (error) {
-    logger.error(`Error deleting client (${req.params.id}): ${error.message}`);
-    res.status(500).json({ message: 'Error deleting client', error: error.message });
+    logger.error('Error creating client:', error);
+    next(new AppError('Error creating client', 500));
   }
 };
 
-exports.getClientTheme = async (req, res) => {
+const updateClient = async (req, res, next) => {
   try {
-    const subdomain = req.headers['x-subdomain'];
-    if (!subdomain) {
-      return res.status(400).json({ message: 'Subdomain header is missing' });
+    const updatedClient = await clientService.updateClient(req.params.id, req.body);
+    if (!updatedClient) {
+      return next(new AppError('Client not found', 404));
     }
-    const theme = await ClientService.getClientTheme(subdomain);
-    if (!theme) return res.status(404).json({ message: 'Client not found' });
-
-    logger.info(`Client theme fetched (Subdomain: ${subdomain})`);
-    res.json(theme);
+    logger.info(`Client updated: ${req.params.id}`);
+    res.status(200).json(updatedClient);
   } catch (error) {
-    logger.error(`Error fetching client theme (Subdomain: ${req.headers['x-subdomain']}): ${error.message}`);
-    res.status(500).json({ message: 'Error fetching client theme', error: error.message });
+    logger.error(`Error updating client ${req.params.id}:`, error);
+    next(new AppError('Error updating client', 500));
   }
 };
 
-module.exports = exports;
+const deleteClient = async (req, res, next) => {
+  try {
+    const result = await clientService.deleteClient(req.params.id);
+    if (!result) {
+      return next(new AppError('Client not found', 404));
+    }
+    logger.info(`Client deleted: ${req.params.id}`);
+    res.status(204).send();
+  } catch (error) {
+    logger.error(`Error deleting client ${req.params.id}:`, error);
+    next(new AppError('Error deleting client', 500));
+  }
+};
+
+const getClientSettings = async (req, res, next) => {
+  try {
+    const settings = await clientService.getClientSettings(req.params.id);
+    if (!settings) {
+      return next(new AppError('Client settings not found', 404));
+    }
+    res.status(200).json(settings);
+  } catch (error) {
+    logger.error(`Error fetching settings for client ${req.params.id}:`, error);
+    next(new AppError('Error fetching client settings', 500));
+  }
+};
+
+const updateClientSettings = async (req, res, next) => {
+  try {
+    const updatedSettings = await clientService.updateClientSettings(req.params.id, req.body);
+    if (!updatedSettings) {
+      return next(new AppError('Client settings not found', 404));
+    }
+    logger.info(`Settings updated for client: ${req.params.id}`);
+    res.status(200).json(updatedSettings);
+  } catch (error) {
+    logger.error(`Error updating settings for client ${req.params.id}:`, error);
+    next(new AppError('Error updating client settings', 500));
+  }
+};
+
+module.exports = {
+  getAllClients,
+  getClientById,
+  createClient,
+  updateClient,
+  deleteClient,
+  getClientSettings,
+  updateClientSettings
+};

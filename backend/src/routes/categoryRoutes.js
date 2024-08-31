@@ -1,14 +1,26 @@
 const express = require('express');
-const router = express.Router();
 const categoryController = require('../controllers/categoryController');
-const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
+const authorize = require('../middleware/authorize');
 
-router.use(authenticateToken);
+const router = express.Router();
 
-router.get('/', authorizeRoles(1, 2), categoryController.getAllCategories);
-router.post('/', authorizeRoles(1, 2), categoryController.createCategory);
-router.get('/:id', authorizeRoles(1, 2), categoryController.getCategory);
-router.put('/:id', authorizeRoles(1, 2), categoryController.updateCategory);
-router.delete('/:id', authorizeRoles(1, 2), categoryController.deleteCategory);
+// Apply authentication middleware to all routes
+router.use(authenticate);
+
+// Get all categories
+router.get('/', authorize(['admin', 'manager']), categoryController.getAllCategories);
+
+// Get a specific category
+router.get('/:id', authorize(['admin', 'manager']), categoryController.getCategoryById);
+
+// Create a new category
+router.post('/', authorize(['admin']), categoryController.createCategory);
+
+// Update a category
+router.put('/:id', authorize(['admin']), categoryController.updateCategory);
+
+// Delete a category
+router.delete('/:id', authorize(['admin']), categoryController.deleteCategory);
 
 module.exports = router;

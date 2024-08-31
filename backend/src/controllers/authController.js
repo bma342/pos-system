@@ -1,96 +1,96 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
-const User = require('../models/User');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const { User } = require('../models');
+const userService = require('../services/userService');
+const { UnauthorizedError } = require('../utils/errors');
 
-exports.register = async (req, res) => {
+const login = async (req, res, next) => {
+  try {
+    const { username, password } = req.body;
+    const user = await userService.getUserByUsername(username);
+
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedError('Invalid credentials');
+    }
+
+    const token = jwt.sign(
+      { userId: user.id, username: user.username, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const register = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
 
+  const { username, email, password } = req.body;
+
   try {
-    const { username, email, password, phone } = req.body;
-
-    let user = await User.findOne({ where: { email } });
-    if (user) {
-      return res.status(400).json({ msg: 'User already exists' });
-    }
-
-    user = await User.create({
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({
       username,
       email,
-      password: await bcrypt.hash(password, 10),
-      phone,
+      password: hashedPassword
     });
 
-    const payload = {
-      user: {
-        id: user.id,
-      },
-    };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(
+      { userId: user.id, username: user.username, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
 
-    res.status(201).json({ token });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(201).json({ token, user: { id: user.id, username: user.username, role: user.role } });
+  } catch (error) {
+    next(error);
   }
 };
 
-exports.login = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
+const logout = (req, res) => {
+  // In a stateless JWT setup, we don't need to do anything server-side for logout
+  res.json({ message: 'Logged out successfully' });
+};
 
+const getUser = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findByPk(req.user.id, {
+      attributes: { exclude: ['password'] }
+    });
     if (!user) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
+      return res.status(404).json({ message: 'User not found' });
     }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
-    }
-
-    const payload = {
-      user: {
-        id: user.id,
-      },
-    };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-    res.json({ token });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    res.json(user);
+  } catch (error) {
+    next(error);
   }
 };
 
-// Verify phone number
-exports.verifyPhone = async (req, res) => {
-  // Implement the logic to verify the phone number
-  res.status(200).send('Phone number verified successfully');
+const verifyPhone = async (req, res, next) => {
+  // Implement phone verification logic
 };
 
-// Request login code
-exports.requestLoginCode = async (req, res) => {
-  // Implement the logic to request a login code
-  res.status(200).send('Login code sent');
+const requestLoginCode = async (req, res, next) => {
+  // Implement login code request logic
 };
 
-// Login with code
-exports.loginWithCode = async (req, res) => {
-  // Implement the logic to login with a code
-  const { phone, code } = req.body;
-  // Example validation logic
-  if (code === '123456') {
-    res.status(200).send('Logged in successfully');
-  } else {
-    res.status(400).send('Invalid code');
-  }
+const loginWithCode = async (req, res, next) => {
+  // Implement login with code logic
+};
+
+module.exports = {
+  login,
+  register,
+  logout,
+  getUser,
+  verifyPhone,
+  requestLoginCode,
+  loginWithCode,
 };

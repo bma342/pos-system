@@ -1,31 +1,28 @@
-import axios, { AxiosError } from 'axios';
-
-export const logError = (
-  message: string,
-  error: Error,
-  errorInfo?: unknown
-): void => {
-  // Implement your logging mechanism here
-  console.error(message, error, errorInfo);
-
-  // Optional: Integrate with an external logging service
-};
+import { toast } from 'react-toastify';
+import { AxiosError } from 'axios';
 
 export const handleApiError = (error: AxiosError | Error): void => {
-  if (axios.isAxiosError(error)) {
+  let errorMessage = 'An unexpected error occurred';
+
+  if (error instanceof AxiosError) {
     if (error.response) {
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
-      console.error('API Error Response:', error.response.data);
+      errorMessage = error.response.data.message || 'An error occurred';
     } else if (error.request) {
       // The request was made but no response was received
-      console.error('API Error Request:', error.request);
+      errorMessage = 'No response received from server';
     } else {
       // Something happened in setting up the request that triggered an Error
-      console.error('API Error Message:', error.message);
+      errorMessage = error.message || 'An unexpected error occurred';
     }
   } else {
-    // Handle non-Axios errors
-    console.error('Non-Axios Error:', error.message);
+    errorMessage = error.message || 'An unexpected error occurred';
   }
+
+  // Display error message using toast
+  toast.error(errorMessage);
+
+  // Log the error for debugging purposes
+  console.error('API Error:', error);
 };

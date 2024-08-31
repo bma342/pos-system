@@ -1,59 +1,59 @@
-module.exports = (sequelize, DataTypes) => {
-  const MarketingReport = sequelize.define('MarketingReport', {
-    clientId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Clients',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    reportName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    reportType: {
-      type: DataTypes.STRING, // 'abTest', 'discountPerformance', 'loyaltyPerformance', etc.
-      allowNull: false,
-    },
-    startDate: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    endDate: {
-      type: DataTypes.DATE,
-      allowNull: true, // Optional end date for ongoing reports
-    },
-    filters: {
-      type: DataTypes.JSONB, // Store any filters applied to the report (e.g., by location, menu item, etc.)
-      allowNull: true,
-    },
-    status: {
-      type: DataTypes.STRING,
-      defaultValue: 'active', // 'active', 'completed', 'archived'
-    },
-    totalRevenue: {
-      type: DataTypes.FLOAT,
-      allowNull: true, // Aggregated revenue for the report period
-    },
-    totalImpressions: {
-      type: DataTypes.INTEGER,
-      allowNull: true, // Aggregated impressions for the report period
-    },
-    totalConversions: {
-      type: DataTypes.INTEGER,
-      allowNull: true, // Aggregated conversions for the report period
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class MarketingReport extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+MarketingReport.attributes = attributes = {
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Clients', key: 'id' }
+  },
+  campaignId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: { model: 'MarketingCampaigns', key: 'id' }
+  },
+  reportType: {
+    type: DataTypes.ENUM('daily', 'weekly', 'monthly', 'campaign'),
+    allowNull: false
+  },
+  startDate: {
+    type: DataTypes.DATE,
+    allowNull: false
+  },
+  endDate: {
+    type: DataTypes.DATE,
+    allowNull: false
+  },
+  metrics: {
+    type: DataTypes.JSON,
+    allowNull: false
+  },
+  insights: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  recommendations: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  generatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  }
+};
+
+module.exports = (sequelize) => {
+  MarketingReport.init(MarketingReport.attributes, {
+    sequelize,
+    modelName: 'MarketingReport',
+    tableName: 'marketingreports', // Adjust this if needed
   });
-
-  MarketingReport.associate = (models) => {
-    MarketingReport.belongsTo(models.Client, { foreignKey: 'clientId' });
-    MarketingReport.hasMany(models.Analytics, { foreignKey: 'reportId' });
-
-    // Optional association for audit logging
-    MarketingReport.hasMany(models.AuditLog, { foreignKey: 'reportId' });
-  };
-
-  return MarketingReport;
+  return MarketingReport
 };

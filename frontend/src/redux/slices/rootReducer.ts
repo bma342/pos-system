@@ -33,7 +33,7 @@ const rootReducer = combineReducers({
   providers: providerReducer,
   roles: roleReducer,
   serviceFees: serviceFeeReducer,
-  users: userReducer,
+  user: userReducer,
   wallet: walletReducer,
 });
 

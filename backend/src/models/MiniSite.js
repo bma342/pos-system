@@ -1,56 +1,67 @@
-module.exports = (sequelize, DataTypes) => {
-  const MiniSite = sequelize.define('MiniSite', {
-    siteName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    domain: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    themeSettings: {
-      type: DataTypes.JSONB, // Store branding options like colors, fonts, logos, etc.
-      allowNull: true,
-    },
-    contentBlocks: {
-      type: DataTypes.JSONB, // Store content like images, text sections, CTAs
-      allowNull: true,
-    },
-    menuGroupId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'MenuGroups',
-        key: 'id',
-      },
-      allowNull: false,
-    },
-    clientId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Clients',
-        key: 'id',
-      },
-      allowNull: false,
-    },
-    isPublished: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false, // Indicates if the mini-site is live
-    },
-    publishedAt: {
-      type: DataTypes.DATE,
-      allowNull: true, // Set the date when the mini-site is published
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class MiniSite extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+MiniSite.attributes = attributes = {
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Clients', key: 'id' }
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  subdomain: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
+  },
+  theme: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'default'
+  },
+  customDomain: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  settings: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  seoSettings: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  }
+};
+
+module.exports = (sequelize) => {
+  MiniSite.init(MiniSite.attributes, {
+    sequelize,
+    modelName: 'MiniSite',
+    tableName: 'minisites', // Adjust this if needed
   });
-
-  MiniSite.associate = (models) => {
-    MiniSite.belongsTo(models.MenuGroup, { foreignKey: 'menuGroupId' });
-    MiniSite.belongsTo(models.Client, { foreignKey: 'clientId' });
-
-    // Optionally include analytics and tracking
-    MiniSite.hasMany(models.MiniSiteAnalytics, { foreignKey: 'miniSiteId' });
-  };
-
-  return MiniSite;
+  return MiniSite
 };

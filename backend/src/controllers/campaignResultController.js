@@ -1,63 +1,70 @@
-const { CampaignResult } = require('../models');
+const campaignResultService = require('../services/campaignResultService');
+const { AppError } = require('../utils/errorHandler');
+const logger = require('../utils/logger');
 
-exports.getAllCampaignResults = async (req, res) => {
+const getAllCampaignResults = async (req, res, next) => {
   try {
-    const campaignResults = await CampaignResult.findAll();
-    res.json(campaignResults);
+    const results = await campaignResultService.getAllCampaignResults();
+    res.status(200).json(results);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching campaign results', error: error.message });
+    logger.error('Error fetching campaign results:', error);
+    next(new AppError('Error fetching campaign results', 500));
   }
 };
 
-exports.createCampaignResult = async (req, res) => {
+const getCampaignResultById = async (req, res, next) => {
   try {
-    const newCampaignResult = await CampaignResult.create(req.body);
-    res.status(201).json(newCampaignResult);
-  } catch (error) {
-    res.status(400).json({ message: 'Error creating campaign result', error: error.message });
-  }
-};
-
-exports.getCampaignResult = async (req, res) => {
-  try {
-    const campaignResult = await CampaignResult.findByPk(req.params.id);
-    if (campaignResult) {
-      res.json(campaignResult);
-    } else {
-      res.status(404).json({ message: 'Campaign result not found' });
+    const result = await campaignResultService.getCampaignResultById(req.params.id);
+    if (!result) {
+      return next(new AppError('Campaign result not found', 404));
     }
+    res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching campaign result', error: error.message });
+    logger.error(`Error fetching campaign result ${req.params.id}:`, error);
+    next(new AppError('Error fetching campaign result', 500));
   }
 };
 
-exports.updateCampaignResult = async (req, res) => {
+const createCampaignResult = async (req, res, next) => {
   try {
-    const [updated] = await CampaignResult.update(req.body, {
-      where: { id: req.params.id }
-    });
-    if (updated) {
-      const updatedCampaignResult = await CampaignResult.findByPk(req.params.id);
-      res.json(updatedCampaignResult);
-    } else {
-      res.status(404).json({ message: 'Campaign result not found' });
-    }
+    const newResult = await campaignResultService.createCampaignResult(req.body);
+    res.status(201).json(newResult);
   } catch (error) {
-    res.status(400).json({ message: 'Error updating campaign result', error: error.message });
+    logger.error('Error creating campaign result:', error);
+    next(new AppError('Error creating campaign result', 500));
   }
 };
 
-exports.deleteCampaignResult = async (req, res) => {
+const updateCampaignResult = async (req, res, next) => {
   try {
-    const deleted = await CampaignResult.destroy({
-      where: { id: req.params.id }
-    });
-    if (deleted) {
-      res.status(204).send();
-    } else {
-      res.status(404).json({ message: 'Campaign result not found' });
+    const updatedResult = await campaignResultService.updateCampaignResult(req.params.id, req.body);
+    if (!updatedResult) {
+      return next(new AppError('Campaign result not found', 404));
     }
+    res.status(200).json(updatedResult);
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting campaign result', error: error.message });
+    logger.error(`Error updating campaign result ${req.params.id}:`, error);
+    next(new AppError('Error updating campaign result', 500));
   }
+};
+
+const deleteCampaignResult = async (req, res, next) => {
+  try {
+    const deleted = await campaignResultService.deleteCampaignResult(req.params.id);
+    if (!deleted) {
+      return next(new AppError('Campaign result not found', 404));
+    }
+    res.status(204).send();
+  } catch (error) {
+    logger.error(`Error deleting campaign result ${req.params.id}:`, error);
+    next(new AppError('Error deleting campaign result', 500));
+  }
+};
+
+module.exports = {
+  getAllCampaignResults,
+  getCampaignResultById,
+  createCampaignResult,
+  updateCampaignResult,
+  deleteCampaignResult
 };

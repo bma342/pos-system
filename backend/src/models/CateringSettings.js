@@ -1,30 +1,58 @@
-module.exports = (sequelize, DataTypes) => {
-  const CateringSettings = sequelize.define('CateringSettings', {
-    isEnabled: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-    serviceCharges: {
-      type: DataTypes.JSONB, // Store service charges and configurations
-      allowNull: true,
-    },
-    deliveryProviders: {
-      type: DataTypes.JSONB, // Store list of available delivery providers
-      allowNull: true,
-    },
-    locationId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Locations',
-        key: 'id',
-      },
-      allowNull: false,
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class CateringSettings extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+CateringSettings.attributes = attributes = {
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Clients', key: 'id' }
+  },
+  minimumOrderAmount: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    defaultValue: 0
+  },
+  leadTimeHours: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 24
+  },
+  maxOrderDaysInAdvance: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 30
+  },
+  deliveryFee: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true
+  },
+  serviceFeePercentage: {
+    type: DataTypes.DECIMAL(5, 2),
+    allowNull: true
+  },
+  allowPickup: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  allowDelivery: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  }
+};
+
+module.exports = (sequelize) => {
+  CateringSettings.init(CateringSettings.attributes, {
+    sequelize,
+    modelName: 'CateringSettings',
+    tableName: 'cateringsettingss', // Adjust this if needed
   });
-
-  CateringSettings.associate = (models) => {
-    CateringSettings.belongsTo(models.Location, { foreignKey: 'locationId' });
-  };
-
-  return CateringSettings;
+  return CateringSettings
 };

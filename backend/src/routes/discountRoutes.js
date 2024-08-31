@@ -1,11 +1,26 @@
 const express = require('express');
-const router = express.Router();
-const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 const discountController = require('../controllers/discountController');
+const { authenticate } = require('../middleware/auth');
+const authorize = require('../middleware/authorize');
 
-// Routes for discount management
-router.post('/create', authenticateToken, authorizeRoles(1, 2), discountController.createDiscount);
-router.get('/location/:locationId', authenticateToken, discountController.getDiscountsByLocation);
-router.post('/schedule-drop', authenticateToken, authorizeRoles(1), discountController.scheduleDiscountDrop);
+const router = express.Router();
+
+// Apply authentication middleware to all routes
+router.use(authenticate);
+
+// Get all discounts
+router.get('/', authorize(['admin', 'manager']), discountController.getAllDiscounts);
+
+// Get a specific discount
+router.get('/:id', authorize(['admin', 'manager']), discountController.getDiscountById);
+
+// Create a new discount
+router.post('/', authorize(['admin']), discountController.createDiscount);
+
+// Update a discount
+router.put('/:id', authorize(['admin']), discountController.updateDiscount);
+
+// Delete a discount
+router.delete('/:id', authorize(['admin']), discountController.deleteDiscount);
 
 module.exports = router;

@@ -1,27 +1,45 @@
-module.exports = (sequelize, DataTypes) => {
-  const Asset = sequelize.define('Asset', {
-    clientId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    locationId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    type: {
-      type: DataTypes.STRING, // 'logo', 'menuItemImage', 'storeImage', etc.
-      allowNull: false,
-    },
-    filePath: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class Asset extends BaseModel {
+  static associate(models) {
+    this.belongsTo(models.Client, { foreignKey: 'clientId' });
+  }
+}
+
+Asset.attributes = {
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Clients', key: 'id' }
+  },
+  type: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  url: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  size: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  mimeType: {
+    type: DataTypes.STRING,
+    allowNull: true
+  }
+};
+
+module.exports = (sequelize) => {
+  Asset.init(Asset.attributes, {
+    sequelize,
+    modelName: 'Asset',
+    tableName: 'assets', // Adjust this if needed
   });
-
-  Asset.associate = (models) => {
-    Asset.belongsTo(models.Client, { foreignKey: 'clientId' });
-    Asset.belongsTo(models.Location, { foreignKey: 'locationId' });
-  };
-
-  return Asset;
+  return Asset
 };

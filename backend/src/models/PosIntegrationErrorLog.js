@@ -1,48 +1,55 @@
-module.exports = (sequelize, DataTypes) => {
-  const PosIntegrationErrorLog = sequelize.define('PosIntegrationErrorLog', {
-    integrationId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'PosIntegrationSettings',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    errorCode: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    errorMessage: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
-    requestPayload: {
-      type: DataTypes.JSONB,
-      allowNull: true, // Store the payload that was sent during the failed request
-    },
-    responsePayload: {
-      type: DataTypes.JSONB,
-      allowNull: true, // Store the response data if available
-    },
-    resolved: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-    resolvedAt: {
-      type: DataTypes.DATE,
-      allowNull: true, // Timestamp when the issue was resolved
-    },
-    retryCount: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-      allowNull: false,
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class PosIntegrationErrorLog extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+PosIntegrationErrorLog.attributes = attributes = {
+  posIntegrationId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'PosIntegrations', key: 'id' }
+  },
+  errorType: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  errorMessage: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
+  errorDetails: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  occurredAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  },
+  resolved: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
+  },
+  resolvedAt: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  resolutionNotes: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  }
+};
+
+module.exports = (sequelize) => {
+  PosIntegrationErrorLog.init(PosIntegrationErrorLog.attributes, {
+    sequelize,
+    modelName: 'PosIntegrationErrorLog',
+    tableName: 'posintegrationerrorlogs', // Adjust this if needed
   });
-
-  PosIntegrationErrorLog.associate = (models) => {
-    PosIntegrationErrorLog.belongsTo(models.PosIntegrationSettings, { foreignKey: 'integrationId', onDelete: 'CASCADE' });
-  };
-
-  return PosIntegrationErrorLog;
+  return PosIntegrationErrorLog
 };

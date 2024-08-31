@@ -1,53 +1,43 @@
-module.exports = (sequelize, DataTypes) => {
-  const CommissaryLocation = sequelize.define('CommissaryLocation', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    address: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    latitude: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
-    },
-    longitude: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
-    },
-    timeZone: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: 'UTC',
-    },
-    capacity: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    contactInfo: {
-      type: DataTypes.JSONB, // Stores phone number, email, and other contact details
-      allowNull: true,
-    },
-    clientId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Clients',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class CommissaryLocation extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+CommissaryLocation.attributes = attributes = {
+  commissaryKitchenId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'CommissaryKitchens', key: 'id' }
+  },
+  locationId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Locations', key: 'id' }
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  deliverySchedule: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  notes: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  }
+};
+
+module.exports = (sequelize) => {
+  CommissaryLocation.init(CommissaryLocation.attributes, {
+    sequelize,
+    modelName: 'CommissaryLocation',
+    tableName: 'commissarylocations', // Adjust this if needed
   });
-
-  CommissaryLocation.associate = (models) => {
-    CommissaryLocation.belongsTo(models.Client, { foreignKey: 'clientId' });
-    CommissaryLocation.hasMany(models.CateringOrder, { foreignKey: 'commissaryLocationId', as: 'cateringOrders' });
-    CommissaryLocation.hasMany(models.Location, { foreignKey: 'parentLocationId', as: 'childLocations' });
-
-    // Association for tracking related orders and deliveries
-    CommissaryLocation.hasMany(models.Order, { foreignKey: 'commissaryLocationId', as: 'orders' });
-  };
-
-  return CommissaryLocation;
+  return CommissaryLocation
 };

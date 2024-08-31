@@ -1,15 +1,17 @@
-const Redis = require('ioredis');
-const redis = new Redis(process.env.REDIS_URL);
+const NodeCache = require 'node-cache';
 
-module.exports = {
-  async get(key) {
-    const value = await redis.get(key);
-    return value ? JSON.parse(value) : null;
-  },
-  set(key, value, ttl) {
-    return redis.set(key, JSON.stringify(value), 'EX', ttl);
-  },
-  del(key) {
-    return redis.del(key);
+const cache = new NodeCache({ stdTTL: 600 }); // 10 minutes default TTL
+
+const getOrSetCache = async <T>(
+  key,
+  cb: () => Promise<T>
+) => {
+  const value = cache.get<T>(key);
+  if (value) {
+    return value;
   }
+
+  const result = await cb();
+  cache.set(key, result);
+  return result;
 };

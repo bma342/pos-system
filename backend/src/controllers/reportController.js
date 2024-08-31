@@ -1,37 +1,62 @@
 const reportService = require('../services/reportService');
-const logger = require('../services/logger');
+const { AppError } = require('../utils/errorHandler');
+const logger = require('../utils/logger');
 
-// Generate a report based on type
-exports.generateReport = async (req, res) => {
+exports.generateReport = async (req, res, next) => {
   try {
     const report = await reportService.generateReport(req.body);
-    res.status(200).json(report);
+    res.status(201).json(report);
   } catch (error) {
-    logger.error(`Error generating report: ${error.message}`);
-    res.status(500).json({ message: 'Error generating report', error });
+    logger.error('Error generating report:', error);
+    next(new AppError('Failed to generate report', 500));
   }
 };
 
-// Fetch a report by ID
-exports.getReportById = async (req, res) => {
+exports.getReportById = async (req, res, next) => {
   try {
-    const report = await reportService.getReportById(req.params.reportId);
-    if (!report) return res.status(404).json({ message: 'Report not found' });
+    const report = await reportService.getReportById(req.params.id);
+    if (!report) {
+      return next(new AppError('Report not found', 404));
+    }
     res.status(200).json(report);
   } catch (error) {
-    logger.error(`Error fetching report ID ${req.params.reportId}: ${error.message}`);
-    res.status(500).json({ message: 'Error fetching report', error });
+    logger.error(`Error fetching report ${req.params.id}:`, error);
+    next(error);
   }
 };
 
-// Delete a report
-exports.deleteReport = async (req, res) => {
+exports.getClientReports = async (req, res, next) => {
   try {
-    await reportService.deleteReport(req.params.reportId);
+    const reports = await reportService.getClientReports(req.params.clientId);
+    res.status(200).json(reports);
+  } catch (error) {
+    logger.error(`Error fetching reports for client ${req.params.clientId}:`, error);
+    next(error);
+  }
+};
+
+exports.updateReport = async (req, res, next) => {
+  try {
+    const updatedReport = await reportService.updateReport(req.params.id, req.body);
+    if (!updatedReport) {
+      return next(new AppError('Report not found', 404));
+    }
+    res.status(200).json(updatedReport);
+  } catch (error) {
+    logger.error(`Error updating report ${req.params.id}:`, error);
+    next(error);
+  }
+};
+
+exports.deleteReport = async (req, res, next) => {
+  try {
+    const result = await reportService.deleteReport(req.params.id);
+    if (!result) {
+      return next(new AppError('Report not found', 404));
+    }
     res.status(204).send();
   } catch (error) {
-    logger.error(`Error deleting report ID ${req.params.reportId}: ${error.message}`);
-    res.status(500).json({ message: 'Error deleting report', error });
+    logger.error(`Error deleting report ${req.params.id}:`, error);
+    next(error);
   }
 };
-

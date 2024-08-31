@@ -1,47 +1,78 @@
-const db = require('../models');
+const { Discount } = require('../models');
+const { AppError } = require('../utils/errorHandler');
+const logger = require('../utils/logger');
 
-class DiscountService {
-  // Create a discount
-  async createDiscount(discountDetails) {
-    return await db.Discount.create(discountDetails);
+const getAllDiscounts = async (clientId) => {
+  try {
+    return await Discount.findAll({ where: { clientId } });
+  } catch (error) {
+    logger.error('Error fetching all discounts:', error);
+    throw new AppError('Failed to fetch discounts', 500);
   }
+};
 
-  // Get discounts by location
-  async getDiscountsByLocation(locationId) {
-    return await db.Discount.findAll({ where: { locationId } });
-  }
-
-  // Update a discount
-  async updateDiscount(discountId, discountDetails) {
-    const discount = await db.Discount.findByPk(discountId);
+const getDiscountById = async (id, clientId) => {
+  try {
+    const discount = await Discount.findOne({ where: { id, clientId } });
     if (!discount) {
-      throw new Error('Discount not found');
+      throw new AppError('Discount not found', 404);
     }
-
-    return await discount.update(discountDetails);
+    return discount;
+  } catch (error) {
+    logger.error(`Error fetching discount with ID ${id}:`, error);
+    throw error instanceof AppError ? error : new AppError('Failed to fetch discount', 500);
   }
+};
 
-  // Delete a discount
-  async deleteDiscount(discountId) {
-    const discount = await db.Discount.findByPk(discountId);
-    if (!discount) {
-      throw new Error('Discount not found');
-    }
-
-    return await discount.destroy();
+const createDiscount = async (discountData, clientId) => {
+  try {
+    const newDiscount = await Discount.create({ ...discountData, clientId });
+    logger.info(`New discount created with ID: ${newDiscount.id}`);
+    return newDiscount;
+  } catch (error) {
+    logger.error('Error creating discount:', error);
+    throw new AppError('Failed to create discount', 500);
   }
+};
 
-  // Schedule a discount drop for guests
-  async scheduleDiscountDrop(discountId, guestIds, scheduleTime) {
-    setTimeout(async () => {
-      const discount = await db.Discount.findByPk(discountId);
-      if (!discount) return;
-
-      for (const guestId of guestIds) {
-        await db.GuestDiscounts.create({ guestId, discountId });
-      }
-    }, new Date(scheduleTime) - Date.now());
+const updateDiscount = async (id, discountData, clientId) => {
+  try {
+    const discount = await getDiscountById(id, clientId);
+    const updatedDiscount = await discount.update(discountData);
+    logger.info(`Discount updated with ID: ${id}`);
+    return updatedDiscount;
+  } catch (error) {
+    logger.error(`Error updating discount with ID ${id}:`, error);
+    throw error instanceof AppError ? error : new AppError('Failed to update discount', 500);
   }
-}
+};
 
-module.exports = new DiscountService();
+const deleteDiscount = async (id, clientId) => {
+  try {
+    const discount = await getDiscountById(id, clientId);
+    await discount.destroy();
+    logger.info(`Discount deleted with ID: ${id}`);
+    return true;
+  } catch (error) {
+    logger.error(`Error deleting discount with ID ${id}:`, error);
+    throw error instanceof AppError ? error : new AppError('Failed to delete discount', 500);
+  }
+};
+
+const getDiscountsByLocation = async (locationId, clientId) => {
+  try {
+    return await Discount.findAll({ where: { locationId, clientId } });
+  } catch (error) {
+    logger.error(`Error fetching discounts for location ${locationId}:`, error);
+    throw new AppError('Failed to fetch discounts for location', 500);
+  }
+};
+
+module.exports = {
+  getAllDiscounts,
+  getDiscountById,
+  createDiscount,
+  updateDiscount,
+  deleteDiscount,
+  getDiscountsByLocation
+};

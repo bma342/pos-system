@@ -2,81 +2,57 @@ version: '3.8'
 
 services:
   backend:
-    build: 
+    build:
       context: ./backend
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
     environment:
-      - NODE_ENV=${NODE_ENV}
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - NODE_ENV=development
     volumes:
       - ./backend:/app
       - /app/node_modules
-      - ./backend/ssl:/app/ssl:ro
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-k", "https://localhost:5000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    depends_on:
+      - db
+      - redis
 
   frontend:
-    build: 
+    build:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "8080:80"
+      - "3000:3000"
     environment:
-      - REACT_APP_API_URL=https://64.23.178.198/api
+      - NODE_ENV=development
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
       - backend
-    volumes:
-      - ./frontend/ssl:/etc/nginx/ssl:ro
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-k", "http://localhost:8080"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
   db:
-    image: postgres:14-alpine
+    image: postgres:14
     environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=pos
+      - POSTGRES_USER=bryce
+      - POSTGRES_PASSWORD=1234
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 10s
-      retries: 5
-      start_period: 30s
-      timeout: 5s
-    restart: unless-stopped
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
 
   redis:
-    image: redis:6-alpine
-    command: redis-server --appendonly yes
+    image: redis:7
+
+  nginx:
+    image: nginx:stable
+    ports:
+      - "80:80"
+      - "443:443"
     volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      retries: 5
-      start_period: 30s
-      timeout: 5s
-    restart: unless-stopped
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
 
 volumes:
-  postgres_data:
-  redis_data:
+  db_data:

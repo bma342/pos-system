@@ -7,6 +7,17 @@ export type AppDispatch = typeof store.dispatch;
 // Define the UserRole type
 export type UserRole = 'admin' | 'manager' | 'user';
 
+// Define the OrderType
+export type OrderType = 'pickup' | 'delivery' | 'dine-in';
+
+// Define the Reward interface
+export interface Reward {
+  id: number;
+  name: string;
+  description: string;
+  pointsRequired: number;
+}
+
 // Define the interfaces for various entities used in the app
 
 export interface LoyaltyReward {
@@ -29,7 +40,20 @@ export interface Location {
   id: number;
   name: string;
   address: string;
-  gpsCoordinates?: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  phoneNumber: string;
+  email: string;
+  latitude: number;
+  longitude: number;
+  imageUrl?: string;
+  corePOSProfileId?: number;
+  posApis?: string[];
+  isDropoffSite?: boolean;
+  dropOffLocations?: DropOffLocation[];
+  twoFactorException: boolean;
+  paymentGatewayExceptions: PaymentGateway[];
 }
 
 export interface Wallet {
@@ -40,11 +64,24 @@ export interface Wallet {
 }
 
 export interface MenuItem {
-  id: number;
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  modifiers: Modifier[];
+  defaultModifiers: Modifier[];
+  reviewsEnabled: boolean;
+  averageRating?: number;
+  reviewCount?: number;
+  showQuantityAvailable: boolean;
+  quantityAvailable?: number;
+}
+
+export interface Modifier {
+  id: string;
   name: string;
   price: number;
-  description: string;
-  imageUrl?: string;
 }
 
 export interface MenuGroup {
@@ -92,13 +129,15 @@ export interface Client {
 }
 
 export interface Order {
-  id: number;
-  clientId: number;
-  items: OrderItem[];
+  id: string;
+  items: CartItem[];
+  orderType: OrderType;
+  subtotal: number;
+  tax: number;
   total: number;
-  status: string;
-  customerName?: string;
-  createdAt?: string;
+  appliedDiscounts: Reward[];
+  kitchenTip?: number;
+  driverTip?: number;
 }
 
 export interface OrderItem {
@@ -136,15 +175,20 @@ export interface POSProfileState {
 }
 
 export interface Discount {
-  id: string;
+  id: number;
   name: string;
+  type: 'percentage' | 'fixed' | 'bogo';
   value: number;
-  type: string;
-  expirationDate: string;
-  locationId: number | null;
-  conditions: Record<string, unknown>;
-  startDate: string;
-  endDate: string;
+  code?: string;
+  startDate: Date;
+  endDate: Date;
+  isActive: boolean;
+  usageLimit?: number;
+  usageCount: number;
+  minPurchaseAmount?: number;
+  maxDiscountAmount?: number;
+  applicableItems?: string;
+  applicableCategories?: string;
 }
 
 export interface LoyaltyConfig {
@@ -152,10 +196,9 @@ export interface LoyaltyConfig {
 }
 
 export interface CartItem {
-  id: number;
-  name: string;
-  price: number;
+  menuItem: MenuItem;
   quantity: number;
+  selectedModifiers: Modifier[];
 }
 
 export interface DashboardStat {
@@ -191,10 +234,10 @@ export interface OrderState {
 }
 
 export interface AuthState {
-  isAuthenticated: boolean;
-  token: string | null;
   user: User | null;
-  permissions: string[]; // Added to align with the auth slice
+  token: string | null;
+  isAuthenticated: boolean;
+  permissions: string[];
   status: 'idle' | 'loading' | 'failed' | 'succeeded';
   error: string | null;
 }
@@ -230,7 +273,7 @@ export interface LoyaltyState {
   rewards: LoyaltyReward[];
   config: LoyaltyConfig;
   userPoints: number;
-  status: 'idle' | 'loading' | 'failed' | 'succeeded';
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
 
@@ -304,22 +347,116 @@ export interface ApiResponse<T> {
   success: boolean;
   message: string;
 }
-// src/types.ts
-export interface Location {
+
+export interface ClientBranding {
+  id: string;
+  clientId: string;
+  logo: string;
+  favicon: string;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  fontFamily: string;
+  buttonStyle: 'rounded' | 'square';
+  headerStyle: 'centered' | 'left-aligned';
+  footerContent: string;
+}
+
+// Define the AuthResponse type
+export interface AuthResponse {
+  user: User;
+  token: string;
+  permissions?: string[]; // Include permissions if it's part of the response
+}
+
+export interface DropOffTime {
+  id: number;
+  time: string;
+}
+
+export interface DropOffLocation {
   id: number;
   name: string;
   address: string;
   city: string;
   state: string;
   zipCode: string;
-  phoneNumber: string;
-  email: string;
-  latitude: number;
-  longitude: number;
+  parentLocationId: number;
+  dropOffTimes: DropOffTime[];
 }
-// Define the AuthResponse type
-export interface AuthResponse {
-  user: User;
-  token: string;
-  permissions?: string[]; // Include permissions if it's part of the response
+
+export interface LoyaltyChallenge {
+  id: number;
+  name: string;
+  description: string;
+  conditions: {
+    itemCount: number;
+    timeframe: string;
+    minSpend: number;
+    frequency:
+      | 'unlimited'
+      | 'once_per_day'
+      | 'once_per_week'
+      | 'once_per_month';
+    restrictedMenuItems?: number[];
+    restrictedMenuGroups?: number[];
+  };
+  rewardConfig: {
+    reward: string;
+    points: number;
+    discount: number;
+  };
+  challengeType: 'purchase-based' | 'engagement-based';
+  startDate: Date;
+  endDate: Date;
+  status: 'active' | 'inactive' | 'completed' | 'archived';
+  participantCount: number;
+  locationId: number;
+  clientId: number;
+}
+
+// Add this to the existing types
+export interface LoyaltyChallengeProgress {
+  id: number;
+  challengeId: number;
+  guestId: number;
+  progress: {
+    itemCount?: number;
+    totalSpend?: number;
+    // Add other relevant progress fields
+  };
+  isCompleted: boolean;
+  completedAt?: Date;
+}
+
+export interface POSAlert {
+  id: number;
+  posProfileId: number;
+  errorCode: string;
+  message: string;
+  timestamp: Date;
+}
+
+export interface RealtimeMetrics {
+  todaySales: number;
+  todayOrders: number;
+  averageOrderValue: number;
+  newGuests: number;
+  returningGuests: number;
+  mostPopularItem: string;
+}
+
+export enum PaymentGateway {
+  STRIPE = 'stripe',
+  PAYPAL = 'paypal',
+  FINIX = 'finix',
+  AEDYN = 'aedyn',
+  WORLDPAY = 'worldpay',
+}
+
+export interface ClientSettings {
+  companyName: string;
+  supportEmail: string;
+  twoFactorRequired: boolean;
+  defaultPaymentGateways: PaymentGateway[];
 }

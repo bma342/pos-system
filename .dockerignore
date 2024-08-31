@@ -1,0 +1,107 @@
+.dockerignore
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.git
+.gitignore
+.vscode
+*.md
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Exclude test and documentation
+test
+tests
+__tests__
+docs
+*.test.js
+*.spec.js
+
+# Exclude build artifacts
+dist
+build
+*.bundle.js
+
+# Exclude environment files
+.env
+.env.local
+.env.*.local
+
+# Exclude any database files
+*.sqlite
+
+# Exclude large media files (adjust as needed)
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Exclude backup files
+*.bak
+*.backup
+*~
+
+# Exclude any other large or unnecessary directories
+cursor-project
+
+# Node modules
+**/node_modules
+
+# Git directories
+**/.git
+
+# Frontend specific
+frontend/.cache
+frontend/build
+frontend/dist
+
+# Backend specific
+backend/dist
+backend/build
+backend/.git
+
+# Common large directories
+**/typescript
+**/@mui
+**/@faker-js
+**/antd
+**/@ant-design
+**/@formatjs
+**/date-fns
+**/exceljs
+**/rxjs
+**/twilio
+
+# Cache and temporary files
+**/.cache
+**/tmp
+**/temp
+
+# Log files
+**/*.log
+
+# Environment files
+**/.env*
+
+# Editor directories
+**/.vscode
+**/.idea
+
+# OS files
+**/.DS_Store
+**/Thumbs.db
+
+# Docker files
+Dockerfile
+docker-compose.yml
+docker-compose.yml.save*
+.dockerignore
+
+# Other project files (adjust as needed)
+README.md
+LICENSE
+*.md

@@ -1,46 +1,48 @@
-module.exports = (sequelize, DataTypes) => {
-  const GuestLoyaltyProgram = sequelize.define('GuestLoyaltyProgram', {
-    guestId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Guests',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    loyaltyProgramId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'LoyaltyPrograms',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    pointsEarned: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 0,
-    },
-    tierStatus: {
-      type: DataTypes.STRING,
-      allowNull: true, // Optional status (e.g., 'Gold', 'Silver', etc.)
-    },
-    isActive: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
-    },
-    lastUpdated: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class GuestLoyaltyProgram extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+GuestLoyaltyProgram.attributes = attributes = {
+  guestId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Guests', key: 'id' }
+  },
+  loyaltyProgramId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'LoyaltyPrograms', key: 'id' }
+  },
+  points: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  tier: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  joinDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  },
+  lastActivityDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  }
+};
+
+module.exports = (sequelize) => {
+  GuestLoyaltyProgram.init(GuestLoyaltyProgram.attributes, {
+    sequelize,
+    modelName: 'GuestLoyaltyProgram',
+    tableName: 'guestloyaltyprograms', // Adjust this if needed
   });
-
-  GuestLoyaltyProgram.associate = (models) => {
-    GuestLoyaltyProgram.belongsTo(models.Guest, { foreignKey: 'guestId' });
-    GuestLoyaltyProgram.belongsTo(models.LoyaltyProgram, { foreignKey: 'loyaltyProgramId' });
-  };
-
-  return GuestLoyaltyProgram;
+  return GuestLoyaltyProgram
 };

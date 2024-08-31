@@ -1,77 +1,78 @@
-const { ServiceFee } = require('../models');
-const logger = require('../services/logger');
+const serviceFeeService = require('../services/serviceFeeService');
+const { AppError } = require('../utils/errorHandler');
+const logger = require('../utils/logger');
 
 // Get all service fees
-exports.getAllServiceFees = async (req, res) => {
+exports.getAllServiceFees = async (req, res, next) => {
   try {
-    const serviceFees = await ServiceFee.findAll();
-    res.json(serviceFees);
+    const serviceFees = await serviceFeeService.getAllServiceFees();
+    res.status(200).json(serviceFees);
   } catch (error) {
-    logger.error(`Error fetching service fees: ${error.message}`);
-    res.status(500).json({ message: 'Error fetching service fees', error: error.message });
+    logger.error('Error fetching all service fees:', error);
+    next(new AppError('Failed to fetch service fees', 500));
   }
 };
 
 // Get a single service fee by ID
-exports.getServiceFeeById = async (req, res) => {
+exports.getServiceFeeById = async (req, res, next) => {
   try {
-    const serviceFee = await ServiceFee.findByPk(req.params.id);
+    const serviceFee = await serviceFeeService.getServiceFeeById(req.params.id);
     if (!serviceFee) {
-      return res.status(404).json({ message: 'Service fee not found' });
+      return next(new AppError('Service fee not found', 404));
     }
-    res.json(serviceFee);
+    res.status(200).json(serviceFee);
   } catch (error) {
-    logger.error(`Error fetching service fee: ${error.message}`);
-    res.status(500).json({ message: 'Error fetching service fee', error: error.message });
+    logger.error(`Error fetching service fee ${req.params.id}:`, error);
+    next(error);
   }
 };
 
 // Create a new service fee
-exports.createServiceFee = async (req, res) => {
+exports.createServiceFee = async (req, res, next) => {
   try {
-    const { locationId, providerId, orderType, feeAmount, posSyncId } = req.body;
-    const newServiceFee = await ServiceFee.create({
-      locationId,
-      providerId,
-      orderType,
-      feeAmount,
-      posSyncId,
-    });
+    const newServiceFee = await serviceFeeService.createServiceFee(req.body);
     res.status(201).json(newServiceFee);
   } catch (error) {
-    logger.error(`Error creating service fee: ${error.message}`);
-    res.status(500).json({ message: 'Error creating service fee', error: error.message });
+    logger.error('Error creating service fee:', error);
+    next(new AppError('Failed to create service fee', 500));
   }
 };
 
 // Update an existing service fee
-exports.updateServiceFee = async (req, res) => {
+exports.updateServiceFee = async (req, res, next) => {
   try {
-    const serviceFee = await ServiceFee.findByPk(req.params.id);
-    if (!serviceFee) {
-      return res.status(404).json({ message: 'Service fee not found' });
+    const updatedServiceFee = await serviceFeeService.updateServiceFee(req.params.id, req.body);
+    if (!updatedServiceFee) {
+      return next(new AppError('Service fee not found', 404));
     }
-
-    const updatedServiceFee = await serviceFee.update(req.body);
-    res.json(updatedServiceFee);
+    res.status(200).json(updatedServiceFee);
   } catch (error) {
-    logger.error(`Error updating service fee: ${error.message}`);
-    res.status(500).json({ message: 'Error updating service fee', error: error.message });
+    logger.error(`Error updating service fee ${req.params.id}:`, error);
+    next(error);
   }
 };
 
 // Delete a service fee
-exports.deleteServiceFee = async (req, res) => {
+exports.deleteServiceFee = async (req, res, next) => {
   try {
-    const serviceFee = await ServiceFee.findByPk(req.params.id);
-    if (!serviceFee) {
-      return res.status(404).json({ message: 'Service fee not found' });
+    const result = await serviceFeeService.deleteServiceFee(req.params.id);
+    if (!result) {
+      return next(new AppError('Service fee not found', 404));
     }
-
-    await serviceFee.destroy();
     res.status(204).send();
   } catch (error) {
-    logger.error(`Error deleting service fee: ${error.message}`);
-    res.status(500).json({ message: 'Error deleting service fee', error: error.message });
+    logger.error(`Error deleting service fee ${req.params.id}:`, error);
+    next(error);
+  }
+};
+
+// Get service fees by client
+exports.getServiceFeesByClient = async (req, res, next) => {
+  try {
+    const serviceFees = await serviceFeeService.getServiceFeesByClient(req.params.clientId);
+    res.status(200).json(serviceFees);
+  } catch (error) {
+    logger.error(`Error fetching service fees for client ${req.params.clientId}:`, error);
+    next(error);
   }
 };

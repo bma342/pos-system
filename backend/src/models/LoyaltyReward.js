@@ -1,96 +1,54 @@
-const { Sequelize } = require('sequelize');
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
 
-module.exports = (sequelize, DataTypes) => {
-  const LoyaltyReward = sequelize.define('LoyaltyReward', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    tier: {
-      type: DataTypes.STRING, // Tier name, like 'Gold', 'Platinum'
-      allowNull: false,
-    },
-    pointsRequired: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    expirationDays: {
-      type: DataTypes.INTEGER, // Rolling expiration in days after earning
-      allowNull: true,
-    },
-    startDate: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    endDate: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    status: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: 'active',
-    },
-    walletId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Wallets',
-        key: 'id',
-      },
-      onUpdate: 'CASCADE',
-      onDelete: 'SET NULL',
-      allowNull: true,
-    },
-    locationId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Locations',
-        key: 'id',
-      },
-      onUpdate: 'CASCADE',
-      onDelete: 'SET NULL',
-      allowNull: true,
-    },
-    vanityName: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      validate: {
-        len: [0, 50],
-      },
-    },
-    vanityDescription: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      validate: {
-        len: [0, 100],
-      },
-    },
-    posPayload: {
-      type: DataTypes.JSONB, // Store original POS reward payload for syncing and pass-through
-      allowNull: true,
-    },
-    redemptionMethod: {
-      type: DataTypes.ENUM('auto', 'manual', 'on-site'),
-      allowNull: false,
-      defaultValue: 'manual', // Specifies how the reward is redeemed
-    },
-    createdAt: {
-      allowNull: false,
-      type: DataTypes.DATE,
-      defaultValue: Sequelize.fn('now'),
-    },
-    updatedAt: {
-      allowNull: false,
-      type: DataTypes.DATE,
-      defaultValue: Sequelize.fn('now'),
-    },
+class LoyaltyReward extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+LoyaltyReward.attributes = attributes = {
+  programId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'LoyaltyPrograms', key: 'id' }
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  pointsCost: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  rewardType: {
+    type: DataTypes.ENUM('discount', 'freeItem', 'giftCard', 'other'),
+    allowNull: false
+  },
+  rewardValue: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  expirationDays: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  }
+};
+
+module.exports = (sequelize) => {
+  LoyaltyReward.init(LoyaltyReward.attributes, {
+    sequelize,
+    modelName: 'LoyaltyReward',
+    tableName: 'loyaltyrewards', // Adjust this if needed
   });
-
-  LoyaltyReward.associate = (models) => {
-    LoyaltyReward.belongsTo(models.Wallet, { foreignKey: 'walletId' });
-    LoyaltyReward.belongsTo(models.Location, { foreignKey: 'locationId' });
-    LoyaltyReward.belongsTo(models.LoyaltyProgram, { foreignKey: 'loyaltyProgramId' });
-  };
-
-  return LoyaltyReward;
+  return LoyaltyReward
 };

@@ -1,93 +1,102 @@
-const db = require('../models');
-const logger = require('../services/logger');
+const { Client, ClientSettings } = require('../models');
+const { AppError } = require('../utils/errorHandler');
+const logger = require('../utils/logger');
 
-class ClientService {
-  // Fetch all clients
-  async getAllClients() {
-    try {
-      const clients = await db.Client.findAll();
-      return clients;
-    } catch (error) {
-      logger.error(`Error fetching all clients: ${error.message}`);
-      throw new Error('Error fetching clients.');
-    }
+const getAllClients = async () => {
+  try {
+    return await Client.findAll();
+  } catch (error) {
+    logger.error('Error fetching all clients:', error);
+    throw new AppError('Failed to fetch clients', 500);
   }
+};
 
-  // Fetch client by ID
-  async getClientById(clientId) {
-    try {
-      const client = await db.Client.findByPk(clientId);
-      if (!client) throw new Error('Client not found');
-      return client;
-    } catch (error) {
-      logger.error(`Error fetching client by ID: ${error.message}`);
-      throw new Error('Error fetching client.');
+const getClientById = async (id) => {
+  try {
+    const client = await Client.findByPk(id);
+    if (!client) {
+      throw new AppError('Client not found', 404);
     }
+    return client;
+  } catch (error) {
+    logger.error(`Error fetching client with ID ${id}:`, error);
+    throw error instanceof AppError ? error : new AppError('Failed to fetch client', 500);
   }
+};
 
-  // Create a new client
-  async createClient(clientData) {
-    try {
-      const { name, email, phoneNumber, address } = clientData;
-      const subdomain = name.toLowerCase().replace(/\s+/g, '-'); // Generate subdomain from client name
-      const client = await db.Client.create({ name, email, phoneNumber, address, subdomain });
-      logger.info(`Client created: ${client.name}`);
-      return client;
-    } catch (error) {
-      logger.error(`Error creating client: ${error.message}`);
-      throw new Error('Error creating client.');
+const createClient = async (clientData) => {
+  try {
+    const newClient = await Client.create(clientData);
+    logger.info(`New client created with ID: ${newClient.id}`);
+    return newClient;
+  } catch (error) {
+    logger.error('Error creating client:', error);
+    throw new AppError('Failed to create client', 500);
+  }
+};
+
+const updateClient = async (id, clientData) => {
+  try {
+    const client = await getClientById(id);
+    const updatedClient = await client.update(clientData);
+    logger.info(`Client updated with ID: ${id}`);
+    return updatedClient;
+  } catch (error) {
+    logger.error(`Error updating client with ID ${id}:`, error);
+    throw error instanceof AppError ? error : new AppError('Failed to update client', 500);
+  }
+};
+
+const deleteClient = async (id) => {
+  try {
+    const client = await getClientById(id);
+    await client.destroy();
+    logger.info(`Client deleted with ID: ${id}`);
+    return true;
+  } catch (error) {
+    logger.error(`Error deleting client with ID ${id}:`, error);
+    throw error instanceof AppError ? error : new AppError('Failed to delete client', 500);
+  }
+};
+
+const getClientSettings = async (clientId) => {
+  try {
+    const settings = await ClientSettings.findOne({ where: { clientId } });
+    if (!settings) {
+      throw new AppError('Client settings not found', 404);
     }
+    return settings;
+  } catch (error) {
+    logger.error(`Error fetching settings for client ${clientId}:`, error);
+    throw error instanceof AppError ? error : new AppError('Failed to fetch client settings', 500);
   }
+};
 
-  // Update client details
-  async updateClient(clientId, updateData) {
-    try {
-      const client = await db.Client.findByPk(clientId);
-      if (!client) throw new Error('Client not found');
-      await client.update(updateData);
-      logger.info(`Client updated: ${client.name}`);
-      return client;
-    } catch (error) {
-      logger.error(`Error updating client: ${error.message}`);
-      throw new Error('Error updating client.');
+const updateClientSettings = async (clientId, settingsData) => {
+  try {
+    const [settings, created] = await ClientSettings.findOrCreate({
+      where: { clientId },
+      defaults: settingsData
+    });
+
+    if (!created) {
+      await settings.update(settingsData);
     }
+
+    logger.info(`Settings updated for client: ${clientId}`);
+    return settings;
+  } catch (error) {
+    logger.error(`Error updating settings for client ${clientId}:`, error);
+    throw new AppError('Failed to update client settings', 500);
   }
+};
 
-  // Delete a client
-  async deleteClient(clientId) {
-    try {
-      const client = await db.Client.findByPk(clientId);
-      if (!client) throw new Error('Client not found');
-      await client.destroy();
-      logger.info(`Client deleted: ${client.name}`);
-      return { message: 'Client deleted successfully' };
-    } catch (error) {
-      logger.error(`Error deleting client: ${error.message}`);
-      throw new Error('Error deleting client.');
-    }
-  }
-
-  // Fetch client theme settings
-  async getClientTheme(subdomain) {
-    try {
-      const client = await db.Client.findOne({ where: { subdomain } });
-      if (!client) throw new Error('Client not found');
-
-      const theme = {
-        primaryColor: client.primaryColor,
-        secondaryColor: client.secondaryColor,
-        accentColor: client.accentColor,
-        primaryFont: client.primaryFont,
-        secondaryFont: client.secondaryFont,
-      };
-
-      logger.info(`Client theme fetched: ${client.name}`);
-      return theme;
-    } catch (error) {
-      logger.error(`Error fetching client theme: ${error.message}`);
-      throw new Error('Error fetching client theme.');
-    }
-  }
-}
-
-module.exports = new ClientService();
+module.exports = {
+  getAllClients,
+  getClientById,
+  createClient,
+  updateClient,
+  deleteClient,
+  getClientSettings,
+  updateClientSettings
+};

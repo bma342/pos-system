@@ -1,61 +1,53 @@
-module.exports = (sequelize, DataTypes) => {
-  const LoyaltySubscription = sequelize.define('LoyaltySubscription', {
-    guestId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Guests',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    subscriptionType: {
-      type: DataTypes.STRING, // 'monthly', 'yearly', 'lifetime'
-      allowNull: false,
-    },
-    startDate: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    endDate: {
-      type: DataTypes.DATE,
-      allowNull: true, // Nullable if it's a lifetime subscription
-    },
-    renewalDate: {
-      type: DataTypes.DATE,
-      allowNull: true, // For recurring subscriptions
-    },
-    status: {
-      type: DataTypes.STRING,
-      defaultValue: 'active', // Can be 'active', 'cancelled', 'paused'
-      allowNull: false,
-    },
-    paymentMethod: {
-      type: DataTypes.STRING, // 'credit card', 'paypal', etc.
-      allowNull: false,
-    },
-    autoRenew: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true, // If the subscription is set to auto-renew
-    },
-    paymentDetails: {
-      type: DataTypes.JSONB, // Store encrypted payment details or tokenized data
-      allowNull: true,
-    },
-    clientId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Clients',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class LoyaltySubscription extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+LoyaltySubscription.attributes = attributes = {
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Users', key: 'id' }
+  },
+  programId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'LoyaltyPrograms', key: 'id' }
+  },
+  startDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  },
+  endDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  status: {
+    type: DataTypes.ENUM('active', 'paused', 'cancelled'),
+    allowNull: false,
+    defaultValue: 'active'
+  },
+  currentPoints: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  currentTier: {
+    type: DataTypes.STRING,
+    allowNull: true
+  }
+};
+
+module.exports = (sequelize) => {
+  LoyaltySubscription.init(LoyaltySubscription.attributes, {
+    sequelize,
+    modelName: 'LoyaltySubscription',
+    tableName: 'loyaltysubscriptions', // Adjust this if needed
   });
-
-  LoyaltySubscription.associate = (models) => {
-    LoyaltySubscription.belongsTo(models.Guest, { foreignKey: 'guestId' });
-    LoyaltySubscription.belongsTo(models.Client, { foreignKey: 'clientId' });
-  };
-
-  return LoyaltySubscription;
+  return LoyaltySubscription
 };

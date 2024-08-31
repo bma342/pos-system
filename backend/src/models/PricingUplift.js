@@ -1,79 +1,69 @@
-module.exports = (sequelize, DataTypes) => {
-  const PricingUplift = sequelize.define('PricingUplift', {
-    providerName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    upliftPercentage: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-      defaultValue: 0.0,
-    },
-    roundingOption: {
-      type: DataTypes.ENUM('none', 'up', 'down', 'nearest'),
-      allowNull: false,
-      defaultValue: 'none',
-    },
-    locationId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Locations',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    menuItemId: {
-      type: DataTypes.INTEGER,
-      allowNull: true, // Optional if the uplift is item-specific
-      references: {
-        model: 'MenuItems',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    menuGroupId: {
-      type: DataTypes.INTEGER,
-      allowNull: true, // Optional if the uplift is group-specific
-      references: {
-        model: 'MenuGroups',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    clientId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Clients',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    syncStatus: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: 'pending', // Can be 'pending', 'active', or 'completed'
-    },
-    providerIntegrationId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'ProviderIntegrations',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-  });
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
 
-  PricingUplift.associate = (models) => {
-    PricingUplift.belongsTo(models.Location, { foreignKey: 'locationId' });
-    PricingUplift.belongsTo(models.MenuItem, { foreignKey: 'menuItemId' });
-    PricingUplift.belongsTo(models.MenuGroup, { foreignKey: 'menuGroupId' });
-    PricingUplift.belongsTo(models.Client, { foreignKey: 'clientId' });
-    PricingUplift.belongsTo(models.ProviderIntegration, { foreignKey: 'providerIntegrationId' });
-  };
+class PricingUplift extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
 
-  return PricingUplift;
+PricingUplift.attributes = attributes = {
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Clients', key: 'id' }
+  },
+  locationId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: { model: 'Locations', key: 'id' }
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  type: {
+    type: DataTypes.ENUM('percentage', 'fixed'),
+    allowNull: false
+  },
+  value: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false
+  },
+  appliesTo: {
+    type: DataTypes.ENUM('all', 'category', 'item'),
+    allowNull: false
+  },
+  categoryId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: { model: 'Categories', key: 'id' }
+  },
+  menuItemId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: { model: 'MenuItems', key: 'id' }
+  },
+  startDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  endDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  }
 };
 
+module.exports = (sequelize) => {
+  PricingUplift.init(PricingUplift.attributes, {
+    sequelize,
+    modelName: 'PricingUplift',
+    tableName: 'pricinguplifts', // Adjust this if needed
+  });
+  return PricingUplift
+};

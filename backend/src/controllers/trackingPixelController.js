@@ -1,37 +1,72 @@
-const db = require('../models');
+const trackingPixelService = require('../services/trackingPixelService');
+const { AppError } = require('../utils/errorHandler');
+const logger = require('../utils/logger');
 
-exports.createPixel = async (req, res) => {
+exports.createPixel = async (req, res, next) => {
   try {
-    const pixel = await db.TrackingPixel.create(req.body);
-    res.status(201).json(pixel);
+    const newPixel = await trackingPixelService.createPixel(req.body);
+    res.status(201).json(newPixel);
   } catch (error) {
-    res.status(500).json({ message: 'Error creating tracking pixel', error });
+    logger.error('Error creating tracking pixel:', error);
+    next(new AppError('Failed to create tracking pixel', 500));
   }
 };
 
-exports.updatePixel = async (req, res) => {
+exports.getAllPixels = async (req, res, next) => {
   try {
-    const pixel = await db.TrackingPixel.update(req.body, { where: { id: req.params.id } });
-    res.status(200).json(pixel);
-  } catch (error) {
-    res.status(500).json({ message: 'Error updating tracking pixel', error });
-  }
-};
-
-exports.deletePixel = async (req, res) => {
-  try {
-    await db.TrackingPixel.destroy({ where: { id: req.params.id } });
-    res.status(204).json();
-  } catch (error) {
-    res.status(500).json({ message: 'Error deleting tracking pixel', error });
-  }
-};
-
-exports.getPixelsByLocation = async (req, res) => {
-  try {
-    const pixels = await db.TrackingPixel.findAll({ where: { locationId: req.params.locationId } });
+    const pixels = await trackingPixelService.getAllPixels();
     res.status(200).json(pixels);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching tracking pixels', error });
+    logger.error('Error fetching all tracking pixels:', error);
+    next(new AppError('Failed to fetch tracking pixels', 500));
+  }
+};
+
+exports.getPixelById = async (req, res, next) => {
+  try {
+    const pixel = await trackingPixelService.getPixelById(req.params.id);
+    if (!pixel) {
+      return next(new AppError('Tracking pixel not found', 404));
+    }
+    res.status(200).json(pixel);
+  } catch (error) {
+    logger.error(`Error fetching tracking pixel ${req.params.id}:`, error);
+    next(error);
+  }
+};
+
+exports.updatePixel = async (req, res, next) => {
+  try {
+    const updatedPixel = await trackingPixelService.updatePixel(req.params.id, req.body);
+    if (!updatedPixel) {
+      return next(new AppError('Tracking pixel not found', 404));
+    }
+    res.status(200).json(updatedPixel);
+  } catch (error) {
+    logger.error(`Error updating tracking pixel ${req.params.id}:`, error);
+    next(error);
+  }
+};
+
+exports.deletePixel = async (req, res, next) => {
+  try {
+    const result = await trackingPixelService.deletePixel(req.params.id);
+    if (!result) {
+      return next(new AppError('Tracking pixel not found', 404));
+    }
+    res.status(204).send();
+  } catch (error) {
+    logger.error(`Error deleting tracking pixel ${req.params.id}:`, error);
+    next(error);
+  }
+};
+
+exports.triggerPixel = async (req, res, next) => {
+  try {
+    const result = await trackingPixelService.triggerPixel(req.params.id);
+    res.status(200).json(result);
+  } catch (error) {
+    logger.error(`Error triggering tracking pixel ${req.params.id}:`, error);
+    next(error);
   }
 };

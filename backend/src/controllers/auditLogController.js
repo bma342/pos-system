@@ -1,61 +1,46 @@
-const { createAuditLog, fetchAuditLogs } = require('../services/auditLogService');
+const { Request, Response } = require 'express';
+const { AuditLog } = require '../models';
 
-// Create an audit log entry
-exports.createAuditLog = async (req, res) => {
-  const { action, details, userId } = req.body;
-
+const getAuditLogs = async (req, res) => {
   try {
-    await createAuditLog(action, details, userId);
-    res.status(201).json({ message: 'Audit log created successfully' });
+    const { page = 1, limit = 20, startDate, endDate, userId, action } = req.query;
+    const options = {
+      order: [['createdAt', 'DESC']],
+      limit(limit ),
+      offset: (parseInt(page ) - 1) * parseInt(limit ),
+    };
+
+    if (startDate && endDate) {
+      options.where = {
+        ...options.where,
+        createdAt: {
+          [Op.between]: [new Date(startDate ), new Date(endDate )],
+        },
+      };
+    }
+
+    if (userId) {
+      options.where = {
+        ...options.where,
+        userId,
+      };
+    }
+
+    if (action) {
+      options.where = {
+        ...options.where,
+        action,
+      };
+    }
+
+    const logs = await AuditLog.findAndCountAll(options);
+
+    res.json({
+      logs.rows,
+      totalPages.ceil(logs.count / parseInt(limit )),
+      currentPage(page ),
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// Fetch all audit logs with filtering options (e.g., by user, action type, date range)
-exports.getAuditLogs = async (req, res) => {
-  const { userId, action, dateRangeStart, dateRangeEnd } = req.query;
-
-  try {
-    const logs = await fetchAuditLogs({ userId, action, dateRangeStart, dateRangeEnd });
-    res.status(200).json(logs);
-  } catch (error) {
-    res.status(500).json({ error: 'Error fetching audit logs', details: error.message });
-  }
-};
-
-// Fetch audit logs by specific user
-exports.getAuditLogsByUser = async (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    const logs = await fetchAuditLogs({ userId });
-    res.status(200).json(logs);
-  } catch (error) {
-    res.status(500).json({ error: 'Error fetching user audit logs', details: error.message });
-  }
-};
-
-// Fetch audit logs by action type
-exports.getAuditLogsByAction = async (req, res) => {
-  const { action } = req.params;
-
-  try {
-    const logs = await fetchAuditLogs({ action });
-    res.status(200).json(logs);
-  } catch (error) {
-    res.status(500).json({ error: 'Error fetching audit logs by action', details: error.message });
-  }
-};
-
-// Fetch audit logs within a specific date range
-exports.getAuditLogsByDateRange = async (req, res) => {
-  const { dateRangeStart, dateRangeEnd } = req.query;
-
-  try {
-    const logs = await fetchAuditLogs({ dateRangeStart, dateRangeEnd });
-    res.status(200).json(logs);
-  } catch (error) {
-    res.status(500).json({ error: 'Error fetching audit logs by date range', details: error.message });
+    res.status(500).json({ message: 'Error fetching audit logs', error });
   }
 };

@@ -1,49 +1,46 @@
-module.exports = (sequelize, DataTypes) => {
-  const Modifier = sequelize.define('Modifier', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    price: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
-    },
-    posModifierId: {
-      type: DataTypes.STRING,
-      allowNull: true, // For storing specific POS integration IDs
-    },
-    abTestVariantA: {
-      type: DataTypes.STRING,
-      allowNull: true, // A/B test variant name A
-    },
-    abTestVariantB: {
-      type: DataTypes.STRING,
-      allowNull: true, // A/B test variant name B
-    },
-    abTestTracking: {
-      type: DataTypes.JSONB,
-      allowNull: true, // JSON field for tracking A/B test stats
-    },
-    sizeSliderEnabled: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false, // If the size slider is enabled for this modifier
-    },
-    sliderOptions: {
-      type: DataTypes.JSONB, // JSON to store slider options like {"leftLabel": "Small", "rightLabel": "Large", "steps": 4}
-      allowNull: true,
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class Modifier extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+Modifier.attributes = attributes = {
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Clients', key: 'id' }
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  type: {
+    type: DataTypes.ENUM('single', 'multiple'),
+    allowNull: false
+  },
+  price: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  }
+};
+
+module.exports = (sequelize) => {
+  Modifier.init(Modifier.attributes, {
+    sequelize,
+    modelName: 'Modifier',
+    tableName: 'modifiers', // Adjust this if needed
   });
-
-  Modifier.associate = (models) => {
-    Modifier.belongsToMany(models.MenuItem, {
-      through: models.MenuItemModifier,
-      foreignKey: 'modifierId',
-      otherKey: 'menuItemId',
-    });
-
-    // New association for enhanced reporting and A/B testing
-    Modifier.hasMany(models.ABTestResult, { foreignKey: 'modifierId', as: 'abTestResults' });
-  };
-
-  return Modifier;
+  return Modifier
 };

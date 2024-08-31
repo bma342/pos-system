@@ -1,56 +1,50 @@
-// src/models/DriverLocations.js
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
 
-module.exports = (sequelize, DataTypes) => {
-  const DriverLocations = sequelize.define('DriverLocations', {
-    driverId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'DeliveryDrivers',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    locationId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Locations',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    assignedOn: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    isPrimaryLocation: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false, // Indicates if this is the primary location for the driver
-    },
-    deliveryRadius: {
-      type: DataTypes.FLOAT, // Define custom delivery radius for this location assignment
-      allowNull: true,
-    },
-    customHours: {
-      type: DataTypes.JSONB, // Store custom hours for this driver-location assignment
-      allowNull: true,
-    },
-    driverStatus: {
-      type: DataTypes.STRING,
-      defaultValue: 'available', // 'available', 'on-delivery', 'unavailable'
-    },
+class DriverLocations extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+DriverLocations.attributes = attributes = {
+  driverId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'DeliveryDrivers', key: 'id' }
+  },
+  latitude: {
+    type: DataTypes.FLOAT,
+    allowNull: false
+  },
+  longitude: {
+    type: DataTypes.FLOAT,
+    allowNull: false
+  },
+  timestamp: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  },
+  accuracy: {
+    type: DataTypes.FLOAT,
+    allowNull: true
+  },
+  speed: {
+    type: DataTypes.FLOAT,
+    allowNull: true
+  },
+  bearing: {
+    type: DataTypes.FLOAT,
+    allowNull: true
+  }
+};
+
+module.exports = (sequelize) => {
+  DriverLocations.init(DriverLocations.attributes, {
+    sequelize,
+    modelName: 'DriverLocations',
+    tableName: 'driverlocationss', // Adjust this if needed
   });
-
-  DriverLocations.associate = (models) => {
-    DriverLocations.belongsTo(models.DeliveryDriver, { foreignKey: 'driverId' });
-    DriverLocations.belongsTo(models.Location, { foreignKey: 'locationId' });
-
-    // Ensure that a driver can be assigned to multiple locations and vice versa
-    models.DeliveryDriver.belongsToMany(models.Location, { through: DriverLocations, foreignKey: 'driverId' });
-    models.Location.belongsToMany(models.DeliveryDriver, { through: DriverLocations, foreignKey: 'locationId' });
-  };
-
-  return DriverLocations;
+  return DriverLocations
 };

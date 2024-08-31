@@ -1,37 +1,55 @@
-module.exports = (sequelize, DataTypes) => {
-  const DataWall = sequelize.define('DataWall', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    accessLevel: {
-      type: DataTypes.ENUM('admin', 'manager', 'viewer'), // Define different access levels
-      allowNull: false,
-    },
-    locationId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Locations',
-        key: 'id',
-      },
-    },
-    reportId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Reports',
-        key: 'id',
-      },
-    },
-    permissions: {
-      type: DataTypes.JSONB, // Define custom permission logic for data walls
-      allowNull: false,
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class DataWall extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+DataWall.attributes = attributes = {
+  clientId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Clients', key: 'id' }
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  dataSource: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  queryParameters: {
+    type: DataTypes.JSON,
+    allowNull: true
+  },
+  refreshInterval: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 3600 // in seconds
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  lastRefreshed: {
+    type: DataTypes.DATE,
+    allowNull: true
+  }
+};
+
+module.exports = (sequelize) => {
+  DataWall.init(DataWall.attributes, {
+    sequelize,
+    modelName: 'DataWall',
+    tableName: 'datawalls', // Adjust this if needed
   });
-
-  DataWall.associate = (models) => {
-    DataWall.belongsTo(models.Location, { foreignKey: 'locationId' });
-    DataWall.belongsTo(models.Report, { foreignKey: 'reportId' });
-  };
-
-  return DataWall;
+  return DataWall
 };

@@ -1,34 +1,21 @@
-module.exports = (sequelize, DataTypes) => {
-  const TrackingPixel = sequelize.define('TrackingPixel', {
-    locationId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'Locations',
-        key: 'id',
-      },
-      onDelete: 'SET NULL',
-    },
-    type: {
-      type: DataTypes.ENUM('TikTok', 'GTM', 'Meta', 'Other'),
-      allowNull: false,
-    },
-    pixelId: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    isGlobal: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-  }, {
-    tableName: 'TrackingPixels',
-    timestamps: true,
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class TrackingPixel extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+TrackingPixel.attributes = {
+  // Define attributes here
+};
+
+module.exports = (sequelize) => {
+  TrackingPixel.init(TrackingPixel.attributes, {
+    sequelize,
+    modelName: 'TrackingPixel',
+    tableName: 'trackingpixels', // Adjust this if needed
   });
-
-  TrackingPixel.associate = (models) => {
-    TrackingPixel.belongsTo(models.Location, { foreignKey: 'locationId' });
-  };
-
-  return TrackingPixel;
+  return TrackingPixel
 };

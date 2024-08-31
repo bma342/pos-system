@@ -1,39 +1,39 @@
-module.exports = (sequelize, DataTypes) => {
-  const CateringOrderModifier = sequelize.define('CateringOrderModifier', {
-    cateringOrderItemId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'CateringOrderItems',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    modifierId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'Modifiers',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    priceAdjustment: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-      defaultValue: 0.0,
-    },
-    quantity: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 1,
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class CateringOrderModifier extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+CateringOrderModifier.attributes = attributes = {
+  cateringOrderItemId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'CateringOrderItems', key: 'id' }
+  },
+  modifierId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'Modifiers', key: 'id' }
+  },
+  quantity: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 1
+  },
+  price: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false
+  }
+};
+
+module.exports = (sequelize) => {
+  CateringOrderModifier.init(CateringOrderModifier.attributes, {
+    sequelize,
+    modelName: 'CateringOrderModifier',
+    tableName: 'cateringordermodifiers', // Adjust this if needed
   });
-
-  CateringOrderModifier.associate = (models) => {
-    CateringOrderModifier.belongsTo(models.CateringOrderItem, { foreignKey: 'cateringOrderItemId' });
-    CateringOrderModifier.belongsTo(models.Modifier, { foreignKey: 'modifierId' });
-  };
-
-  return CateringOrderModifier;
+  return CateringOrderModifier
 };

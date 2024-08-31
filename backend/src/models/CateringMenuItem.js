@@ -1,41 +1,47 @@
-module.exports = (sequelize, DataTypes) => {
-  const CateringMenuItem = sequelize.define('CateringMenuItem', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    price: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-    },
-    imageUrl: {
-      type: DataTypes.STRING,
-      allowNull: true, // Optional image for the item
-    },
-    isAvailable: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true, // Indicate if the item is available
-    },
-    menuId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'CateringMenus',
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
+const { DataTypes } = require('sequelize');
+const BaseModel = require('./BaseModel');
+
+class CateringMenuItem extends BaseModel {
+  static associate(models) {
+    // Define associations here
+  }
+}
+
+CateringMenuItem.attributes = attributes = {
+  cateringMenuId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'CateringMenus', key: 'id' }
+  },
+  menuItemId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: { model: 'MenuItems', key: 'id' }
+  },
+  price: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false
+  },
+  minimumQuantity: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 1
+  },
+  maximumQuantity: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  }
+};
+
+module.exports = (sequelize) => {
+  CateringMenuItem.init(CateringMenuItem.attributes, {
+    sequelize,
+    modelName: 'CateringMenuItem',
+    tableName: 'cateringmenuitems', // Adjust this if needed
   });
-
-  CateringMenuItem.associate = (models) => {
-    CateringMenuItem.belongsTo(models.CateringMenu, { foreignKey: 'menuId' });
-
-    // Add any additional associations, such as with Modifiers, if needed
-  };
-
-  return CateringMenuItem;
+  return CateringMenuItem
 };

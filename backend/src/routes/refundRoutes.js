@@ -1,14 +1,26 @@
 const express = require('express');
-const router = express.Router();
 const refundController = require('../controllers/refundController');
-const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
+const authorize = require('../middleware/authorize');
 
-router.use(authenticateToken);
+const router = express.Router();
 
-router.get('/', authorizeRoles('Admin', 'Manager'), refundController.getAllRefunds);
-router.post('/', authorizeRoles('Admin', 'Manager'), refundController.createRefund);
-router.get('/:id', authorizeRoles('Admin', 'Manager'), refundController.getRefundById);
-router.put('/:id', authorizeRoles('Admin', 'Manager'), refundController.updateRefund);
-router.delete('/:id', authorizeRoles('Admin', 'Manager'), refundController.deleteRefund);
+// Apply authentication middleware to all routes
+router.use(authenticate);
+
+// Process refund
+router.post('/', authorize(['admin', 'manager']), refundController.processRefund);
+
+// Get refund by ID
+router.get('/:id', authorize(['admin', 'manager']), refundController.getRefundById);
+
+// Get all refunds for an order
+router.get('/order/:orderId', authorize(['admin', 'manager']), refundController.getRefundsByOrder);
+
+// Update refund status
+router.put('/:id/status', authorize(['admin']), refundController.updateRefundStatus);
+
+// Cancel refund
+router.post('/:id/cancel', authorize(['admin']), refundController.cancelRefund);
 
 module.exports = router;
