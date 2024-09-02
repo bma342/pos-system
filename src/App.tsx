@@ -1,22 +1,16 @@
-import React from 'react';
-import * as Sentry from "@sentry/react";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import ErrorBoundary from './components/ErrorBoundary';
-
-Sentry.init({
-  dsn: "YOUR_SENTRY_DSN",
-  integrations: [new Sentry.BrowserTracing()],
-  tracesSampleRate: 1.0,
-});
+import React, { Suspense, lazy, useMemo, useState, useEffect } from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { ClientProvider } from './context/ClientContext';
+import AppRoutes from './routes';
+import Navbar from './components/layout/Navbar';
 
 const App: React.FC = () => {
-  return (
-    <ErrorBoundary>
-      {/* Your app components */}
-      <ToastContainer />
-    </ErrorBoundary>
-  );
+  const { isLoading: isClientLoading, error: clientError, clientId, isAuthenticated } = useClientContext();
+  const [subdomain, setSubdomain] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // ... rest of the component
 };
 
-export default App;
+export default React.memo(App);

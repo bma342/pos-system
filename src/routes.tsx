@@ -1,22 +1,26 @@
 import React from 'react';
-import { Route, Routes } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import AdminDiscounts from './pages/AdminDiscounts';
-import AdminLoyaltyManagement from './pages/AdminLoyaltyManagement';
-import PrivateRoute from './components/PrivateRoute';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import ClientLogin from './pages/ClientLogin';
+import BusinessAdminDashboard from './pages/BusinessAdminDashboard';
+import { useClientContext } from './context/ClientContext';
 
 const AppRoutes: React.FC = () => {
+  const { client, isLoading } = useClientContext();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!client) {
+    return <div>Invalid subdomain or client not found</div>;
+  }
+
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/" element={<PrivateRoute />}>
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="admin/discounts" element={<AdminDiscounts />} />
-        <Route path="admin/loyalty" element={<AdminLoyaltyManagement />} />
-      </Route>
+      <Route path="/login" element={<ClientLogin />} />
+      <Route path="/admin" element={<BusinessAdminDashboard />} />
+      {/* Add more routes as needed */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 };

@@ -1,30 +1,20 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
 
 interface PrivateRouteProps {
-  children: React.ReactElement;
-  requiredRole?: string;
+  isAuthenticated: boolean;
+  children: React.ReactNode;
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({
+  isAuthenticated,
   children,
-  requiredRole,
 }) => {
-  const { isAuthenticated, user } = useSelector(
-    (state: RootState) => state.auth
-  );
-
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to="/unauthorized" replace />;
-  }
-
-  return children;
+  return <>{children}</>;
 };
 
 export default PrivateRoute;

@@ -1,109 +1,63 @@
-import React from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  loginUser,
-  selectAuthStatus,
-  selectAuthError,
-} from '../redux/slices/authSlice';
-import { AppDispatch } from '../types';
-import { TextField, Typography, CircularProgress } from '@mui/material';
-import styled from 'styled-components';
-import Button from '@mui/material/Button';
-import Layout from '../components/Layout'; // Ensure this file is correctly typed to accept children
+import { useDispatch } from 'react-redux';
+import { useClientContext } from '../context/ClientContext';
+import { loginUser } from '../redux/slices/authSlice';
+import { AppDispatch } from '../redux/store';
 
-interface IFormInput {
-  email: string;
-  password: string;
-}
-
-const FormWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-`;
-
-const StyledForm = styled.form`
-  width: 100%;
-  max-width: 300px;
-`;
-
-const Login: React.FC = React.memo(() => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<IFormInput>();
-  const dispatch = useDispatch<AppDispatch>();
+const Login: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const status = useSelector(selectAuthStatus);
-  const error = useSelector(selectAuthError);
+  const dispatch = useDispatch<AppDispatch>();
+  const { client } = useClientContext();
 
-  const onSubmit: SubmitHandler<IFormInput> = async (data) => {
-    const resultAction = await dispatch(loginUser(data));
-    if (loginUser.fulfilled.match(resultAction)) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!client) {
+      setError('Client information not available');
+      return;
+    }
+
+    try {
+      await dispatch(loginUser({ email, password, clientId: client.id })).unwrap();
       navigate('/dashboard');
+    } catch (err) {
+      setError('Invalid email or password');
+      console.error(err);
     }
   };
 
-  return (
-    <Layout>
-      <FormWrapper>
-        <Typography variant="h4" gutterBottom>
-          Login
-        </Typography>
-        <StyledForm onSubmit={handleSubmit(onSubmit)}>
-          <TextField
-            label="Email"
-            type="email"
-            {...register('email', {
-              required: 'Email is required',
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: 'Invalid email address',
-              },
-            })}
-            error={!!errors.email}
-            helperText={errors.email?.message}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="Password"
-            type="password"
-            {...register('password', {
-              required: 'Password is required',
-              minLength: {
-                value: 6,
-                message: 'Password must be at least 6 characters',
-              },
-            })}
-            error={!!errors.password}
-            helperText={errors.password?.message}
-            fullWidth
-            margin="normal"
-          />
-          <Button
-            type="submit"
-            disabled={status === 'loading'}
-            style={{ marginTop: '1rem', width: '100%' }}
-          >
-            {status === 'loading' ? <CircularProgress size={24} /> : 'Login'}
-          </Button>
-        </StyledForm>
-        {error && (
-          <Typography color="error" style={{ marginTop: '1rem' }}>
-            {error}
-          </Typography>
-        )}
-      </FormWrapper>
-    </Layout>
-  );
-});
+  if (!client) {
+    return <div>Loading...</div>;
+  }
 
-Login.displayName = 'Login';
+  return (
+    <div>
+      <h2>Login to {client.name}</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          required
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          required
+        />
+        <button type="submit">Login</button>
+      </form>
+      {error && <p>{error}</p>}
+    </div>
+  );
+};
 
 export default Login;

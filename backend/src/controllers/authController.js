@@ -4,25 +4,27 @@ const bcrypt = require('bcrypt');
 const { User } = require('../models');
 const userService = require('../services/userService');
 const { UnauthorizedError } = require('../utils/errors');
+const Client = require('../models/Client'); // Assuming Client model is defined
 
-const login = async (req, res, next) => {
+const login = async (req, res) => {
+  const { email, password } = req.body;
+  const { subdomain } = req.params; // Assuming subdomain is passed as a route parameter
+
   try {
-    const { username, password } = req.body;
-    const user = await userService.getUserByUsername(username);
-
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      throw new UnauthorizedError('Invalid credentials');
+    const client = await Client.findOne({ subdomain });
+    if (!client) {
+      return res.status(404).json({ message: 'Client not found' });
     }
 
-    const token = jwt.sign(
-      { userId: user.id, username: user.username, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
+    const user = await User.findOne({ email, clientId: client._id });
+    if (!user || !(await user.comparePassword(password))) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
 
-    res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
+    const token = user.generateAuthToken();
+    res.json({ user, token });
   } catch (error) {
-    next(error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 

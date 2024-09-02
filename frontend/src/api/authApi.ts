@@ -1,13 +1,15 @@
 import axiosInstance from './axios';
-import { User, AuthResponse, UserRole } from '../types';
+import { AuthResponse } from '../types';
 
 export const loginUser = async (credentials: {
   email: string;
   password: string;
+  subdomain: string;
 }): Promise<AuthResponse> => {
+  const { subdomain, ...loginData } = credentials;
   const response = await axiosInstance.post<AuthResponse>(
-    '/auth/login',
-    credentials
+    `/auth/${subdomain}/login`,
+    loginData
   );
   return response.data;
 };

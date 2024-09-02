@@ -6,6 +6,9 @@ import {
 } from '../types/clientTypes';
 import apiClient from './apiClient';
 
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || 'https://api.eatsuite.net';
+
 export const fetchClientId = async (): Promise<number | null> => {
   try {
     const response = await axios.get<number>('/api/clients/get-client-id');
@@ -80,4 +83,18 @@ export const updateClientPreferences = async (
     preferences
   );
   return response.data;
+};
+
+export const fetchClientBySubdomain = async (
+  subdomain: string
+): Promise<Client> => {
+  try {
+    const response = await axios.get<Client>(
+      `/api/clients/subdomain/${subdomain}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching client by subdomain:', error);
+    throw error;
+  }
 };
