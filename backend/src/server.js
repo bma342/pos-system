@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit');
 const { AppError, errorHandler } = require('./utils/errorHandler');
 const logger = require('./utils/logger');
 const routes = require('./routes');
+const subdomainMiddleware = require('./middleware/subdomainMiddleware');
 
 const app = express();
 
@@ -28,6 +29,9 @@ app.use((req, res, next) => {
   logger.info(`${req.method} ${req.originalUrl}`);
   next();
 });
+
+// Add this before your routes
+app.use(subdomainMiddleware);
 
 // Routes
 app.use('/api', routes);

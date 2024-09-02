@@ -1,20 +1,22 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
+import { useClientContext } from '../context/ClientContext';
 
-interface PrivateRouteProps {
-  isAuthenticated: boolean;
-  children: React.ReactNode;
-}
+const PrivateRoute: React.FC = () => {
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const { client, isLoading } = useClientContext();
 
-const PrivateRoute: React.FC<PrivateRouteProps> = ({
-  isAuthenticated,
-  children,
-}) => {
-  if (!isAuthenticated) {
+  if (isLoading) {
+    return <div>Loading...</div>; // Or a more sophisticated loading component
+  }
+
+  if (!client) {
     return <Navigate to="/login" replace />;
   }
 
-  return <>{children}</>;
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default PrivateRoute;
