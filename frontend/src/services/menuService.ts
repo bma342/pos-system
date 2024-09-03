@@ -1,103 +1,18 @@
 import axios from 'axios';
 import { Menu, MenuItem, MenuGroup } from '../types/menuTypes';
 
-class MenuService {
-  private apiUrl = '/api/menus';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000/api';
 
-  async getMenus(): Promise<Menu[]> {
-    const response = await axios.get<Menu[]>(this.apiUrl);
+export const menuService = {
+  async getMenus(clientId: string): Promise<Menu[]> {
+    const response = await axios.get<Menu[]>(`${API_BASE_URL}/clients/${clientId}/menus`);
     return response.data;
-  }
+  },
 
-  async getMenuById(id: string): Promise<Menu> {
-    const response = await axios.get<Menu>(`${this.apiUrl}/${id}`);
+  async updateMenuItem(menuId: string, itemId: string, updates: Partial<MenuItem>): Promise<MenuItem> {
+    const response = await axios.put<MenuItem>(`${API_BASE_URL}/menus/${menuId}/items/${itemId}`, updates);
     return response.data;
-  }
+  },
 
-  async createMenu(menuData: Omit<Menu, 'id'>): Promise<Menu> {
-    const response = await axios.post<Menu>(this.apiUrl, menuData);
-    return response.data;
-  }
-
-  async updateMenu(id: string, menuData: Partial<Menu>): Promise<Menu> {
-    const response = await axios.put<Menu>(`${this.apiUrl}/${id}`, menuData);
-    return response.data;
-  }
-
-  async deleteMenu(id: string): Promise<void> {
-    await axios.delete(`${this.apiUrl}/${id}`);
-  }
-
-  async addMenuItem(
-    menuId: string,
-    itemData: Omit<MenuItem, 'id'>
-  ): Promise<MenuItem> {
-    const response = await axios.post<MenuItem>(
-      `${this.apiUrl}/${menuId}/items`,
-      itemData
-    );
-    return response.data;
-  }
-
-  async updateMenuItem(
-    menuId: string,
-    itemId: string,
-    itemData: Partial<MenuItem>
-  ): Promise<MenuItem> {
-    const response = await axios.put<MenuItem>(
-      `${this.apiUrl}/${menuId}/items/${itemId}`,
-      itemData
-    );
-    return response.data;
-  }
-
-  async deleteMenuItem(menuId: string, itemId: string): Promise<void> {
-    await axios.delete(`${this.apiUrl}/${menuId}/items/${itemId}`);
-  }
-
-  async addMenuGroup(
-    menuId: string,
-    groupData: Omit<MenuGroup, 'id'>
-  ): Promise<MenuGroup> {
-    const response = await axios.post<MenuGroup>(
-      `${this.apiUrl}/${menuId}/groups`,
-      groupData
-    );
-    return response.data;
-  }
-
-  async updateMenuGroup(
-    menuId: string,
-    groupId: string,
-    groupData: Partial<MenuGroup>
-  ): Promise<MenuGroup> {
-    const response = await axios.put<MenuGroup>(
-      `${this.apiUrl}/${menuId}/groups/${groupId}`,
-      groupData
-    );
-    return response.data;
-  }
-
-  async deleteMenuGroup(menuId: string, groupId: string): Promise<void> {
-    await axios.delete(`${this.apiUrl}/${menuId}/groups/${groupId}`);
-  }
-
-  async getMenuAnalytics(
-    menuId: string,
-    startDate: Date,
-    endDate: Date
-  ): Promise<Record<string, number>> {
-    const response = await axios.get<Record<string, number>>(
-      `${this.apiUrl}/${menuId}/analytics`,
-      {
-        params: {
-          startDate: startDate.toISOString(),
-          endDate: endDate.toISOString(),
-        },
-      }
-    );
-    return response.data;
-  }
-}
-
-export default new MenuService();
+  // Add other menu-related API calls here
+};

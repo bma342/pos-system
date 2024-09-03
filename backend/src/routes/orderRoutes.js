@@ -12,4 +12,8 @@ router.get('/:orderId', authenticate, authorize(['User', 'Admin']), OrderControl
 router.put('/:orderId/cancel', authenticate, authorize(['User']), OrderController.cancelOrder);
 router.put('/:orderId/status', authenticate, authorize(['Admin']), OrderController.updateOrderStatus);
 
+// Add other necessary routes (updateOrder, deleteOrder, etc.)
+router.post('/orders', OrderController.createOrder);
+router.get('/orders/:id', OrderController.getOrder);
+
 module.exports = router;

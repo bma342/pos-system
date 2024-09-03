@@ -1,19 +1,19 @@
 export enum UserRole {
   GUEST = 'GUEST',
   CLIENT_ADMIN = 'CLIENT_ADMIN',
-  SUPER_ADMIN = 'SUPER_ADMIN',
+  GLOBAL_ADMIN = 'GLOBAL_ADMIN',
+  EMPLOYEE = 'EMPLOYEE',
 }
 
 export interface User {
-  id: number;
+  id: string;
   email: string;
-  firstName: string;
-  lastName: string;
-  roles: UserRole[];
-  clientId: number;
+  name: string;
+  role: string;
+  // Add any other user properties
 }
 
 export interface AuthResponse {
-  user: User;
   token: string;
+  user: User;
 }

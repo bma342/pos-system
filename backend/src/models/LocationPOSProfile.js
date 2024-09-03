@@ -9,31 +9,35 @@ class LocationPOSProfile extends BaseModel {
 
 LocationPOSProfile.attributes = attributes = {
   locationId: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
     allowNull: false,
-    references: { model: 'Locations', key: 'id' }
   },
-  posProfileId: {
-    type: DataTypes.INTEGER,
+  corePOSProfileId: {
+    type: DataTypes.UUID,
     allowNull: false,
-    references: { model: 'POSProfiles', key: 'id' }
+    references: {
+      model: 'core_pos_profiles',
+      key: 'id',
+    },
   },
-  isActive: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: true
+  lastSyncStatus: {
+    type: DataTypes.ENUM('SUCCESS', 'FAILED', 'IN_PROGRESS', 'NOT_SYNCED'),
+    defaultValue: 'NOT_SYNCED',
+  },
+  lastSyncError: {
+    type: DataTypes.STRING,
   },
   customSettings: {
     type: DataTypes.JSON,
-    allowNull: true
-  }
+    defaultValue: {},
+  },
 };
 
 module.exports = (sequelize) => {
   LocationPOSProfile.init(LocationPOSProfile.attributes, {
     sequelize,
     modelName: 'LocationPOSProfile',
-    tableName: 'locationposprofiles', // Adjust this if needed
+    tableName: 'location_pos_profiles', // Adjust this if needed
   });
   return LocationPOSProfile
 };

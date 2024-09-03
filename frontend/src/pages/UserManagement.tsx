@@ -52,7 +52,7 @@ const UserManagement: React.FC = () => {
 
   const handleAddUser = () => {
     setSelectedUser({
-      id: 0,
+      id: '',
       username: '',
       email: '',
       role: UserRole.EMPLOYEE,
@@ -71,7 +71,7 @@ const UserManagement: React.FC = () => {
 
     try {
       let updatedUser: User;
-      if (selectedUser.id === 0) {
+      if (selectedUser.id === '') {
         updatedUser = await userService.createUser(selectedUser);
         setUsers([...users, updatedUser]);
       } else {
@@ -144,7 +144,7 @@ const UserManagement: React.FC = () => {
                 <TableCell>{user.id}</TableCell>
                 <TableCell>{user.username}</TableCell>
                 <TableCell>{user.email}</TableCell>
-                <TableCell>{user.roles.join(', ')}</TableCell>
+                <TableCell>{user.role}</TableCell>
                 <TableCell>
                   <Button onClick={() => handleEditUser(user)}>Edit</Button>
                   <Button
@@ -179,7 +179,7 @@ const UserManagement: React.FC = () => {
               }}
             >
               <Typography variant="h6" gutterBottom>
-                {selectedUser.id === 0 ? 'Add New User' : 'Edit User'}
+                {selectedUser.id === '' ? 'Add New User' : 'Edit User'}
               </Typography>
               <TextField
                 label="Username"
@@ -202,11 +202,11 @@ const UserManagement: React.FC = () => {
               <FormControl fullWidth margin="normal">
                 <InputLabel>Role</InputLabel>
                 <Select
-                  value={selectedUser.roles[0]}
+                  value={selectedUser.role}
                   onChange={(e) =>
                     setSelectedUser({
                       ...selectedUser,
-                      roles: [e.target.value as UserRole],
+                      role: e.target.value as UserRole,
                     })
                   }
                 >

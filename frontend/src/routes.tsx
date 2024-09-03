@@ -3,12 +3,10 @@ import { Routes, Route } from 'react-router-dom';
 import { UserRole } from './types/userTypes';
 import PrivateRoute from './components/PrivateRoute';
 import Dashboard from './pages/Dashboard';
-import AdminPanel from './pages/AdminPanel';
 import GuestLandingPage from './pages/GuestLandingPage';
 import Login from './pages/Login';
 import Menu from './pages/Menu';
 import OrderConfirmation from './pages/OrderConfirmation';
-import UserProfile from './pages/UserProfile';
 import LocationManagement from './pages/LocationManagement';
 import MenuBuilder from './pages/MenuBuilder';
 import OrderPage from './pages/OrderPage';
@@ -32,17 +30,13 @@ import CateringMenuItems from './pages/CateringMenuItems';
 import CateringMenus from './pages/CateringMenus';
 import CateringOrderAssignments from './pages/CateringOrderAssignments';
 import CateringOrders from './pages/CateringOrders';
-import CateringOrdersAdmin from './pages/CateringOrdersAdmin';
 import ClientSettings from './pages/ClientSettings';
 import GlobalAdminDashboard from './pages/GlobalAdminDashboard';
-import GlobalAdminPanel from './pages/GlobalAdminPanel';
 import GuestMenuPage from './pages/GuestMenuPage';
 import GuestProfile from './pages/GuestProfile';
-import GuestProfilePage from './pages/GuestProfilePage';
 import HomePage from './pages/HomePage';
 import Inventory from './pages/Inventory';
 import InventoryManagement from './pages/InventoryManagement';
-import LoyaltyAdminPage from './pages/LoyaltyAdminPage';
 import LoyaltyManagement from './pages/LoyaltyManagement';
 import MenuManagementAdmin from './pages/MenuManagementAdmin';
 import MenuPage from './pages/MenuPage';
@@ -50,14 +44,7 @@ import POSSettingsPage from './pages/PosSettingsPage';
 import Register from './pages/Register';
 import ReportingDashboard from './pages/ReportingDashboard';
 import UserManagement from './pages/UserManagement';
-
-// Update UserRole enum if GLOBAL_ADMIN is missing
-enum UserRole {
-  GUEST,
-  CLIENT_ADMIN,
-  GLOBAL_ADMIN,
-  // ... other roles
-}
+import AdminPanel from './pages/AdminPanel'; // Add this import
 
 const AppRoutes: React.FC = () => {
   return (
@@ -66,8 +53,6 @@ const AppRoutes: React.FC = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/menu/:locationId" element={<Menu />} />
-      <Route path="/cart" element={<Cart />} />
-      <Route path="/checkout" element={<Checkout />} />
       <Route
         path="/order-confirmation/:orderId"
         element={<OrderConfirmation />}

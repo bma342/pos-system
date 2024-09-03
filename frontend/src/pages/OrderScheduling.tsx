@@ -1,22 +1,16 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
-import { fetchLocations } from '../redux/slices/locationSlice';
+import { fetchLocations, setLocations } from '../redux/slices/locationSlice';
 import { Location } from '../types';
 
 const OrderScheduling: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const locations = useSelector(
-    (state: RootState) => state.locations.locations
-  );
-  const status = useSelector((state: RootState) => state.location.status);
+  const locations = useSelector((state: RootState) => state.location.locations);
 
   useEffect(() => {
     dispatch(fetchLocations());
   }, [dispatch]);
-
-  if (status === 'loading') return <div>Loading...</div>;
-  if (status === 'failed') return <div>Error loading locations</div>;
 
   return (
     <div>

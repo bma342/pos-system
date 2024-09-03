@@ -44,4 +44,14 @@ router.delete('/:id/integrations/:integrationId', authorize(['admin']), provider
 // Sync provider data
 router.post('/:id/sync', authorize(['admin']), providerController.syncProviderData);
 
+// New routes for provider service
+router.get('/providers', providerController.getProviders);
+router.get('/providers/:id', providerController.getProvider);
+router.post('/providers', providerController.addProvider);
+router.put('/providers/:id', providerController.updateProvider);
+router.delete('/providers/:id', providerController.deleteProvider);
+router.get('/providers/search', providerController.searchProviders);
+router.post('/providers/bulk-delete', providerController.bulkDeleteProviders);
+router.get('/providers/stats', providerController.getProviderStats);
+
 module.exports = router;

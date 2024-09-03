@@ -1,6 +1,5 @@
 const { Counter, Histogram } = require('prom-client');
-const { Order } = require('../models/Order');
-const { MenuItem } = require('../models/MenuItem');
+const { Order, OrderItem, MenuItem } = require('../models/Order');
 const { calculatePrepTime, formatEstimatedTime, checkInventory } = require('./orderPrepService');
 const { emitDashboardUpdate, emitNewOrder } = require('./dashboardService'); // Changed from './dashboardService1' to './dashboardService'
 const { emitOrderUpdate } = require('../socket');
@@ -18,35 +17,23 @@ const orderValueHistogram = new Histogram({
 });
 
 const createOrder = async (orderData) => {
-  // Check inventory
-  const inventoryAvailable = await checkInventory(orderData.items);
-  if (!inventoryAvailable) {
-    throw new Error('Some items are out of stock');
-  }
+  const order = await Order.create(orderData);
 
-  // Calculate prep time
-  const prepTime = await calculatePrepTime(orderData);
-  const estimatedTime = formatEstimatedTime(prepTime, orderData.scheduledTime);
-
-  // Create order
-  const order = await Order.create({
-    ...orderData,
-    estimatedPickupTime: estimatedTime,
-  });
-
-  // Update inventory
   for (const item of orderData.items) {
     const menuItem = await MenuItem.findByPk(item.menuItemId);
-    if (menuItem) {
-      await menuItem.update({
-        onlineInventoryOffset: menuItem.onlineInventoryOffset - item.quantity,
-      });
+    if (!menuItem) {
+      throw new Error(`Menu item not found: ${item.menuItemId}`);
     }
-  }
 
-  // Emit updates
-  emitNewOrder(order);
-  emitDashboardUpdate();
+    await OrderItem.create({
+      orderId: order.id,
+      menuItemId: menuItem.id,
+      name: menuItem.name,
+      quantity: item.quantity,
+      price: item.price || menuItem.price, // Use provided price or default to menu price
+      specialInstructions: item.specialInstructions
+    });
+  }
 
   return order;
 };

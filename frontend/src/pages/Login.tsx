@@ -1,60 +1,58 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { useClientContext } from '../context/ClientContext';
+import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../redux/slices/authSlice';
-import { AppDispatch } from '../redux/store';
+import { RootState, AppDispatch } from '../redux/store';
+import { Client } from '../types';
 
 const Login: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
-  const dispatch = useDispatch<AppDispatch>();
-  const { client } = useClientContext();
+  const client = useSelector((state: RootState) => state.clientConfig.client);
+  const error = useSelector((state: RootState) => state.auth.error);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await dispatch(
-        loginUser({
-          email,
-          password,
-          clientId: client.id,
-          subdomain: client.subdomain,
-        })
-      );
-      navigate('/dashboard');
-    } catch (error) {
-      setError('Invalid credentials');
+    if (client) {
+      const loginData = {
+        email,
+        password,
+        clientId: client.id,
+        subdomain: client.subdomain || '',
+      };
+      dispatch(loginUser(loginData));
+    } else {
+      console.error('Client is null');
     }
   };
 
-  if (!client) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <div>
-      <h2>Login to {client.name}</h2>
+    <div className="login-container">
+      <h2>Login</h2>
       <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          required
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          required
-        />
+        <div>
+          <label htmlFor="email">Email:</label>
+          <input
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
         <button type="submit">Login</button>
       </form>
-      {error && <p>{error}</p>}
+      {error && <p className="error-message">{error}</p>}
     </div>
   );
 };

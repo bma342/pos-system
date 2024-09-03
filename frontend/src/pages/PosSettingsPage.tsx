@@ -8,23 +8,35 @@ import {
 
 const POSSettingsPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const posSettings = useSelector((state: RootState) => state.posSettings);
+  const { settings, error } = useSelector((state: RootState) => state.posSettings);
   const [modifierSendMethod, setModifierSendMethod] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     dispatch(fetchPOSSettings());
   }, [dispatch]);
 
   useEffect(() => {
-    if (posSettings.modifierSendMethod) {
-      setModifierSendMethod(posSettings.modifierSendMethod);
+    if (settings?.modifierSendMethod) {
+      setModifierSendMethod(settings.modifierSendMethod);
     }
-  }, [posSettings]);
+  }, [settings]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(updatePOSSettings({ modifierSendMethod }));
+    setIsSaving(true);
+    try {
+      await dispatch(updatePOSSettings({ modifierSendMethod })).unwrap();
+      alert('Settings updated successfully');
+    } catch (err) {
+      alert('Failed to update settings. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  if (status === 'loading') return <div>Loading...</div>;
+  if (status === 'failed') return <div>Error: {error}</div>;
 
   return (
     <div className="pos-settings-page">
@@ -41,7 +53,9 @@ const POSSettingsPage: React.FC = () => {
             <option value="individual">Send Individually</option>
           </select>
         </div>
-        <button type="submit">Save Settings</button>
+        <button type="submit" disabled={isSaving}>
+          {isSaving ? 'Saving...' : 'Save Settings'}
+        </button>
       </form>
     </div>
   );

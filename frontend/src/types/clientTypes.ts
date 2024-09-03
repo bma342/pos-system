@@ -22,3 +22,10 @@ export interface ClientBranding {
   logo: string;
   // ... other branding fields
 }
+
+export interface ClientConfig {
+  id: string;
+  name: string;
+  settings: Record<string, any>;
+  // Add other properties as needed
+}

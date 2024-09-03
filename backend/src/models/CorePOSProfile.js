@@ -1,50 +1,46 @@
 const { DataTypes } = require('sequelize');
-const BaseModel = require('./BaseModel');
-
-class CorePOSProfile extends BaseModel {
-  static associate(models) {
-    // Define associations here
-  }
-}
-
-CorePOSProfile.attributes = attributes = {
-  clientId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: { model: 'Clients', key: 'id' }
-  },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  posType: {
-    type: DataTypes.ENUM('Toast', 'Square', 'Clover', 'Other'),
-    allowNull: false
-  },
-  apiKey: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  apiSecret: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  settings: {
-    type: DataTypes.JSON,
-    allowNull: true
-  },
-  isActive: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: true
-  }
-};
 
 module.exports = (sequelize) => {
-  CorePOSProfile.init(CorePOSProfile.attributes, {
-    sequelize,
-    modelName: 'CorePOSProfile',
-    tableName: 'coreposprofiles', // Adjust this if needed
+  const CorePOSProfile = sequelize.define('CorePOSProfile', {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    posType: {
+      type: DataTypes.ENUM('TOAST', 'BRINK', 'REVEL', 'SQUARE'),
+      allowNull: false,
+    },
+    apiEndpoint: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    apiKey: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    syncInterval: {
+      type: DataTypes.INTEGER,
+      defaultValue: 3600,
+    },
+    lastSyncTimestamp: {
+      type: DataTypes.DATE,
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+    settings: {
+      type: DataTypes.JSON,
+      defaultValue: {},
+    },
+  }, {
+    tableName: 'core_pos_profiles',
   });
-  return CorePOSProfile
+
+  return CorePOSProfile;
 };

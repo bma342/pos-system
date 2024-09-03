@@ -6,6 +6,7 @@ import WalletDrop from '../components/WalletDrop';
 import DiscountBuilder from '../components/DiscountBuilder';
 import POSDiscountSync from '../components/POSDiscountSync';
 import ClientAdminHub from '../components/ClientAdminHub';
+import { UserRole } from '../types/userTypes';
 
 const LoyaltyAdminPage: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);

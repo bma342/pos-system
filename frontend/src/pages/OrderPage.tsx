@@ -1,111 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { AppDispatch } from '../redux/store';
-import {
-  addToCart,
-  removeFromCart,
-  applyDiscount,
-  selectCartItems,
-} from '../redux/slices/cartSlice';
-import { Discount, CartItem, MenuItem } from '../types';
+import { RootState } from '../redux/store';
 import { fetchMenus } from '../redux/slices/menuSlice';
-import { fetchDiscounts } from '../redux/slices/discountSlice';
-import { useClientContext } from '../context/ClientContext';
+import { addToCart, applyDiscount, removeFromCart } from '../redux/slices/cartSlice';
+import { Menu, MenuItem } from '../types/menuTypes';
+import { CartItem, Discount } from '../types/cartTypes';
 
 const OrderPage: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const cart = useSelector(selectCartItems);
-  const { clientId } = useClientContext();
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [availableDiscounts, setAvailableDiscounts] = useState<Discount[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useDispatch();
+  const menus = useSelector((state: RootState) => state.menu.menus);
+  const cartItems = useSelector((state: RootState) => state.cart.items);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (clientId) {
-        setLoading(true);
-        try {
-          const menuAction = await dispatch(fetchMenus(clientId));
-          if (fetchMenus.fulfilled.match(menuAction)) {
-            const items = menuAction.payload.flatMap((menu) =>
-              menu.groups.flatMap((group) => group.items)
-            );
-            setMenuItems(items);
-          }
-
-          const discountAction = await dispatch(fetchDiscounts(clientId));
-          if (fetchDiscounts.fulfilled.match(discountAction)) {
-            setAvailableDiscounts(discountAction.payload);
-          }
-        } catch (err) {
-          setError('Failed to load menu items or discounts');
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchData();
-  }, [dispatch, clientId]);
+    dispatch(fetchMenus() as any);
+  }, [dispatch]);
 
   const handleAddToCart = (item: MenuItem) => {
-    dispatch(
-      addToCart({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: 1,
-      })
-    );
+    dispatch(addToCart({
+      menuItemId: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: 1,
+    }));
   };
 
-  const handleRemoveFromCart = (itemId: number) => {
+  const handleRemoveFromCart = (itemId: string) => {
     dispatch(removeFromCart(itemId));
   };
 
   const handleApplyDiscount = (discount: Discount) => {
-    dispatch(applyDiscount(discount));
+    dispatch(applyDiscount(discount.amount));
   };
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
 
   return (
     <div>
-      <h2>Order</h2>
+      <h1>Order Page</h1>
       <div>
-        <h3>Menu Items</h3>
-        {menuItems.map((item) => (
-          <div key={item.id}>
-            <span>
-              {item.name} - ${item.price.toFixed(2)}
-            </span>
-            <button onClick={() => handleAddToCart(item)}>Add to Cart</button>
+        <h2>Menu</h2>
+        {menus.map((menu: Menu & { menuGroups: MenuGroup[] }) => (
+          <div key={menu.id}>
+            <h3>{menu.name}</h3>
+            {menu.menuGroups.flatMap((group: MenuGroup) => group.items).map((item: MenuItem) => (
+              <div key={item.id}>
+                <span>{item.name} - ${item.price}</span>
+                <button onClick={() => handleAddToCart(item)}>Add to Cart</button>
+              </div>
+            ))}
           </div>
         ))}
       </div>
       <div>
-        <h3>Cart</h3>
-        {cart.map((cartItem: CartItem) => (
-          <div key={cartItem.id}>
+        <h2>Cart</h2>
+        {cartItems.map((cartItem: CartItem) => (
+          <div key={cartItem.menuItemId}>
             <span>{cartItem.name}</span>
             <span>${cartItem.price.toFixed(2)}</span>
-            <button onClick={() => handleRemoveFromCart(cartItem.id)}>
-              Remove
-            </button>
+            <button onClick={() => handleRemoveFromCart(cartItem.menuItemId)}>Remove</button>
           </div>
-        ))}
-      </div>
-      <div>
-        <h3>Available Discounts</h3>
-        {availableDiscounts.map((discount) => (
-          <button
-            key={discount.id}
-            onClick={() => handleApplyDiscount(discount)}
-          >
-            Apply {discount.name} ({discount.value}% off)
-          </button>
         ))}
       </div>
     </div>

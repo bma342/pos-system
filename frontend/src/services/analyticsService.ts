@@ -27,18 +27,16 @@ export class AnalyticsService {
     endDate: Date,
     limit: number
   ): Promise<TopSellingItem[]> {
-    // ... implementation
-  }
-
-  async function getTopSellingItems(): Promise<TopSellingItem[]> {
-    // Your implementation here
-    return []; // Return an empty array if no data
+    const response = await axios.get('/api/analytics/top-selling-items-custom', {
+      params: { startDate, endDate, limit },
+    });
+    return response.data;
   }
 
   async getTopSellingItemsDefault(): Promise<TopSellingItem[]> {
     const response = await axios.get('/api/analytics/top-selling-items-default');
     return response.data;
   }
-
-  // Add other analytics methods as needed
 }
+
+export default new AnalyticsService();

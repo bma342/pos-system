@@ -2,6 +2,8 @@ const CateringOrderService = require('../services/cateringOrderService');
 const logger = require('../services/logger');
 const { check, validationResult } = require('express-validator');
 const CateringOrder = require('../models/CateringOrder');
+const CateringOrderItem = require('../models/CateringOrderItem');
+const Modifier = require('../models/Modifier');
 
 // Validation middleware for catering order creation
 const validateCateringOrder = [

@@ -1,51 +1,50 @@
 const { DataTypes } = require('sequelize');
-const BaseModel = require('./BaseModel');
+const sequelize = require('../db');
 
-class Menu extends BaseModel {
-  static associate(models) {
-    // Define associations here
-  }
-}
-
-Menu.attributes = attributes = {
-  clientId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: { model: 'Clients', key: 'id' }
+const Menu = sequelize.define('Menu', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
   },
   name: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
   description: {
     type: DataTypes.TEXT,
-    allowNull: true
+    allowNull: true,
+  },
+  clientId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
+  locationId: {
+    type: DataTypes.UUID,
+    allowNull: true,
   },
   isActive: {
     type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: true
+    defaultValue: true,
   },
   startDate: {
     type: DataTypes.DATE,
-    allowNull: true
+    allowNull: true,
   },
   endDate: {
     type: DataTypes.DATE,
-    allowNull: true
+    allowNull: true,
   },
-  type: {
-    type: DataTypes.ENUM('regular', 'seasonal', 'special'),
-    allowNull: false,
-    defaultValue: 'regular'
-  }
+  menuType: {
+    type: DataTypes.ENUM('REGULAR', 'SPECIAL', 'SEASONAL'),
+    defaultValue: 'REGULAR',
+  },
+});
+
+Menu.associate = (models) => {
+  Menu.hasMany(models.MenuGroup, { as: 'groups', foreignKey: 'menuId' });
+  Menu.belongsTo(models.Client, { foreignKey: 'clientId' });
+  Menu.belongsTo(models.Location, { foreignKey: 'locationId' });
 };
 
-module.exports = (sequelize) => {
-  Menu.init(Menu.attributes, {
-    sequelize,
-    modelName: 'Menu',
-    tableName: 'menus', // Adjust this if needed
-  });
-  return Menu
-};
+module.exports = Menu;

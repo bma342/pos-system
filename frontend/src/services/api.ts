@@ -1,7 +1,9 @@
 import axios, { AxiosError, AxiosRequestConfig, isAxiosError } from 'axios';
 import { store } from '../redux/store';
-import { logout as logoutAction } from '../redux/slices/authSlice';
+import { logoutUser } from '../redux/slices/authSlice';
 import logger from '../utils/logger';
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import { RootState } from '../redux/store';
 
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL,
@@ -32,7 +34,7 @@ api.interceptors.response.use(
         // Retry the original request
         return api(error.config as AxiosRequestConfig);
       } catch (refreshError) {
-        store.dispatch(logoutAction());
+        store.dispatch(logout());
         if (isAxiosError(refreshError)) {
           logger.error('API Refresh Error:', refreshError);
         } else if (refreshError instanceof Error) {
@@ -94,11 +96,21 @@ export const login = async (credentials: {
   });
 };
 
-export const logout = async () => {
-  return apiCall({
-    method: 'POST',
-    url: '/auth/logout',
-  });
-};
+export const logout = createAsyncThunk(
+  'auth/logout',
+  async (_, { dispatch }) => {
+    try {
+      // Perform logout logic here
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      
+      // Dispatch the logout action from the auth slice
+      dispatch(logoutUser());
+    } catch (error) {
+      console.error('Logout failed:', error);
+      throw error;
+    }
+  }
+);
 
 export default api;

@@ -2,45 +2,34 @@ const { DataTypes } = require('sequelize');
 const BaseModel = require('./BaseModel');
 
 class Modifier extends BaseModel {
+  static init(sequelize) {
+    super.init({
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+      },
+      orderItemId: {
+        type: DataTypes.UUID,
+        allowNull: false
+      },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      price: {
+        type: DataTypes.FLOAT,
+        allowNull: false
+      }
+    }, {
+      sequelize,
+      modelName: 'Modifier'
+    });
+  }
+
   static associate(models) {
-    // Define associations here
+    this.belongsTo(models.OrderItem, { foreignKey: 'orderItemId' });
   }
 }
 
-Modifier.attributes = attributes = {
-  clientId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: { model: 'Clients', key: 'id' }
-  },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  description: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  type: {
-    type: DataTypes.ENUM('single', 'multiple'),
-    allowNull: false
-  },
-  price: {
-    type: DataTypes.DECIMAL(10, 2),
-    allowNull: true
-  },
-  isActive: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: true
-  }
-};
-
-module.exports = (sequelize) => {
-  Modifier.init(Modifier.attributes, {
-    sequelize,
-    modelName: 'Modifier',
-    tableName: 'modifiers', // Adjust this if needed
-  });
-  return Modifier
-};
+module.exports = Modifier;

@@ -8,11 +8,21 @@ import {
 } from '../redux/slices/walletSlice';
 import { AppDispatch } from '../redux/store';
 
+interface Reward {
+  id: string;
+  name: string;
+}
+
+interface Discount {
+  id: string;
+  name: string;
+}
+
 const Wallet: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const balance = useSelector(selectWalletBalance);
-  const rewards = useSelector(selectWalletRewards);
-  const discounts = useSelector(selectWalletDiscounts);
+  const balance = useSelector(selectWalletBalance) as number;
+  const rewards = useSelector(selectWalletRewards) as Reward[];
+  const discounts = useSelector(selectWalletDiscounts) as Discount[];
 
   useEffect(() => {
     dispatch(loadWalletData());
@@ -21,16 +31,13 @@ const Wallet: React.FC = () => {
   return (
     <div>
       <h2>Your Wallet</h2>
-      <p>Balance: ${balance.toFixed(2)}</p>
+      <p>Balance: ${(balance as number).toFixed(2)}</p>
 
       <h3>Rewards</h3>
-      {rewards.length > 0 ? (
+      {(rewards as Reward[]).length > 0 ? (
         <ul>
-          {rewards.map((reward) => (
-            <li key={reward.id}>
-              {reward.name}: {reward.description} - {reward.pointsRequired}{' '}
-              points
-            </li>
+          {(rewards as Reward[]).map((reward: Reward) => (
+            <li key={reward.id}>{reward.name}</li>
           ))}
         </ul>
       ) : (
@@ -38,15 +45,10 @@ const Wallet: React.FC = () => {
       )}
 
       <h3>Discounts</h3>
-      {discounts.length > 0 ? (
+      {(discounts as Discount[]).length > 0 ? (
         <ul>
-          {discounts.map((discount) => (
-            <li key={discount.id}>
-              {discount.name}: {discount.value}% (Expires:{' '}
-              {discount.expirationDate &&
-                new Date(discount.expirationDate).toLocaleDateString()}
-              )
-            </li>
+          {(discounts as Discount[]).map((discount: Discount) => (
+            <li key={discount.id}>{discount.name}</li>
           ))}
         </ul>
       ) : (

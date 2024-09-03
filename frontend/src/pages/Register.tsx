@@ -1,139 +1,88 @@
-import React from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/store';
+import { register as registerUser } from '../redux/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
-import {
-  registerUser,
-  selectAuthStatus,
-  selectAuthError,
-} from '../redux/slices/authSlice';
-import { AppDispatch } from '../types';
-import {
-  TextField,
-  Button,
-  Typography,
-  Box,
-  CircularProgress,
-} from '@mui/material';
-
-interface IFormInput {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
 
 const Register: React.FC = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm<IFormInput>();
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const status = useSelector(selectAuthStatus);
-  const error = useSelector(selectAuthError);
+  const { status } = useSelector((state: RootState) => state.auth);
 
-  const onSubmit: SubmitHandler<IFormInput> = async ({
-    name,
-    email,
-    password,
-  }) => {
-    const resultAction = await dispatch(
-      registerUser({ name, email, password, role: 'user' }) // Assigning default role as 'user'
-    );
-    if (registerUser.fulfilled.match(resultAction)) {
-      navigate('/dashboard');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (password !== confirmPassword) {
+      setError("Passwords don't match");
+      return;
+    }
+
+    try {
+      await dispatch(registerUser({ username, email, password })).unwrap();
+      navigate('/login');
+    } catch (err) {
+      setError('Registration failed. Please try again.');
     }
   };
 
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      minHeight="100vh"
-    >
-      <Typography variant="h4" gutterBottom>
-        Register
-      </Typography>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <TextField
-          label="Name"
-          {...register('name', { required: 'Name is required' })}
-          error={!!errors.name}
-          helperText={errors.name?.message}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Email"
-          type="email"
-          {...register('email', {
-            required: 'Email is required',
-            pattern: {
-              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-              message: 'Invalid email address',
-            },
-          })}
-          error={!!errors.email}
-          helperText={errors.email?.message}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Password"
-          type="password"
-          {...register('password', {
-            required: 'Password is required',
-            minLength: {
-              value: 6,
-              message: 'Password must be at least 6 characters',
-            },
-          })}
-          error={!!errors.password}
-          helperText={errors.password?.message}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Confirm Password"
-          type="password"
-          {...register('confirmPassword', {
-            required: 'Please confirm your password',
-            validate: (val: string) => {
-              if (watch('password') !== val) {
-                return 'Your passwords do not match';
-              }
-            },
-          })}
-          error={!!errors.confirmPassword}
-          helperText={errors.confirmPassword?.message}
-          fullWidth
-          margin="normal"
-        />
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          disabled={status === 'loading'}
-          style={{ marginTop: '1rem' }}
-        >
-          {status === 'loading' ? <CircularProgress size={24} /> : 'Register'}
-        </Button>
+    <div className="register-page">
+      <h2>Register</h2>
+      {error && <div className="error">{error}</div>}
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="username">Username:</label>
+          <input
+            type="text"
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="email">Email:</label>
+          <input
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="confirmPassword">Confirm Password:</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit" disabled={status === 'loading'}>
+          {status === 'loading' ? 'Registering...' : 'Register'}
+        </button>
       </form>
-      {error && (
-        <Typography color="error" style={{ marginTop: '1rem' }}>
-          {error}
-        </Typography>
-      )}
-    </Box>
+    </div>
   );
 };
-
-Register.displayName = 'Register';
 
 export default Register;

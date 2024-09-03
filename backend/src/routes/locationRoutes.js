@@ -12,5 +12,6 @@ router.post('/', locationController.createLocation);
 router.get('/:id', locationController.getLocationDetails);
 router.put('/:id', locationController.updateLocation);
 router.delete('/:id', locationController.deleteLocation);
+router.get('/count/:clientId', authenticate, locationController.getLocationCount);
 
 module.exports = router;

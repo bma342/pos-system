@@ -1,96 +1,79 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { ServiceFee, RootState } from '../../types';
+import { RootState } from '../store';
+import { serviceFeeService } from '../../services/serviceFeeService';
+
+interface ServiceFee {
+  id: string;
+  name: string;
+  amount: number;
+  type: 'FIXED' | 'PERCENTAGE';
+}
 
 interface ServiceFeeState {
-  serviceFees: ServiceFee[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  fees: ServiceFee[];
+  loading: boolean;
   error: string | null;
 }
 
 const initialState: ServiceFeeState = {
-  serviceFees: [],
-  status: 'idle',
+  fees: [],
+  loading: false,
   error: null,
 };
 
 export const fetchServiceFees = createAsyncThunk(
-  'serviceFees/fetchServiceFees',
-  async () => {
-    // Simulated API call
-    const response = await fetch('/api/serviceFees');
-    return await response.json();
-  }
-);
-
-export const addServiceFee = createAsyncThunk(
-  'serviceFees/addServiceFee',
-  async (fee: Omit<ServiceFee, 'id'>) => {
-    // Simulated API call
-    const response = await fetch('/api/serviceFees', {
-      method: 'POST',
-      body: JSON.stringify(fee),
-    });
-    return await response.json();
-  }
-);
-
-export const updateServiceFee = createAsyncThunk(
-  'serviceFees/updateServiceFee',
-  async (fee: Partial<ServiceFee> & { id: number }) => {
-    // Simulated API call
-    const response = await fetch(`/api/serviceFees/${fee.id}`, {
-      method: 'PUT',
-      body: JSON.stringify(fee),
-    });
-    return await response.json();
+  'serviceFees/fetchAll',
+  async (_, { rejectWithValue }) => {
+    try {
+      const fees = await serviceFeeService.getAllFees();
+      return fees;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('An unknown error occurred');
+    }
   }
 );
 
 const serviceFeeSlice = createSlice({
   name: 'serviceFees',
   initialState,
-  reducers: {},
+  reducers: {
+    addServiceFee: (state, action: PayloadAction<ServiceFee>) => {
+      state.fees.push(action.payload);
+    },
+    updateServiceFee: (state, action: PayloadAction<ServiceFee>) => {
+      const index = state.fees.findIndex(fee => fee.id === action.payload.id);
+      if (index !== -1) {
+        state.fees[index] = action.payload;
+      }
+    },
+    removeServiceFee: (state, action: PayloadAction<string>) => {
+      state.fees = state.fees.filter(fee => fee.id !== action.payload);
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchServiceFees.pending, (state) => {
-        state.status = 'loading';
+        state.loading = true;
+        state.error = null;
       })
-      .addCase(
-        fetchServiceFees.fulfilled,
-        (state, action: PayloadAction<ServiceFee[]>) => {
-          state.status = 'succeeded';
-          state.serviceFees = action.payload;
-        }
-      )
+      .addCase(fetchServiceFees.fulfilled, (state, action) => {
+        state.loading = false;
+        state.fees = action.payload;
+      })
       .addCase(fetchServiceFees.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message || null;
-      })
-      .addCase(
-        addServiceFee.fulfilled,
-        (state, action: PayloadAction<ServiceFee>) => {
-          state.serviceFees.push(action.payload);
-        }
-      )
-      .addCase(
-        updateServiceFee.fulfilled,
-        (state, action: PayloadAction<ServiceFee>) => {
-          const index = state.serviceFees.findIndex(
-            (fee) => fee.id === action.payload.id
-          );
-          if (index !== -1) {
-            state.serviceFees[index] = action.payload;
-          }
-        }
-      );
+        state.loading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 
-export const selectServiceFees = (state: RootState) =>
-  state.serviceFee.serviceFees;
-export const selectServiceFeeStatus = (state: RootState) =>
-  state.serviceFee.status;
-export const selectServiceFeeError = (state: RootState) =>
-  state.serviceFee.error;
+export const { addServiceFee, updateServiceFee, removeServiceFee } = serviceFeeSlice.actions;
+
+export const selectServiceFees = (state: RootState) => state.serviceFees.fees;
+export const selectServiceFeesLoading = (state: RootState) => state.serviceFees.loading;
+export const selectServiceFeesError = (state: RootState) => state.serviceFees.error;
 
 export default serviceFeeSlice.reducer;

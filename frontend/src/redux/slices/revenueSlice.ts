@@ -1,24 +1,36 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { RevenueData } from '../../types/revenueTypes';
+import { RootState } from '../store';
 import { fetchRevenueData } from '../../api/revenueApi';
+
+interface RevenueData {
+  date: string;
+  amount: number;
+}
 
 interface RevenueState {
   data: RevenueData[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  loading: boolean;
   error: string | null;
 }
 
 const initialState: RevenueState = {
   data: [],
-  status: 'idle',
+  loading: false,
   error: null,
 };
 
 export const fetchRevenue = createAsyncThunk(
   'revenue/fetchRevenue',
-  async (dateRange: { start: Date; end: Date }) => {
-    const response = await fetchRevenueData(dateRange);
-    return response;
+  async (dateRange: { startDate: string; endDate: string }, { rejectWithValue }) => {
+    try {
+      const data = await fetchRevenueData(dateRange);
+      return data;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('An unknown error occurred');
+    }
   }
 );
 
@@ -29,17 +41,22 @@ const revenueSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchRevenue.pending, (state) => {
-        state.status = 'loading';
+        state.loading = true;
+        state.error = null;
       })
       .addCase(fetchRevenue.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.loading = false;
         state.data = action.payload;
       })
       .addCase(fetchRevenue.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message || null;
+        state.loading = false;
+        state.error = action.payload as string;
       });
   },
 });
+
+export const selectRevenueData = (state: RootState) => state.revenue.data;
+export const selectRevenueLoading = (state: RootState) => state.revenue.loading;
+export const selectRevenueError = (state: RootState) => state.revenue.error;
 
 export default revenueSlice.reducer;

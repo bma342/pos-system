@@ -37,15 +37,15 @@ const MenuBuilder: React.FC = () => {
     }
   }, [menus, activeMenu]);
 
-  const handleSaveMenu = () => {
-    if (clientId && activeMenu) {
-      dispatch(
-        updateMenu({
-          clientId,
-          menuId: activeMenu.id,
-          menuData: activeMenu,
-        })
-      );
+  const handleSaveMenu = async () => {
+    if (activeMenu) {
+      const updatedMenu: Menu = {
+        ...activeMenu,
+        clientId: clientId.toString(),
+        menuId: activeMenu.id.toString(),
+        menuData: activeMenu,
+      };
+      await dispatch(updateMenu(updatedMenu));
     }
   };
 
@@ -105,8 +105,8 @@ const MenuBuilder: React.FC = () => {
         {menus.map((menu) => (
           <Button
             key={menu.id}
-            onClick={() => setActiveMenu(menu)}
-            variant={activeMenu?.id === menu.id ? 'contained' : 'outlined'}
+            onClick={() => setActiveMenu(menu as Menu)}
+            variant={activeMenu?.id.toString() === menu.id.toString() ? 'contained' : 'outlined'}
           >
             {menu.name}
           </Button>

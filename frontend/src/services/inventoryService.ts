@@ -1,53 +1,30 @@
 import axios from 'axios';
-import { InventoryItem } from '../types/inventoryTypes';
+import { InventoryItem } from '../types';
 
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000/api';
 
-export class InventoryService {
-  async getAllInventoryItems(tenantId: string): Promise<InventoryItem[]> {
-    const response = await axios.get(
-      `${API_BASE_URL}/tenants/${tenantId}/inventory`
-    );
+export const inventoryService = {
+  async getInventory(): Promise<InventoryItem[]> {
+    const response = await axios.get<InventoryItem[]>(`${API_BASE_URL}/inventory`);
     return response.data;
-  }
+  },
 
-  async getInventoryItem(
-    tenantId: string,
-    itemId: number
-  ): Promise<InventoryItem> {
-    const response = await axios.get(
-      `${API_BASE_URL}/tenants/${tenantId}/inventory/${itemId}`
-    );
+  async getInventoryItem(id: string): Promise<InventoryItem> {
+    const response = await axios.get<InventoryItem>(`${API_BASE_URL}/inventory/${id}`);
     return response.data;
-  }
+  },
 
-  async createInventoryItem(
-    tenantId: string,
-    item: Omit<InventoryItem, 'id'>
-  ): Promise<InventoryItem> {
-    const response = await axios.post(
-      `${API_BASE_URL}/tenants/${tenantId}/inventory`,
-      item
-    );
+  async updateInventoryItem(item: InventoryItem): Promise<InventoryItem> {
+    const response = await axios.put<InventoryItem>(`${API_BASE_URL}/inventory/${item.id}`, item);
     return response.data;
-  }
+  },
 
-  async updateInventoryItem(
-    tenantId: string,
-    itemId: number,
-    item: InventoryItem
-  ): Promise<InventoryItem> {
-    const response = await axios.put(
-      `${API_BASE_URL}/tenants/${tenantId}/inventory/${itemId}`,
-      item
-    );
+  async createInventoryItem(item: Omit<InventoryItem, 'id'>): Promise<InventoryItem> {
+    const response = await axios.post<InventoryItem>(`${API_BASE_URL}/inventory`, item);
     return response.data;
-  }
+  },
 
-  async deleteInventoryItem(tenantId: string, itemId: number): Promise<void> {
-    await axios.delete(
-      `${API_BASE_URL}/tenants/${tenantId}/inventory/${itemId}`
-    );
-  }
-}
+  async deleteInventoryItem(id: string): Promise<void> {
+    await axios.delete(`${API_BASE_URL}/inventory/${id}`);
+  },
+};

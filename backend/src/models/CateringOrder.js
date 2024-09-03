@@ -2,50 +2,54 @@ const { DataTypes } = require('sequelize');
 const BaseModel = require('./BaseModel');
 
 class CateringOrder extends BaseModel {
+  static init(sequelize) {
+    super.init({
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+      },
+      clientId: {
+        type: DataTypes.UUID,
+        allowNull: false
+      },
+      customerId: {
+        type: DataTypes.UUID,
+        allowNull: false
+      },
+      total: {
+        type: DataTypes.FLOAT,
+        allowNull: false
+      },
+      status: {
+        type: DataTypes.ENUM('PENDING', 'PROCESSING', 'COMPLETED', 'CANCELLED'),
+        allowNull: false
+      },
+      eventDate: {
+        type: DataTypes.DATE,
+        allowNull: false
+      },
+      eventType: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      deliveryAddress: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      specialInstructions: {
+        type: DataTypes.TEXT,
+        allowNull: true
+      }
+    }, {
+      sequelize,
+      modelName: 'CateringOrder'
+    });
+  }
+
   static associate(models) {
-    // Define associations here
+    this.hasMany(models.CateringOrderItem, { foreignKey: 'orderId' });
   }
 }
 
-CateringOrder.attributes = attributes = {
-  cateringId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: { model: 'Caterings', key: 'id' }
-  },
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: { model: 'Users', key: 'id' }
-  },
-  orderDate: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW
-  },
-  deliveryDate: {
-    type: DataTypes.DATE,
-    allowNull: false
-  },
-  status: {
-    type: DataTypes.ENUM('pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'),
-    defaultValue: 'pending'
-  },
-  totalAmount: {
-    type: DataTypes.DECIMAL(10, 2),
-    allowNull: false
-  },
-  specialInstructions: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  }
-};
-
-module.exports = (sequelize) => {
-  CateringOrder.init(CateringOrder.attributes, {
-    sequelize,
-    modelName: 'CateringOrder',
-    tableName: 'cateringorders', // Adjust this if needed
-  });
-  return CateringOrder
-};
+module.exports = CateringOrder;

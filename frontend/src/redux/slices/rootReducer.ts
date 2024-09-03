@@ -1,7 +1,7 @@
 import { combineReducers } from '@reduxjs/toolkit';
 import authReducer from './authSlice';
 import brandingReducer from './brandingSlice';
-import cateringOrderReducer from './CateringOrderSlice';
+import cateringOrderReducer from './cateringOrderSlice';
 import clientReducer from './clientSlice';
 import dashboardReducer from './dashboardSlice';
 import discountReducer from './discountSlice';

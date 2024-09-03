@@ -25,21 +25,21 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import SyncIcon from '@mui/icons-material/Sync';
 import { useParams } from 'react-router-dom';
-import { MenuService } from '../services/menuService';
+import { menuService } from '../services/menuService';
 import { useAuth } from '../contexts/AuthContext';
 import { Menu, MenuGroup, MenuItem, Modifier } from '../types/menuTypes';
 
 interface SelectedItem {
-  id: number;
+  id: string;
   name: string;
-  parentId?: number;
-  grandParentId?: number;
+  parentId?: string;
+  grandParentId?: string;
   price?: number;
   description?: string;
   isAvailable?: boolean;
-  menuId?: number;
-  groupId?: number;
-  itemId?: number;
+  menuId?: string;
+  groupId?: string;
+  itemId?: string;
 }
 
 const MenuManagementAdmin: React.FC = () => {
@@ -63,8 +63,6 @@ const MenuManagementAdmin: React.FC = () => {
   const { clientId } = useParams<{ clientId: string }>();
   const { user } = useAuth();
 
-  const menuService = useMemo(() => new MenuService(), []);
-
   const loadMenus = useCallback(async () => {
     if (!clientId) return;
     try {
@@ -75,7 +73,7 @@ const MenuManagementAdmin: React.FC = () => {
       setError('Failed to load menus. Please try again.');
       setLoading(false);
     }
-  }, [clientId, menuService]);
+  }, [clientId]);
 
   useEffect(() => {
     loadMenus();
@@ -104,19 +102,19 @@ const MenuManagementAdmin: React.FC = () => {
       switch (modalType) {
         case 'menu':
           result =
-            selectedItem.id === 0
+            selectedItem.id === '0'
               ? await menuService.createMenu(clientId, selectedItem)
               : await menuService.updateMenu(
                   clientId,
                   selectedItem.id,
                   selectedItem
                 );
-          setMenus(menus.map((m) => (m.id === result.id ? result : m)));
+          setMenus(menus.map((m) => (m.id === result.id ? result as Menu : m)));
           break;
         case 'group':
           if (selectedItem.parentId) {
             result =
-              selectedItem.id === 0
+              selectedItem.id === '0'
                 ? await menuService.createMenuGroup(
                     clientId,
                     selectedItem.parentId,
@@ -145,7 +143,7 @@ const MenuManagementAdmin: React.FC = () => {
         case 'item':
           if (selectedItem.grandParentId && selectedItem.parentId) {
             result =
-              selectedItem.id === 0
+              selectedItem.id === '0'
                 ? await menuService.createMenuItem(
                     clientId,
                     selectedItem.grandParentId,
@@ -187,7 +185,7 @@ const MenuManagementAdmin: React.FC = () => {
             selectedItem.itemId
           ) {
             result =
-              selectedItem.id === 0
+              selectedItem.id === '0'
                 ? await menuService.createModifier(
                     clientId,
                     selectedItem.menuId,
@@ -255,7 +253,7 @@ const MenuManagementAdmin: React.FC = () => {
 
   const handleDelete = async (
     type: 'menu' | 'group' | 'item' | 'modifier',
-    id: number
+    id: string
   ) => {
     if (!clientId) return;
     try {
@@ -275,11 +273,11 @@ const MenuManagementAdmin: React.FC = () => {
 
   const handleAdd = (
     type: 'menu' | 'group' | 'item' | 'modifier',
-    parentId?: number,
-    grandParentId?: number
+    parentId?: string,
+    grandParentId?: string
   ) => {
     setModalType(type);
-    setSelectedItem({ id: 0, name: '', parentId, grandParentId });
+    setSelectedItem({ id: '0', name: '', parentId, grandParentId });
     setIsModalOpen(true);
   };
 
@@ -294,166 +292,69 @@ const MenuManagementAdmin: React.FC = () => {
       setSyncStatus('Error syncing menus');
       console.error('Error syncing menus:', error);
     }
-  }, [clientId, menuService, loadMenus]);
+  }, [clientId, loadMenus]);
 
-  const renderMenuStructure = (menu: Menu) => {
+  const renderMenuStructure = (menu: Menu): JSX.Element => {
     return (
-      <List key={menu.id}>
-        <ListItem>
-          <ListItemText primary={menu.name} />
-          <ListItemSecondaryAction>
-            <IconButton onClick={() => handleEdit('menu', menu)} size="small">
-              <EditIcon />
-            </IconButton>
-            <IconButton
-              onClick={() => handleDelete('menu', menu.id)}
-              size="small"
-              color="secondary"
-            >
-              <DeleteIcon />
-            </IconButton>
-            <Button
-              onClick={() => handleAdd('group', menu.id)}
-              startIcon={<AddIcon />}
-              size="small"
-            >
-              Add Group
-            </Button>
-          </ListItemSecondaryAction>
-        </ListItem>
-        {menu.menuGroups.map((group: MenuGroup) => (
-          <List key={group.id} component="div" disablePadding>
-            <ListItem style={{ paddingLeft: 32 }}>
-              <ListItemText primary={group.name} />
-              <ListItemSecondaryAction>
-                <IconButton
-                  onClick={() =>
-                    handleEdit('group', { ...group, parentId: menu.id })
-                  }
-                  size="small"
-                >
-                  <EditIcon />
-                </IconButton>
-                <IconButton
-                  onClick={() => handleDelete('group', group.id)}
-                  size="small"
-                  color="secondary"
-                >
-                  <DeleteIcon />
-                </IconButton>
-                <Button
-                  onClick={() => handleAdd('item', group.id, menu.id)}
-                  startIcon={<AddIcon />}
-                  size="small"
-                >
-                  Add Item
-                </Button>
-              </ListItemSecondaryAction>
-            </ListItem>
-            {group.items.map((item: MenuItem) => (
-              <List key={item.id} component="div" disablePadding>
-                <ListItem style={{ paddingLeft: 64 }}>
-                  <ListItemText
-                    primary={item.name}
-                    secondary={`$${item.price.toFixed(2)}`}
-                  />
-                  <ListItemSecondaryAction>
-                    <IconButton
-                      onClick={() =>
-                        handleEdit('item', {
-                          ...item,
-                          parentId: group.id,
-                          grandParentId: menu.id,
-                        })
-                      }
-                      size="small"
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => handleDelete('item', item.id)}
-                      size="small"
-                      color="secondary"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                    <Button
-                      onClick={() => handleAdd('modifier', item.id, group.id)}
-                      startIcon={<AddIcon />}
-                      size="small"
-                    >
-                      Add Modifier
-                    </Button>
-                  </ListItemSecondaryAction>
-                </ListItem>
-                {item.modifiers.map((modifier: Modifier) => (
-                  <ListItem key={modifier.id} style={{ paddingLeft: 96 }}>
-                    <ListItemText
-                      primary={modifier.name}
-                      secondary={`$${modifier.price.toFixed(2)}`}
-                    />
-                    <ListItemSecondaryAction>
-                      <IconButton
-                        onClick={() =>
-                          handleEdit('modifier', {
-                            ...modifier,
-                            parentId: item.id,
-                            grandParentId: group.id,
-                          })
-                        }
-                        size="small"
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => handleDelete('modifier', modifier.id)}
-                        size="small"
-                        color="secondary"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </ListItemSecondaryAction>
-                  </ListItem>
-                ))}
-              </List>
-            ))}
-          </List>
-        ))}
-      </List>
+      <Accordion key={menu.id}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography>{menu.name}</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          {menu.menuGroups.map((group) => (
+            <Accordion key={group.id}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography>{group.name}</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <List>
+                  {group.items.map((item) => (
+                    <ListItem key={item.id}>
+                      <ListItemText
+                        primary={item.name}
+                        secondary={`$${item.price.toFixed(2)}`}
+                      />
+                      <ListItemSecondaryAction>
+                        <IconButton
+                          edge="end"
+                          aria-label="edit"
+                          onClick={() => handleEdit('item', item)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton
+                          edge="end"
+                          aria-label="delete"
+                          onClick={() => handleDelete('item', item.id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                  ))}
+                </List>
+              </AccordionDetails>
+            </Accordion>
+          ))}
+        </AccordionDetails>
+      </Accordion>
     );
   };
-
-  useEffect(() => {
-    if (user && user.role === 'admin') {
-      console.log('Admin user logged in:', user.username);
-    }
-  }, [user]);
 
   const renderModalContent = () => {
     if (!selectedItem) return null;
 
     return (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSave();
-        }}
-      >
+      <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
         <Typography variant="h6">
-          {modalType === 'menu'
-            ? 'Menu'
-            : modalType === 'group'
-              ? 'Menu Group'
-              : modalType === 'item'
-                ? 'Menu Item'
-                : 'Modifier'}
+          {modalType === 'menu' ? 'Menu' :
+           modalType === 'group' ? 'Menu Group' :
+           modalType === 'item' ? 'Menu Item' : 'Modifier'}
         </Typography>
         <TextField
           label="Name"
           value={selectedItem.name}
-          onChange={(e) =>
-            setSelectedItem({ ...selectedItem, name: e.target.value })
-          }
+          onChange={(e) => setSelectedItem({ ...selectedItem, name: e.target.value })}
           fullWidth
           margin="normal"
         />
@@ -462,12 +363,10 @@ const MenuManagementAdmin: React.FC = () => {
             label="Price"
             type="number"
             value={selectedItem.price || ''}
-            onChange={(e) =>
-              setSelectedItem({
-                ...selectedItem,
-                price: parseFloat(e.target.value),
-              })
-            }
+            onChange={(e) => setSelectedItem({
+              ...selectedItem,
+              price: parseFloat(e.target.value),
+            })}
             fullWidth
             margin="normal"
           />
@@ -476,9 +375,7 @@ const MenuManagementAdmin: React.FC = () => {
           <TextField
             label="Description"
             value={selectedItem.description || ''}
-            onChange={(e) =>
-              setSelectedItem({ ...selectedItem, description: e.target.value })
-            }
+            onChange={(e) => setSelectedItem({ ...selectedItem, description: e.target.value })}
             fullWidth
             margin="normal"
             multiline
@@ -490,23 +387,16 @@ const MenuManagementAdmin: React.FC = () => {
             control={
               <Switch
                 checked={selectedItem.isAvailable || false}
-                onChange={(e) =>
-                  setSelectedItem({
-                    ...selectedItem,
-                    isAvailable: e.target.checked,
-                  })
-                }
+                onChange={(e) => setSelectedItem({
+                  ...selectedItem,
+                  isAvailable: e.target.checked,
+                })}
               />
             }
             label="Available"
           />
         )}
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          disabled={isSaving}
-        >
+        <Button type="submit" variant="contained" color="primary" disabled={isSaving}>
           {isSaving ? <CircularProgress size={24} /> : 'Save'}
         </Button>
       </form>
@@ -548,9 +438,7 @@ const MenuManagementAdmin: React.FC = () => {
         Add Menu
       </Button>
       <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <Paper
-          style={{ padding: '20px', maxWidth: '500px', margin: '20px auto' }}
-        >
+        <Paper style={{ padding: '20px', maxWidth: '500px', margin: '20px auto' }}>
           {renderModalContent()}
         </Paper>
       </Modal>

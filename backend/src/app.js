@@ -7,6 +7,7 @@ const orderRoutes = require './routes/orderRoutes';
 const paymentRoutes = require './routes/paymentRoutes';
 const twoFactorRoutes = require './routes/twoFactorRoutes';
 const clientSettingsRoutes = require './routes/clientSettingsRoutes';
+const providerRoutes = require './routes/providerRoutes';
 
 const app = express();
 
@@ -23,5 +24,12 @@ if (typeof app.use === 'function') {
 app.use('/api/payments', paymentRoutes);
 app.use('/api/2fa', twoFactorRoutes);
 app.use('/api/client-settings', clientSettingsRoutes);
+app.use('/api', providerRoutes);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
 
 module.exports = app;

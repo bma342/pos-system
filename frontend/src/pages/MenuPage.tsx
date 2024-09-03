@@ -27,25 +27,25 @@ const MenuPage: React.FC = () => {
 
   useEffect(() => {
     if (clientId) {
-      dispatch(fetchMenus(clientId));
+      dispatch(fetchMenus(clientId.toString()));
     }
   }, [dispatch, clientId]);
 
   useEffect(() => {
     if (menus.length > 0 && !activeMenu) {
-      setActiveMenu(menus[0]);
+      setActiveMenu(menus[0] as MenuType || null);
     }
   }, [menus, activeMenu]);
 
   const handleSaveMenu = () => {
     if (clientId && activeMenu) {
-      dispatch(
-        updateMenu({
-          clientId,
-          menuId: activeMenu.id,
-          menuData: activeMenu,
-        })
-      );
+      const updatedMenu: Menu = {
+        ...activeMenu,
+        clientId: clientId.toString(),
+        menuId: activeMenu.id.toString(),
+        menuData: activeMenu,
+      };
+      dispatch(updateMenu(updatedMenu));
     }
   };
 
@@ -60,30 +60,23 @@ const MenuPage: React.FC = () => {
       const [reorderedGroup] = newMenu.groups.splice(parseInt(sourceIndex), 1);
       newMenu.groups.splice(parseInt(destIndex), 0, reorderedGroup);
     } else {
-      const sourceGroup = newMenu.groups.find(
-        (g) => g.id.toString() === sourceParentId
-      );
-      const destGroup = newMenu.groups.find(
-        (g) => g.id.toString() === destParentId
-      );
+      const sourceGroup = newMenu.groups.find((group) => group.id === sourceParentId);
+      const destGroup = newMenu.groups.find((group) => group.id === destParentId);
 
       if (sourceGroup && destGroup) {
-        const [reorderedItem] = sourceGroup.items.splice(
-          parseInt(sourceIndex),
-          1
-        );
+        const [reorderedItem] = sourceGroup.items.splice(parseInt(sourceIndex), 1);
         destGroup.items.splice(parseInt(destIndex), 0, reorderedItem);
       }
     }
 
     setActiveMenu(newMenu);
-    dispatch(updateMenu({ clientId, menuId: newMenu.id, menuData: newMenu }));
+    dispatch(updateMenu({ clientId, menuId: newMenu.id.toString(), menuData: newMenu }));
   };
 
   const handleAddGroup = () => {
     if (activeMenu && newGroupName) {
       const newGroup: MenuGroup = {
-        id: Date.now(),
+        id: Date.now().toString(),
         name: newGroupName,
         items: [],
       };

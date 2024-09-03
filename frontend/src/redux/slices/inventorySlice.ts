@@ -1,12 +1,7 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { RootState } from '../store';
 import { InventoryItem } from '../../types';
-import {
-  fetchInventoryItems,
-  createInventoryItem,
-  updateInventoryItem,
-  deleteInventoryItem,
-  updateInventoryQuantity,
-} from '../../api/inventoryApi';
+import { inventoryService } from '../../services/inventoryService';
 
 interface InventoryState {
   items: InventoryItem[];
@@ -23,45 +18,15 @@ const initialState: InventoryState = {
 export const fetchInventory = createAsyncThunk(
   'inventory/fetchInventory',
   async () => {
-    const response = await fetchInventoryItems();
+    const response = await inventoryService.getInventory();
     return response;
   }
 );
 
-export const addInventoryItem = createAsyncThunk(
-  'inventory/addInventoryItem',
-  async (itemData: Partial<InventoryItem>) => {
-    const response = await createInventoryItem(itemData);
-    return response;
-  }
-);
-
-export const editInventoryItem = createAsyncThunk(
-  'inventory/editInventoryItem',
-  async ({
-    id,
-    itemData,
-  }: {
-    id: number;
-    itemData: Partial<InventoryItem>;
-  }) => {
-    const response = await updateInventoryItem(id, itemData);
-    return response;
-  }
-);
-
-export const removeInventoryItem = createAsyncThunk(
-  'inventory/removeInventoryItem',
-  async (id: number) => {
-    await deleteInventoryItem(id);
-    return id;
-  }
-);
-
-export const updateQuantity = createAsyncThunk(
-  'inventory/updateQuantity',
-  async ({ id, quantity }: { id: number; quantity: number }) => {
-    const response = await updateInventoryQuantity(id, quantity);
+export const updateInventoryItem = createAsyncThunk(
+  'inventory/updateItem',
+  async (item: InventoryItem) => {
+    const response = await inventoryService.updateInventoryItem(item);
     return response;
   }
 );
@@ -75,37 +40,25 @@ const inventorySlice = createSlice({
       .addCase(fetchInventory.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(fetchInventory.fulfilled, (state, action) => {
+      .addCase(fetchInventory.fulfilled, (state, action: PayloadAction<InventoryItem[]>) => {
         state.status = 'succeeded';
         state.items = action.payload;
       })
       .addCase(fetchInventory.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.error.message || null;
+        state.error = action.error.message || 'Failed to fetch inventory';
       })
-      .addCase(addInventoryItem.fulfilled, (state, action) => {
-        state.items.push(action.payload);
-      })
-      .addCase(editInventoryItem.fulfilled, (state, action) => {
-        const index = state.items.findIndex(
-          (item) => item.id === action.payload.id
-        );
+      .addCase(updateInventoryItem.fulfilled, (state, action: PayloadAction<InventoryItem>) => {
+        const index = state.items.findIndex((item) => item.id === action.payload.id);
         if (index !== -1) {
           state.items[index] = action.payload;
-        }
-      })
-      .addCase(removeInventoryItem.fulfilled, (state, action) => {
-        state.items = state.items.filter((item) => item.id !== action.payload);
-      })
-      .addCase(updateQuantity.fulfilled, (state, action) => {
-        const index = state.items.findIndex(
-          (item) => item.id === action.payload.id
-        );
-        if (index !== -1) {
-          state.items[index].quantity = action.payload.quantity;
         }
       });
   },
 });
+
+export const selectInventoryItems = (state: RootState) => state.inventory.items;
+export const selectInventoryStatus = (state: RootState) => state.inventory.status;
+export const selectInventoryError = (state: RootState) => state.inventory.error;
 
 export default inventorySlice.reducer;

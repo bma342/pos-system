@@ -5,7 +5,7 @@ import { updateUserProfile } from '../redux/slices/userSlice';
 
 const ProfilePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const userProfile = useSelector((state: RootState) => state.user.profile);
+  const userProfile = useSelector((state: RootState) => state.user.currentUser);
   const [firstName, setFirstName] = useState(userProfile?.firstName || '');
   const [lastName, setLastName] = useState(userProfile?.lastName || '');
 

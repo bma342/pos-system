@@ -1,12 +1,13 @@
 const express = require('express');
-const router = express.Router();
 const corePosProfileController = require('../controllers/corePosProfileController');
 
-// Routes for managing Core POS Profiles
-router.get('/', corePosProfileController.getAllProfiles);
-router.get('/:id', corePosProfileController.getProfileById);
-router.post('/', corePosProfileController.createProfile);
-router.put('/:id', corePosProfileController.updateProfile);
-router.delete('/:id', corePosProfileController.deleteProfile);
+const router = express.Router();
+
+router.get('/', corePosProfileController.getAll);
+router.get('/:id', corePosProfileController.getById);
+router.post('/', corePosProfileController.create);
+router.put('/:id', corePosProfileController.update);
+router.delete('/:id', corePosProfileController.delete);
+router.post('/:id/sync', corePosProfileController.syncLocation);
 
 module.exports = router;

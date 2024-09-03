@@ -13,17 +13,17 @@ import {
 import { AppDispatch, RootState } from '../redux/store';
 import { unwrapResult } from '@reduxjs/toolkit';
 
-interface LoginFormInputs {
+export interface LoginFormInputs {
   email: string;
   password: string;
 }
 
-interface AuthResponse {
-  role: string;
-  // other properties
+interface LoginFormProps {
+  onSuccess?: (user: any) => void;
+  onError?: (error: any) => void;
 }
 
-const LoginForm: React.FC = () => {
+const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onError }) => {
   const {
     register,
     handleSubmit,
@@ -33,23 +33,29 @@ const LoginForm: React.FC = () => {
   const navigate = useNavigate();
   const emailRef = useRef<HTMLInputElement>(null);
 
-  // Use authStatus to track authentication state
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const isLoading = authStatus === 'loading';
 
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     try {
       const actionResult = await dispatch(loginUser(data));
-      const user = unwrapResult(actionResult) as unknown as AuthResponse;
-
-      if (user.role === 'admin') {
-        navigate('/admin/dashboard');
+      const user = unwrapResult(actionResult);
+      if (onSuccess) {
+        onSuccess(user);
       } else {
-        navigate('/');
+        if (user.role === 'admin') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/');
+        }
       }
     } catch (error) {
       console.error('Login failed', error);
-      alert('Login failed. Please try again.');
+      if (onError) {
+        onError(error);
+      } else {
+        alert('Login failed. Please try again.');
+      }
     }
   };
 
@@ -60,15 +66,7 @@ const LoginForm: React.FC = () => {
   }, []);
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit(onSubmit)}
-      noValidate
-      sx={{ mt: 1 }}
-    >
-      <Typography variant="h4" component="h1" gutterBottom>
-        Login
-      </Typography>
+    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1 }}>
       <TextField
         margin="normal"
         required
@@ -79,7 +77,7 @@ const LoginForm: React.FC = () => {
         {...register('email', { required: 'Email is required' })}
         error={!!errors.email}
         helperText={errors.email ? errors.email.message : ''}
-        disabled={isLoading} // Disable input if loading
+        disabled={isLoading}
       />
       <TextField
         margin="normal"
@@ -91,7 +89,7 @@ const LoginForm: React.FC = () => {
         {...register('password', { required: 'Password is required' })}
         error={!!errors.password}
         helperText={errors.password ? errors.password.message : ''}
-        disabled={isLoading} // Disable input if loading
+        disabled={isLoading}
       />
       <Button
         type="submit"
@@ -99,18 +97,9 @@ const LoginForm: React.FC = () => {
         variant="contained"
         color="primary"
         sx={{ mt: 3, mb: 2 }}
-        disabled={isLoading} // Disable button if loading
+        disabled={isLoading}
       >
         {isLoading ? <CircularProgress size={24} /> : 'Sign In'}
-      </Button>
-      <Button
-        fullWidth
-        variant="outlined"
-        color="secondary"
-        onClick={() => navigate('/register')}
-        disabled={isLoading} // Disable button if loading
-      >
-        Register
       </Button>
     </Box>
   );

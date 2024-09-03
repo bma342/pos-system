@@ -1,6 +1,9 @@
 const { Order, Location, MenuItem } = require('../models');
 const orderService = require('../services/orderService');
 const logger = require('../utils/logger');
+const Order = require('../models/Order');
+const OrderItem = require('../models/OrderItem');
+const Modifier = require('../models/Modifier');
 
 class OrderController {
   static async cancelOrder(req, res) {
@@ -13,7 +16,18 @@ class OrderController {
 
   static async createOrder(req, res) {
     try {
-      const order = await orderService.createOrder(req.body);
+      const { clientId, customerId, items, total, status } = req.body;
+      const order = await Order.create({ clientId, customerId, total, status });
+
+      for (const item of items) {
+        const orderItem = await OrderItem.create({ ...item, orderId: order.id });
+        if (item.modifiers) {
+          for (const modifier of item.modifiers) {
+            await Modifier.create({ ...modifier, orderItemId: orderItem.id });
+          }
+        }
+      }
+
       res.status(201).json(order);
     } catch (error) {
       logger.error(`Error creating order: ${error.message}`);
@@ -43,6 +57,21 @@ class OrderController {
       res.status(500).json({ message: 'Error updating order status', error: error.message });
     }
   }
+
+  static async getOrder(req, res) {
+    try {
+      const { id } = req.params;
+      const order = await Order.findByPk(id, {
+        include: [{ model: OrderItem, include: [Modifier] }]
+      });
+      if (!order) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = {
@@ -50,5 +79,6 @@ module.exports = {
   getOrderHistory: OrderController.getOrderHistory,
   createOrder: OrderController.createOrder,
   getOrderDetails: OrderController.getOrderDetails,
-  updateOrderStatus: OrderController.updateOrderStatus
+  updateOrderStatus: OrderController.updateOrderStatus,
+  getOrder: OrderController.getOrder
 };

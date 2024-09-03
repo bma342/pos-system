@@ -16,7 +16,7 @@ import reviewReducer from './slices/reviewSlice';
 import roleReducer from './slices/roleSlice';
 import guestReducer from './slices/guestSlice';
 import dashboardReducer from './slices/dashboardSlice';
-import cateringOrderReducer from './slices/CateringOrderSlice';
+import cateringOrderReducer from './slices/cateringOrderSlice';
 import inventoryReducer from './slices/inventorySlice';
 import realtimeMetricsReducer from './slices/realtimeMetricsSlice';
 
@@ -42,5 +42,7 @@ const rootReducer = combineReducers({
   inventory: inventoryReducer,
   realtimeMetrics: realtimeMetricsReducer,
 });
+
+export type RootState = ReturnType<typeof rootReducer>;
 
 export default rootReducer;

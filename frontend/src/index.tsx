@@ -1,84 +1,44 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter as Router } from 'react-router-dom';
+import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { ReactQueryDevtools } from 'react-query/devtools';
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import { ToastContainer } from 'react-toastify';
-import axios from 'axios';
-import muiTheme from './theme';
-import App from './App';
 import { store, persistor } from './redux/store';
-import { ClientProvider } from './context/ClientContext';
-import reportWebVitals from './reportWebVitals';
-import * as serviceWorkerRegistration from './serviceWorkerRegistration';
-
+import App from './App';
 import './index.css';
-import 'react-toastify/dist/ReactToastify.css';
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+import reportWebVitals from './reportWebVitals';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { ThemeProvider } from './components/ThemeProvider';
+import { ClientBrandingProvider } from './components/ClientBrandingProvider';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
-// Set up axios for development environment
-if (process.env.NODE_ENV === 'development') {
-  axios.defaults.baseURL = 'https://your-dev-api-url.com'; // Replace with your actual development API URL
-  axios.defaults.headers.common['Content-Type'] = 'application/json';
-}
-
-// Set up react-query client with default options
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: false,
-      staleTime: 5 * 60 * 1000,
-    },
-  },
-});
-
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
-
-try {
-  root.render(
-    <React.StrictMode>
+ReactDOM.render(
+  <React.StrictMode>
+    <ErrorBoundary>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
-          <QueryClientProvider client={queryClient}>
-            <ThemeProvider theme={muiTheme}>
-              <CssBaseline />
-              <ClientProvider>
-                <Router>
-                  <App />
-                </Router>
-                <ToastContainer
-                  position="bottom-right"
-                  autoClose={5000}
-                  hideProgressBar={false}
-                  newestOnTop
-                  closeOnClick
-                  rtl={false}
-                  pauseOnFocusLoss
-                  draggable
-                  pauseOnHover
-                />
-              </ClientProvider>
+          <Router>
+            <ThemeProvider>
+              <ClientBrandingProvider>
+                <App />
+              </ClientBrandingProvider>
             </ThemeProvider>
-            <ReactQueryDevtools initialIsOpen={false} />
-          </QueryClientProvider>
+          </Router>
         </PersistGate>
       </Provider>
-    </React.StrictMode>
-  );
-} catch (error) {
-  console.error('Error rendering React app:', error);
-  document.body.innerHTML =
-    '<h1>An error occurred while loading the application. Please try again later.</h1>';
-}
+    </ErrorBoundary>
+  </React.StrictMode>,
+  document.getElementById('root')
+);
 
-// Register the service worker for offline capabilities
+// If you want your app to work offline and load faster, you can change
+// unregister() to register() below. Note this comes with some pitfalls.
+// Learn more about service workers: https://cra.link/PWA
 serviceWorkerRegistration.register();
 
-// Measure performance in your app, pass a function to log results (for example: reportWebVitals(console.log))
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
+// Add any additional initialization or global setup here
