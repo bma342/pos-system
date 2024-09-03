@@ -6,20 +6,14 @@ export interface LocationUpdateData {
 }
 
 export interface Location {
-  id: number;
+  id: string;
   name: string;
   address: string;
   city: string;
-  state: string;
-  zipCode: string;
-  country: string;
-  phoneNumber: string;
-  email: string;
-  timezone: string;
-  isActive: boolean;
-  clientId: number;
-  createdAt: string;
-  updatedAt: string;
+  latitude: number;
+  longitude: number;
+  isDropoffSite: boolean;
+  // Add other properties as needed
 }
 
 export interface LocationCreateData {

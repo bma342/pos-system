@@ -7,6 +7,7 @@ import {
   dashboardService,
   DashboardData,
 } from '../../services/dashboardService';
+import { useAuth } from '../../hooks/useAuth'; // Add this import
 import 'jspdf-autotable';
 
 const ExecutiveDashboard: React.FC = () => {
@@ -18,6 +19,7 @@ const ExecutiveDashboard: React.FC = () => {
     null
   );
   const [isLoading, setIsLoading] = useState(true);
+  const { user, isGlobalAdmin, authToken } = useAuth(); // Add this line
 
   useEffect(() => {
     if (isGlobalAdmin) {

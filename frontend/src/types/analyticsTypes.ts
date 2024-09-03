@@ -1,5 +1,5 @@
 export interface SalesByCategory {
-  category: string;
+  name: string;
   value: number;
 }
 

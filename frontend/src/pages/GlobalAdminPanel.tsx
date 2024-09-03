@@ -5,8 +5,9 @@ import {
   fetchClients,
   createClient,
   updateClient,
+  deleteClient,
 } from '../redux/slices/clientSlice';
-import { Client } from '../types';
+import { Client } from '../types/clientTypes';
 import {
   TextField,
   Button,
@@ -22,7 +23,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 const GlobalAdminPanel: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { clients, status, error } = useSelector(
-    (state: RootState) => state.clients
+    (state: RootState) => state.client
   );
   const [newClient, setNewClient] = useState<Partial<Client>>({
     name: '',
@@ -43,7 +44,7 @@ const GlobalAdminPanel: React.FC = () => {
     dispatch(updateClient(client));
   };
 
-  const handleDeleteClient = (id: number) => {
+  const handleDeleteClient = (id: string) => {
     if (window.confirm('Are you sure you want to delete this client?')) {
       dispatch(deleteClient(id));
     }
@@ -105,6 +106,7 @@ const GlobalAdminPanel: React.FC = () => {
               onChange={(e) =>
                 handleUpdateClient({ ...client, active: e.target.checked })
               }
+              sx={{ marginRight: 1 }}
             />
             <IconButton onClick={() => handleDeleteClient(client.id)}>
               <DeleteIcon />

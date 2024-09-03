@@ -40,6 +40,8 @@ import roleReducer from './slices/roleSlice';
 import salesReportReducer from './slices/salesReportSlice';
 import sessionReducer from './slices/sessionSlice';
 import ordersReducer from './slices/orderSlice';
+import clientReducer from './slices/clientSlice';
+import locationReducer from './slices/locationSlice';
 
 // Configure persist options
 const persistConfig = {
@@ -83,6 +85,7 @@ const rootReducer = combineReducers({
   salesReport: salesReportReducer,
   session: sessionReducer,
   orders: ordersReducer,
+  client: clientReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -95,6 +98,8 @@ const logger = createLogger({
 
 export const store = configureStore({
   reducer: {
+    dashboard: dashboardReducer,
+    location: locationReducer,
     abTest: abTestReducer,
     client: clientReducer,
     location: locationReducer,
@@ -103,6 +108,8 @@ export const store = configureStore({
     abTest: abTestReducer,
     session: sessionReducer,
     auth: authReducer,
+    serviceFee: serviceFeeReducer,
+    wallet: walletReducer
     // Add other reducers here
   },
   middleware: (getDefaultMiddleware) =>

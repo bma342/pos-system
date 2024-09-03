@@ -1,7 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { walletService } from '../../services/walletService';
-import { Wallet, WalletTransaction } from '../../types';
+import { Wallet, WalletTransaction } from '../../types/walletTypes';
 
 interface Reward {
   id: string;
@@ -31,32 +31,26 @@ const initialState: WalletState = {
   error: null,
 };
 
-export const fetchWallet = createAsyncThunk(
-  'wallet/fetchWallet',
-  async (userId: string, { rejectWithValue }) => {
+export const fetchWalletBalance = createAsyncThunk(
+  'wallet/fetchBalance',
+  async (_, { rejectWithValue }) => {
     try {
-      const wallet = await walletService.getWallet(userId);
-      return wallet;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('An unknown error occurred');
+      const balance = await walletService.getBalance();
+      return balance;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
     }
   }
 );
 
-export const fetchTransactions = createAsyncThunk(
-  'wallet/fetchTransactions',
-  async (walletId: string, { rejectWithValue }) => {
+export const addFunds = createAsyncThunk(
+  'wallet/addFunds',
+  async (amount: number, { rejectWithValue }) => {
     try {
-      const transactions = await walletService.getTransactions(walletId);
-      return transactions;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('An unknown error occurred');
+      const updatedBalance = await walletService.addFunds(amount);
+      return updatedBalance;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
     }
   }
 );
@@ -65,47 +59,39 @@ const walletSlice = createSlice({
   name: 'wallet',
   initialState,
   reducers: {
-    setBalance(state, action: PayloadAction<number>) {
-      state.balance = action.payload;
-    },
-    setRewards(state, action: PayloadAction<Reward[]>) {
-      state.rewards = action.payload;
-    },
-    setDiscounts(state, action: PayloadAction<Discount[]>) {
-      state.discounts = action.payload;
-    },
-    setLoading(state, action: PayloadAction<boolean>) {
-      state.loading = action.payload;
-    },
-    setError(state, action: PayloadAction<string | null>) {
-      state.error = action.payload;
-    },
+    // Add any synchronous actions here
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchWalletBalance.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchWalletBalance.fulfilled, (state, action: PayloadAction<number>) => {
+        state.loading = false;
+        state.balance = action.payload;
+      })
+      .addCase(fetchWalletBalance.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(addFunds.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addFunds.fulfilled, (state, action: PayloadAction<number>) => {
+        state.loading = false;
+        state.balance = action.payload;
+      })
+      .addCase(addFunds.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 
-export const { setBalance, setRewards, setDiscounts, setLoading, setError } = walletSlice.actions;
-
-// Selectors
-export const selectWalletBalance = (state: RootState): number => state.wallet.balance;
-export const selectWalletRewards = (state: RootState): Reward[] => state.wallet.rewards;
-export const selectWalletDiscounts = (state: RootState): Discount[] => state.wallet.discounts;
-
-// Async thunk for loading wallet data
-export const loadWalletData = () => async (dispatch: any) => {
-  try {
-    dispatch(setLoading(true));
-    // Fetch wallet data from API
-    const response = await fetch('/api/wallet');
-    const data = await response.json();
-    
-    dispatch(setBalance(data.balance));
-    dispatch(setRewards(data.rewards));
-    dispatch(setDiscounts(data.discounts));
-    dispatch(setLoading(false));
-  } catch (error) {
-    dispatch(setError(error.message));
-    dispatch(setLoading(false));
-  }
-};
+export const selectWalletBalance = (state: RootState) => state.wallet.balance;
+export const selectWalletLoading = (state: RootState) => state.wallet.loading;
+export const selectWalletError = (state: RootState) => state.wallet.error;
 
 export default walletSlice.reducer;

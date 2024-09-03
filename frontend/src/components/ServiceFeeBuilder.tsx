@@ -1,39 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, Typography, Box } from '@mui/material';
-import { getServiceFees, createServiceFee } from '../api/serviceFeeApi';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchServiceFees, createServiceFee } from '../redux/slices/serviceFeeSlice';
 import { ServiceFee } from '../types/serviceFeeTypes';
+import { AppDispatch, RootState } from '../redux/store';
 
 const ServiceFeeBuilder: React.FC = () => {
-  const [serviceFees, setServiceFees] = useState<ServiceFee[]>([]);
-  const [newFee, setNewFee] = useState<ServiceFee>({ name: '', percentage: 0 });
+  const dispatch = useDispatch<AppDispatch>();
+  const serviceFees = useSelector((state: RootState) => state.serviceFee.serviceFees);
+  const [newFee, setNewFee] = useState<ServiceFee>({ id: '', name: '', amount: 0, type: 'FIXED' });
 
   useEffect(() => {
-    fetchServiceFees();
-  }, []);
-
-  const fetchServiceFees = async () => {
-    try {
-      const fees = await getServiceFees();
-      setServiceFees(fees);
-    } catch (error) {
-      console.error('Failed to fetch service fees:', error);
-    }
-  };
+    dispatch(fetchServiceFees());
+  }, [dispatch]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setNewFee((prev: ServiceFee) => ({
+    setNewFee((prev) => ({
       ...prev,
-      [name]: name === 'percentage' ? parseFloat(value) : value,
+      [name]: name === 'amount' ? parseFloat(value) : value,
     }));
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      await createServiceFee(newFee);
-      setNewFee({ name: '', percentage: 0 });
-      fetchServiceFees();
+      await dispatch(createServiceFee(newFee));
+      setNewFee({ id: '', name: '', amount: 0, type: 'FIXED' });
     } catch (error) {
       console.error('Failed to create service fee:', error);
     }
@@ -55,30 +48,29 @@ const ServiceFeeBuilder: React.FC = () => {
           required
         />
         <TextField
-          name="percentage"
-          label="Fee Percentage"
+          name="amount"
+          label="Fee Amount"
           type="number"
-          value={newFee.percentage}
+          value={newFee.amount}
           onChange={handleInputChange}
           fullWidth
           margin="normal"
           required
-          inputProps={{ min: 0, max: 100, step: 0.01 }}
         />
         <Button type="submit" variant="contained" color="primary">
           Add Service Fee
         </Button>
       </form>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>
         Existing Service Fees
       </Typography>
-      <ul>
-        {serviceFees.map((fee) => (
-          <li key={fee.id}>
-            {fee.name}: {fee.percentage}%
-          </li>
-        ))}
-      </ul>
+      {serviceFees.map((fee) => (
+        <Box key={fee.id} sx={{ mb: 2 }}>
+          <Typography>
+            {fee.name}: {fee.amount} ({fee.type})
+          </Typography>
+        </Box>
+      ))}
     </Box>
   );
 };

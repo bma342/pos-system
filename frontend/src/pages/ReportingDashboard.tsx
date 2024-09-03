@@ -4,14 +4,15 @@ import { RootState, AppDispatch } from '../redux/store';
 import { fetchDashboardStats } from '../redux/slices/dashboardSlice';
 import { CircularProgress, Grid, Paper, Typography, Button } from '@mui/material';
 import DateRangePicker from '../components/DateRangePicker';
+import { DateRange } from '../types/dateTypes';
 
 const LazyBarChart = lazy(() => import('../components/LazyBarChart'));
 const LazyLineChart = lazy(() => import('../components/LazyLineChart'));
 
 const ReportingDashboard: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { stats, status, error } = useSelector((state: RootState) => state.reportingDashboard);
-  const [dateRange, setDateRange] = useState({ startDate: null, endDate: null });
+  const { stats, status, error } = useSelector((state: RootState) => state.dashboard);
+  const [dateRange, setDateRange] = useState<DateRange>({ startDate: null, endDate: null });
 
   useEffect(() => {
     if (dateRange.startDate && dateRange.endDate) {
@@ -19,8 +20,8 @@ const ReportingDashboard: React.FC = () => {
     }
   }, [dispatch, dateRange]);
 
-  const handleDateRangeChange = (newDateRange: { startDate: Date | null; endDate: Date | null }) => {
-    setDateRange(newDateRange as { startDate: null; endDate: null });
+  const handleDateRangeChange = (newDateRange: DateRange) => {
+    setDateRange(newDateRange);
   };
 
   const handleRefresh = () => {
@@ -57,29 +58,19 @@ const ReportingDashboard: React.FC = () => {
             <Typography variant="h4">${stats.averageOrderValue.toFixed(2)}</Typography>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper elevation={3} style={{ padding: '1rem' }}>
-            <Typography variant="h6">Customers</Typography>
-            <Typography variant="h4">{stats.customers}</Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12}>
-          <Paper elevation={3} style={{ padding: '1rem' }}>
-            <Typography variant="h6">Revenue Over Time</Typography>
-            <Suspense fallback={<CircularProgress />}>
-              <LazyLineChart data={stats.revenueOverTime} />
-            </Suspense>
-          </Paper>
-        </Grid>
-        <Grid item xs={12}>
-          <Paper elevation={3} style={{ padding: '1rem' }}>
-            <Typography variant="h6">Top Selling Products</Typography>
-            <Suspense fallback={<CircularProgress />}>
-              <LazyBarChart data={stats.topSellingProducts} />
-            </Suspense>
-          </Paper>
-        </Grid>
+        {/* Add more stat cards as needed */}
       </Grid>
+
+      <Suspense fallback={<CircularProgress />}>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <LazyBarChart data={stats.barChartData} />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <LazyLineChart data={stats.lineChartData} />
+          </Grid>
+        </Grid>
+      </Suspense>
     </div>
   );
 };

@@ -20,7 +20,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { User, UserRole } from '../types/userTypes';
-import UserService from '../services/UserService';
+import { userService } from '../services/userService';
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -33,12 +33,12 @@ const UserManagement: React.FC = () => {
     severity: 'success' | 'error';
   } | null>(null);
 
-  const userService = useMemo(() => new UserService(), []);
+  const userServiceInstance = useMemo(() => new userService(), []);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const data = await userService.getUsers();
+        const data = await userServiceInstance.getUsers();
         setUsers(data);
         setLoading(false);
       } catch (error) {
@@ -48,15 +48,14 @@ const UserManagement: React.FC = () => {
     };
 
     fetchUsers();
-  }, [userService]);
+  }, [userServiceInstance]);
 
   const handleAddUser = () => {
     setSelectedUser({
       id: '',
-      username: '',
       email: '',
       role: UserRole.EMPLOYEE,
-      tenantId: '',
+      clientId: '',
     });
     setIsModalOpen(true);
   };
@@ -72,10 +71,10 @@ const UserManagement: React.FC = () => {
     try {
       let updatedUser: User;
       if (selectedUser.id === '') {
-        updatedUser = await userService.createUser(selectedUser);
+        updatedUser = await userServiceInstance.createUser(selectedUser);
         setUsers([...users, updatedUser]);
       } else {
-        updatedUser = await userService.updateUser(
+        updatedUser = await userServiceInstance.updateUser(
           selectedUser.id,
           selectedUser
         );
@@ -93,10 +92,10 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  const handleDeleteUser = async (userId: number) => {
+  const handleDeleteUser = async (userId: string) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
-        await userService.deleteUser(userId);
+        await userServiceInstance.deleteUser(userId);
         setUsers(users.filter((user) => user.id !== userId));
         setSnackbar({
           message: 'User deleted successfully',
@@ -116,23 +115,16 @@ const UserManagement: React.FC = () => {
 
   return (
     <div>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h4" component="h1" gutterBottom>
         User Management
       </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleAddUser}
-        style={{ marginBottom: '20px' }}
-      >
-        Add New User
+      <Button onClick={handleAddUser} variant="contained" color="primary">
+        Add User
       </Button>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Username</TableCell>
               <TableCell>Email</TableCell>
               <TableCell>Role</TableCell>
               <TableCell>Actions</TableCell>
@@ -141,16 +133,11 @@ const UserManagement: React.FC = () => {
           <TableBody>
             {users.map((user) => (
               <TableRow key={user.id}>
-                <TableCell>{user.id}</TableCell>
-                <TableCell>{user.username}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.role}</TableCell>
                 <TableCell>
                   <Button onClick={() => handleEditUser(user)}>Edit</Button>
-                  <Button
-                    onClick={() => handleDeleteUser(user.id)}
-                    color="secondary"
-                  >
+                  <Button onClick={() => handleDeleteUser(user.id)}>
                     Delete
                   </Button>
                 </TableCell>
@@ -181,15 +168,6 @@ const UserManagement: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 {selectedUser.id === '' ? 'Add New User' : 'Edit User'}
               </Typography>
-              <TextField
-                label="Username"
-                value={selectedUser.username}
-                onChange={(e) =>
-                  setSelectedUser({ ...selectedUser, username: e.target.value })
-                }
-                fullWidth
-                margin="normal"
-              />
               <TextField
                 label="Email"
                 value={selectedUser.email}

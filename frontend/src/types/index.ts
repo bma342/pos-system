@@ -190,3 +190,22 @@ export interface Modifier {
   name: string;
   price: number;
 }
+
+export interface Menu {
+  id: string;
+  name: string;
+  groups: MenuGroup[];
+}
+
+export interface MenuGroup {
+  id: string;
+  name: string;
+  items: MenuItem[];
+}
+
+export interface MenuItem {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+}

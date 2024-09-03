@@ -1,67 +1,21 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { Menu, MenuStatistics } from '../../types/menuTypes';
-import { menuApi } from '../../api/menuApi';
+import { Menu } from '../../types';
+import { menuService } from '../../services/menuService';
 
-interface MenuState {
-  currentMenu: Menu | null;
-  menuStatistics: MenuStatistics | null;
-  loading: boolean;
-  error: string | null;
-}
-
-const initialState: MenuState = {
-  currentMenu: null,
-  menuStatistics: null,
-  loading: false,
-  error: null,
-};
-
-export const fetchMenu = createAsyncThunk(
-  'menu/fetchMenu',
-  async (clientId: string, { rejectWithValue }) => {
-    try {
-      const menu = await menuApi.getMenu(clientId);
-      return menu;
-    } catch (error) {
-      return rejectWithValue('Failed to fetch menu');
-    }
+export const fetchMenus = createAsyncThunk(
+  'menu/fetchMenus',
+  async (clientId: string) => {
+    const menus = await menuService.getMenus(clientId);
+    return menus;
   }
 );
 
-export const fetchMenuStatistics = createAsyncThunk(
-  'menu/fetchMenuStatistics',
-  async (clientId: string, { rejectWithValue }) => {
-    try {
-      const statistics = await menuApi.getMenuStatistics(clientId);
-      return statistics;
-    } catch (error) {
-      return rejectWithValue('Failed to fetch menu statistics');
-    }
+export const updateMenu = createAsyncThunk(
+  'menu/updateMenu',
+  async ({ clientId, menuId, menuData }: { clientId: string; menuId: string; menuData: Menu }) => {
+    const updatedMenu = await menuService.updateMenu(clientId, menuId, menuData);
+    return updatedMenu;
   }
 );
 
-const menuSlice = createSlice({
-  name: 'menu',
-  initialState,
-  reducers: {},
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchMenu.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchMenu.fulfilled, (state, action) => {
-        state.loading = false;
-        state.currentMenu = action.payload;
-      })
-      .addCase(fetchMenu.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
-      .addCase(fetchMenuStatistics.fulfilled, (state, action) => {
-        state.menuStatistics = action.payload;
-      });
-  },
-});
-
-export default menuSlice.reducer;
+// ... rest of the slice definition

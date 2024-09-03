@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { RootState, AppDispatch, Menu, MenuGroup } from '../types';
 import { fetchMenus, updateMenu } from '../redux/slices/menuSlice';
 import MenuGroupComponent from './MenuGroupComponent';
@@ -31,110 +31,78 @@ const MenuBuilder: React.FC = () => {
     }
   }, [dispatch, clientId]);
 
-  useEffect(() => {
-    if (menus.length > 0 && !activeMenu) {
-      setActiveMenu(menus[0]);
-    }
-  }, [menus, activeMenu]);
-
-  const onDragEnd = (result: DropResult) => {
-    if (!result.destination || !activeMenu || !clientId) return;
-
-    const newMenu = { ...activeMenu };
-    const [sourceParentId, sourceIndex] = result.source.droppableId.split('-');
-    const [destParentId, destIndex] = result.destination.droppableId.split('-');
-
-    if (sourceParentId === 'menu' && destParentId === 'menu') {
-      const [reorderedGroup] = newMenu.groups.splice(parseInt(sourceIndex), 1);
-      newMenu.groups.splice(parseInt(destIndex), 0, reorderedGroup);
-    } else {
-      const sourceGroup = newMenu.groups.find(
-        (g) => g.id.toString() === sourceParentId
-      );
-      const destGroup = newMenu.groups.find(
-        (g) => g.id.toString() === destParentId
-      );
-
-      if (sourceGroup && destGroup) {
-        const [reorderedItem] = sourceGroup.items.splice(
-          parseInt(sourceIndex),
-          1
-        );
-        destGroup.items.splice(parseInt(destIndex), 0, reorderedItem);
-      }
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination || !activeMenu) {
+      return;
     }
 
-    dispatch(updateMenu({ clientId, menuId: newMenu.id, menuData: newMenu }));
+    const newGroups = Array.from(activeMenu.groups);
+    const [reorderedGroup] = newGroups.splice(result.source.index, 1);
+    newGroups.splice(result.destination.index, 0, reorderedGroup);
+
+    const updatedMenu: Menu = {
+      ...activeMenu,
+      groups: newGroups,
+    };
+
+    setActiveMenu(updatedMenu);
+    dispatch(updateMenu({ clientId, menuId: activeMenu.id, menuData: updatedMenu }));
   };
 
   const handleAddGroup = () => {
-    if (!activeMenu || !newGroupName || !clientId) return;
-
-    const newGroup: MenuGroup = {
-      id: Date.now(),
-      name: newGroupName,
-      items: [],
-    };
-    const updatedMenu = {
-      ...activeMenu,
-      groups: [...activeMenu.groups, newGroup],
-    };
-    dispatch(
-      updateMenu({ clientId, menuId: updatedMenu.id, menuData: updatedMenu })
-    );
-    setNewGroupName('');
-    setIsAddGroupDialogOpen(false);
-  };
-
-  const handleSaveMenu = () => {
-    if (clientId && activeMenu) {
-      dispatch(
-        updateMenu({
-          clientId,
-          menuId: activeMenu.id,
-          menuData: activeMenu,
-        })
-      );
+    if (activeMenu && newGroupName.trim()) {
+      const updatedMenu: Menu = {
+        ...activeMenu,
+        groups: [
+          ...activeMenu.groups,
+          { id: Date.now().toString(), name: newGroupName.trim(), items: [] },
+        ],
+      };
+      dispatch(updateMenu({ clientId, menuId: activeMenu.id, menuData: updatedMenu }));
+      setIsAddGroupDialogOpen(false);
+      setNewGroupName('');
     }
   };
 
-  if (!clientId) return <Typography>No client ID available</Typography>;
-
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" sx={{ mb: 4 }}>
+    <div>
+      <Typography variant="h4" gutterBottom>
         Menu Builder
       </Typography>
-      <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
-        {menus.map((menu: Menu) => (
+      {menus.map((menu) => (
+        <Box key={menu.id} mb={2}>
           <Button
-            key={menu.id}
-            onClick={() => setActiveMenu(menu)}
             variant={activeMenu?.id === menu.id ? 'contained' : 'outlined'}
+            onClick={() => setActiveMenu(menu)}
           >
             {menu.name}
           </Button>
-        ))}
-      </Box>
+        </Box>
+      ))}
       {activeMenu && (
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable droppableId="menu-0" type="group">
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="menu">
             {(provided) => (
-              <Box
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-              >
+              <div {...provided.droppableProps} ref={provided.innerRef}>
                 {activeMenu.groups.map((group, index) => (
-                  <MenuGroupComponent
-                    key={group.id}
-                    group={group}
-                    index={index}
-                    menuId={activeMenu.id.toString()}
-                  />
+                  <Draggable key={group.id} draggableId={group.id} index={index}>
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                      >
+                        <MenuGroupComponent
+                          group={group}
+                          index={index}
+                          menuId={activeMenu.id}
+                        />
+                      </div>
+                    )}
+                  </Draggable>
                 ))}
                 {provided.placeholder}
-              </Box>
+              </div>
             )}
           </Droppable>
         </DragDropContext>
@@ -142,35 +110,32 @@ const MenuBuilder: React.FC = () => {
       <Button
         startIcon={<AddCircleOutlineIcon />}
         onClick={() => setIsAddGroupDialogOpen(true)}
-        sx={{ mt: 2 }}
+        variant="contained"
+        color="primary"
+        style={{ marginTop: '16px' }}
       >
         Add Group
       </Button>
-      <Dialog
-        open={isAddGroupDialogOpen}
-        onClose={() => setIsAddGroupDialogOpen(false)}
-      >
+      <Dialog open={isAddGroupDialogOpen} onClose={() => setIsAddGroupDialogOpen(false)}>
         <DialogTitle>Add New Group</DialogTitle>
         <DialogContent>
           <TextField
+            autoFocus
             margin="dense"
             label="Group Name"
-            type="text"
             fullWidth
-            variant="outlined"
             value={newGroupName}
             onChange={(e) => setNewGroupName(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsAddGroupDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleAddGroup}>Add</Button>
+          <Button onClick={handleAddGroup} color="primary">
+            Add
+          </Button>
         </DialogActions>
       </Dialog>
-      <Button onClick={handleSaveMenu} sx={{ mt: 2 }}>
-        Save Menu
-      </Button>
-    </Box>
+    </div>
   );
 };
 

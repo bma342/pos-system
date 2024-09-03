@@ -17,12 +17,12 @@ import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-markercluster/dist/styles.min.css';
 import { RootState, AppDispatch } from '../redux/store';
 import { fetchLocations } from '../redux/slices/locationSlice';
-import { Location } from '../types';
+import { Location } from '../types/locationTypes';
 import LocationCard from '../components/LocationCard';
 import Button from '@mui/material/Button';
 
 // Fix for default marker icon
-delete L.Icon.Default.prototype._getIconUrl;
+delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
   iconUrl: require('leaflet/dist/images/marker-icon.png'),
@@ -32,7 +32,7 @@ L.Icon.Default.mergeOptions({
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const locations = useSelector(
-    (state: RootState) => state.locations.locations
+    (state: RootState) => state.location.locations
   );
   const [searchTerm, setSearchTerm] = useState('');
   const [tabValue, setTabValue] = useState(0);
@@ -43,7 +43,7 @@ const HomePage: React.FC = () => {
   }, [dispatch]);
 
   const filteredLocations = locations.filter(
-    (location) =>
+    (location: Location) =>
       (location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         location.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
         location.city.toLowerCase().includes(searchTerm.toLowerCase())) &&

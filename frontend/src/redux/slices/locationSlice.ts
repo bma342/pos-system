@@ -4,17 +4,17 @@ import { locationApi } from '../../api/locationApi';
 
 interface LocationState {
   locations: Location[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  loading: boolean;
   error: string | null;
 }
 
 const initialState: LocationState = {
   locations: [],
-  status: 'idle',
+  loading: false,
   error: null,
 };
 
-export const fetchLocationsAsync = createAsyncThunk(
+export const fetchLocations = createAsyncThunk(
   'location/fetchLocations',
   async () => {
     const response = await locationApi.getLocations();
@@ -22,26 +22,23 @@ export const fetchLocationsAsync = createAsyncThunk(
   }
 );
 
-// ... (implement other async thunks for CRUD operations)
-
 const locationSlice = createSlice({
   name: 'location',
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchLocationsAsync.pending, (state) => {
-        state.status = 'loading';
+      .addCase(fetchLocations.pending, (state) => {
+        state.loading = true;
       })
-      .addCase(fetchLocationsAsync.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+      .addCase(fetchLocations.fulfilled, (state, action) => {
+        state.loading = false;
         state.locations = action.payload;
       })
-      .addCase(fetchLocationsAsync.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message || null;
+      .addCase(fetchLocations.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to fetch locations';
       });
-    // ... (implement other cases for CRUD operations)
   },
 });
 

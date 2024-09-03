@@ -1,70 +1,35 @@
-import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { RootState } from '../store';
-import { Revenue, CustomerMetrics, SalesReport, InventoryItem, RealtimeMetrics } from '../../types';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { DateRange } from '../../types/dateTypes';
 import { dashboardApi } from '../../api/dashboardApi';
 
 interface DashboardState {
-  revenue: Revenue[];
-  customerMetrics: CustomerMetrics;
-  inventory: InventoryItem[];
-  salesReport: {
-    salesByCategory: any[]; // Replace 'any' with the correct type
-    topSellingItems: any[]; // Replace 'any' with the correct type
+  stats: {
+    revenue: number;
+    orders: number;
+    averageOrderValue: number;
+    barChartData: any; // Replace 'any' with the appropriate type
+    lineChartData: any; // Replace 'any' with the appropriate type
   };
-  realtimeMetrics: RealtimeMetrics;
-  loading: boolean;
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
 
 const initialState: DashboardState = {
-  revenue: [],
-  customerMetrics: {} as CustomerMetrics,
-  inventory: [],
-  salesReport: {
-    salesByCategory: [],
-    topSellingItems: [],
+  stats: {
+    revenue: 0,
+    orders: 0,
+    averageOrderValue: 0,
+    barChartData: null,
+    lineChartData: null,
   },
-  realtimeMetrics: {} as RealtimeMetrics,
-  loading: false,
+  status: 'idle',
   error: null,
 };
 
-export const fetchRevenue = createAsyncThunk(
-  'dashboard/fetchRevenue',
-  async (dateRange: { start: Date; end: Date }) => {
-    const response = await dashboardApi.getRevenue(dateRange);
-    return response.data;
-  }
-);
-
-export const fetchCustomerMetrics = createAsyncThunk(
-  'dashboard/fetchCustomerMetrics',
-  async () => {
-    const response = await dashboardApi.getCustomerMetrics();
-    return response.data;
-  }
-);
-
-export const fetchSalesByCategory = createAsyncThunk(
-  'dashboard/fetchSalesByCategory',
-  async (dateRange: { start: Date; end: Date }) => {
-    const response = await dashboardApi.getSalesByCategory(dateRange);
-    return response.data;
-  }
-);
-
-export const fetchTopSellingItems = createAsyncThunk(
-  'dashboard/fetchTopSellingItems',
-  async (dateRange: { start: Date; end: Date }) => {
-    const response = await dashboardApi.getTopSellingItems(dateRange);
-    return response.data;
-  }
-);
-
-export const fetchRealtimeMetrics = createAsyncThunk(
-  'dashboard/fetchRealtimeMetrics',
-  async () => {
-    const response = await dashboardApi.getRealtimeMetrics();
+export const fetchDashboardStats = createAsyncThunk(
+  'dashboard/fetchStats',
+  async (dateRange: DateRange) => {
+    const response = await dashboardApi.getStats(dateRange);
     return response.data;
   }
 );
@@ -75,20 +40,16 @@ const dashboardSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchRevenue.fulfilled, (state, action) => {
-        state.revenue = action.payload;
+      .addCase(fetchDashboardStats.pending, (state) => {
+        state.status = 'loading';
       })
-      .addCase(fetchCustomerMetrics.fulfilled, (state, action) => {
-        state.customerMetrics = action.payload;
+      .addCase(fetchDashboardStats.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.stats = action.payload;
       })
-      .addCase(fetchSalesByCategory.fulfilled, (state, action) => {
-        state.salesReport.salesByCategory = action.payload;
-      })
-      .addCase(fetchTopSellingItems.fulfilled, (state, action) => {
-        state.salesReport.topSellingItems = action.payload;
-      })
-      .addCase(fetchRealtimeMetrics.fulfilled, (state, action) => {
-        state.realtimeMetrics = action.payload;
+      .addCase(fetchDashboardStats.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message || 'Failed to fetch dashboard stats';
       });
   },
 });

@@ -1,79 +1,56 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../store';
-import { serviceFeeService } from '../../services/serviceFeeService';
-
-interface ServiceFee {
-  id: string;
-  name: string;
-  amount: number;
-  type: 'FIXED' | 'PERCENTAGE';
-}
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { ServiceFee } from '../../types/serviceFeeTypes';
+import { serviceFeeApi } from '../../api/serviceFeeApi';
 
 interface ServiceFeeState {
-  fees: ServiceFee[];
+  serviceFees: ServiceFee[];
   loading: boolean;
   error: string | null;
 }
 
 const initialState: ServiceFeeState = {
-  fees: [],
+  serviceFees: [],
   loading: false,
   error: null,
 };
 
 export const fetchServiceFees = createAsyncThunk(
-  'serviceFees/fetchAll',
-  async (_, { rejectWithValue }) => {
-    try {
-      const fees = await serviceFeeService.getAllFees();
-      return fees;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('An unknown error occurred');
-    }
+  'serviceFee/fetchServiceFees',
+  async () => {
+    const response = await serviceFeeApi.getServiceFees();
+    return response.data;
+  }
+);
+
+export const createServiceFee = createAsyncThunk(
+  'serviceFee/createServiceFee',
+  async (newFee: ServiceFee) => {
+    const response = await serviceFeeApi.createServiceFee(newFee);
+    return response.data;
   }
 );
 
 const serviceFeeSlice = createSlice({
-  name: 'serviceFees',
+  name: 'serviceFee',
   initialState,
-  reducers: {
-    addServiceFee: (state, action: PayloadAction<ServiceFee>) => {
-      state.fees.push(action.payload);
-    },
-    updateServiceFee: (state, action: PayloadAction<ServiceFee>) => {
-      const index = state.fees.findIndex(fee => fee.id === action.payload.id);
-      if (index !== -1) {
-        state.fees[index] = action.payload;
-      }
-    },
-    removeServiceFee: (state, action: PayloadAction<string>) => {
-      state.fees = state.fees.filter(fee => fee.id !== action.payload);
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchServiceFees.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(fetchServiceFees.fulfilled, (state, action) => {
         state.loading = false;
-        state.fees = action.payload;
+        state.serviceFees = action.payload;
       })
       .addCase(fetchServiceFees.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.error.message || 'Failed to fetch service fees';
+      })
+      .addCase(createServiceFee.fulfilled, (state, action) => {
+        state.serviceFees.push(action.payload);
       });
   },
 });
-
-export const { addServiceFee, updateServiceFee, removeServiceFee } = serviceFeeSlice.actions;
-
-export const selectServiceFees = (state: RootState) => state.serviceFees.fees;
-export const selectServiceFeesLoading = (state: RootState) => state.serviceFees.loading;
-export const selectServiceFeesError = (state: RootState) => state.serviceFees.error;
 
 export default serviceFeeSlice.reducer;

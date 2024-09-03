@@ -21,7 +21,7 @@ export interface Client {
   state: string;
   zipCode: string;
   country: string;
-  isActive: boolean;
+  active: boolean;
   createdAt: string;
   updatedAt: string;
 }
