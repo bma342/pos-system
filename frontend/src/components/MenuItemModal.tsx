@@ -1,77 +1,56 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { MenuItem, Modifier } from '../types';
-import { addToCart } from '../redux/slices/cartSlice';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  TextField,
+  Box,
+} from '@mui/material';
+import { MenuItem } from '../types/menuTypes';
 
-interface Props {
+interface MenuItemModalProps {
   item: MenuItem;
   onClose: () => void;
 }
 
-const MenuItemModal: React.FC<Props> = ({ item, onClose }) => {
-  const dispatch = useDispatch();
-  const [selectedModifiers, setSelectedModifiers] = useState<Modifier[]>(
-    item.defaultModifiers || []
-  );
+const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
   const [quantity, setQuantity] = useState(1);
 
-  const toggleModifier = (modifier: Modifier) => {
-    if (selectedModifiers.some((m) => m.id === modifier.id)) {
-      setSelectedModifiers(
-        selectedModifiers.filter((m) => m.id !== modifier.id)
-      );
-    } else {
-      setSelectedModifiers([...selectedModifiers, modifier]);
-    }
-  };
-
   const handleAddToCart = () => {
-    dispatch(
-      addToCart({
-        menuItem: item,
-        quantity,
-        selectedModifiers,
-      })
-    );
+    // Implement add to cart logic here
+    console.log(`Added ${quantity} ${item.name}(s) to cart`);
     onClose();
   };
 
   return (
-    <div className="menu-item-modal">
-      <button className="close-button" onClick={onClose}>
-        ×
-      </button>
-      <h2>{item.name}</h2>
-      <img src={item.image} alt={item.name} />
-      <p>{item.description}</p>
-      <p>Price: ${item.price.toFixed(2)}</p>
-      {item.reviewsEnabled && (
-        <p>
-          Rating: {item.averageRating} ({item.reviewCount} reviews)
-        </p>
-      )}
-      {item.showQuantityAvailable && <p>Available: {item.quantityAvailable}</p>}
-      <h3>Modifiers</h3>
-      {item.modifiers.map((modifier) => (
-        <div key={modifier.id} className="modifier-option">
-          <input
-            type="checkbox"
-            id={`modifier-${modifier.id}`}
-            checked={selectedModifiers.some((m) => m.id === modifier.id)}
-            onChange={() => toggleModifier(modifier)}
+    <Dialog open={true} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>{item.name}</DialogTitle>
+      <DialogContent>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <img src={item.image} alt={item.name} style={{ maxWidth: '100%', height: 'auto' }} />
+          <Typography variant="body1">{item.description}</Typography>
+          <Typography variant="h6" color="primary">
+            ${item.price.toFixed(2)}
+          </Typography>
+          <TextField
+            label="Quantity"
+            type="number"
+            value={quantity}
+            onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+            InputProps={{ inputProps: { min: 1 } }}
           />
-          <label htmlFor={`modifier-${modifier.id}`}>{modifier.name}</label>
-        </div>
-      ))}
-      <div className="quantity-selector">
-        <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>
-          -
-        </button>
-        <span>{quantity}</span>
-        <button onClick={() => setQuantity(quantity + 1)}>+</button>
-      </div>
-      <button onClick={handleAddToCart}>Add to Cart</button>
-    </div>
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={handleAddToCart} variant="contained" color="primary">
+          Add to Cart
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

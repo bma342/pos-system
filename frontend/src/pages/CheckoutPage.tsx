@@ -16,9 +16,9 @@ const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const location = useSelector(
-    (state: RootState) => state.location.currentLocation
+    (state: RootState) => state.location.selectedLocation
   );
-  const guest = useSelector((state: RootState) => state.auth.guest);
+  const guest = useSelector((state: RootState) => state.auth.currentGuest);
 
   const [orderType, setOrderType] = useState<OrderType>('pickup');
   const [kitchenTip, setKitchenTip] = useState(0);
@@ -80,20 +80,26 @@ const CheckoutPage: React.FC = () => {
       if (!location) {
         throw new Error('Location not selected');
       }
-      const order = await createOrder(
-        cartItems,
+      const orderData = {
+        items: cartItems,
         orderType,
-        location.id,
-        guest?.id || null,
-        appliedDiscounts,
+        locationId: location.id,
+        guestId: guest?.id,
+        subtotal: calculateSubtotal(),
+        tax: calculateTax(calculateSubtotal()),
+        serviceCharge: calculateServiceCharge(calculateSubtotal()),
         kitchenTip,
-        driverTip
-      );
+        driverTip,
+        total: calculateTotal(),
+        appliedDiscounts,
+      };
+      const response = await createOrder(orderData);
+      const orderId = response.data.id;
       dispatch(clearCart());
-      navigate(`/order-confirmation/${order.id}`);
+      navigate(`/order-confirmation/${orderId}`);
     } catch (error) {
       console.error('Error creating order:', error);
-      // Handle error (show error message, etc.)
+      // Handle error (e.g., show error message to user)
     }
   };
 
@@ -128,8 +134,8 @@ const CheckoutPage: React.FC = () => {
             />
           </p>
           <p>Price: ${calculateItemTotal(item).toFixed(2)}</p>
-          {item.selectedModifiers.map((mod) => (
-            <p key={mod.id}>
+          {item.selectedModifiers.map((mod, modIndex) => (
+            <p key={modIndex}>
               {mod.name}: ${(mod.price * item.quantity).toFixed(2)}
             </p>
           ))}

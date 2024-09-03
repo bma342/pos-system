@@ -171,3 +171,22 @@ export type {
 export type { RealtimeMetrics } from './realtimeMetricsTypes';
 export type { RevenueData } from './revenueTypes';
 export type { Review } from './reviewTypes';
+
+export interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  reviewsEnabled: boolean;
+  averageRating?: number;
+  reviewCount?: number;
+  showQuantityAvailable: boolean;
+  quantityAvailable?: number;
+}
+
+export interface Modifier {
+  id: string;
+  name: string;
+  price: number;
+}

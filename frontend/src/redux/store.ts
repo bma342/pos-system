@@ -39,6 +39,7 @@ import providerReducer from './slices/providerSlice';
 import roleReducer from './slices/roleSlice';
 import salesReportReducer from './slices/salesReportSlice';
 import sessionReducer from './slices/sessionSlice';
+import ordersReducer from './slices/orderSlice';
 
 // Configure persist options
 const persistConfig = {
@@ -81,6 +82,7 @@ const rootReducer = combineReducers({
   role: roleReducer,
   salesReport: salesReportReducer,
   session: sessionReducer,
+  orders: ordersReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -93,20 +95,15 @@ const logger = createLogger({
 
 export const store = configureStore({
   reducer: {
-    menu: menuReducer,
-    order: orderReducer,
-    posProfile: posProfileReducer,
-    posSettings: posSettingsReducer,
-    providers: providerReducer,
-    realtimeMetrics: realtimeMetricsReducer,
-    revenue: revenueReducer,
-    reviews: reviewReducer,
-    serviceFees: serviceFeeReducer,
-    wallet: walletReducer,
-    cart: cartReducer,
+    abTest: abTestReducer,
+    client: clientReducer,
     location: locationReducer,
-    user: userReducer,
+    menuItems: menuItemsReducer,
+    clientBranding: clientBrandingReducer,
+    abTest: abTestReducer,
+    session: sessionReducer,
     auth: authReducer,
+    // Add other reducers here
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -119,7 +116,22 @@ export const store = configureStore({
 
 export const persistor = persistStore(store);
 
-export type RootState = ReturnType<typeof store.getState>;
+export interface RootState {
+  location: LocationState;
+  posIntegration: PosIntegrationState;
+  // ... other slices
+}
+
+export interface LocationState {
+  locationProfiles: LocationProfile[];
+  // ... other location state properties
+}
+
+export interface PosIntegrationState {
+  integrations: PosIntegration[];
+  // ... other POS integration state properties
+}
+
 export type AppDispatch = typeof store.dispatch;
 export type AppThunk<ReturnType = void> = ThunkAction<
   ReturnType,

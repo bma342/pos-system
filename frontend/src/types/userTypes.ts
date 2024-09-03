@@ -10,6 +10,7 @@ export interface User {
   email: string;
   name: string;
   role: string;
+  clientId: string;
   // Add any other user properties
 }
 

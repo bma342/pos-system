@@ -2,12 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
 import {
-  fetchABTests,
-  createABTest,
-  updateABTest,
-  deleteABTest,
+  fetchABTestsAsync,
+  createABTestAsync,
+  updateABTestAsync,
+  deleteABTestAsync,
 } from '../redux/slices/abTestSlice';
-import { ABTest, Client, Location } from '../types';
+import { fetchClientsAsync } from '../redux/slices/clientSlice';
+import { fetchLocationsAsync } from '../redux/slices/locationSlice';
+import { ABTest } from '../types/abTestTypes';
+import { Client } from '../types/clientTypes';
+import { Location } from '../types/locationTypes';
 import {
   TextField,
   Button,
@@ -27,10 +31,8 @@ const ABTestManagement: React.FC = () => {
   const { tests, status, error } = useSelector(
     (state: RootState) => state.abTest
   );
-  const clients = useSelector((state: RootState) => state.clients.clients);
-  const locations = useSelector(
-    (state: RootState) => state.locations.locations
-  );
+  const clients = useSelector((state: RootState) => state.client.clients);
+  const locations = useSelector((state: RootState) => state.location.locations);
   const [newTest, setNewTest] = useState<Partial<ABTest>>({
     name: '',
     description: '',
@@ -42,11 +44,13 @@ const ABTestManagement: React.FC = () => {
   });
 
   useEffect(() => {
-    dispatch(fetchABTests());
+    dispatch(fetchABTestsAsync());
+    dispatch(fetchClientsAsync());
+    dispatch(fetchLocationsAsync());
   }, [dispatch]);
 
   const handleCreateTest = () => {
-    dispatch(createABTest(newTest));
+    dispatch(createABTestAsync(newTest as ABTest));
     setNewTest({
       name: '',
       description: '',
@@ -59,12 +63,12 @@ const ABTestManagement: React.FC = () => {
   };
 
   const handleUpdateTest = (test: ABTest) => {
-    dispatch(updateABTest(test));
+    dispatch(updateABTestAsync(test));
   };
 
   const handleDeleteTest = (id: number) => {
     if (window.confirm('Are you sure you want to delete this AB test?')) {
-      dispatch(deleteABTest(id));
+      dispatch(deleteABTestAsync(id));
     }
   };
 
@@ -86,9 +90,7 @@ const ABTestManagement: React.FC = () => {
         <TextField
           label="Description"
           value={newTest.description}
-          onChange={(e) =>
-            setNewTest({ ...newTest, description: e.target.value })
-          }
+          onChange={(e) => setNewTest({ ...newTest, description: e.target.value })}
           sx={{ marginRight: 1 }}
         />
         <TextField
@@ -103,17 +105,9 @@ const ABTestManagement: React.FC = () => {
           onChange={(e) => setNewTest({ ...newTest, variantB: e.target.value })}
           sx={{ marginRight: 1 }}
         />
-        <Switch
-          checked={newTest.isActive}
-          onChange={(e) =>
-            setNewTest({ ...newTest, isActive: e.target.checked })
-          }
-        />
         <Select
           value={newTest.clientId}
-          onChange={(e) =>
-            setNewTest({ ...newTest, clientId: e.target.value as number })
-          }
+          onChange={(e) => setNewTest({ ...newTest, clientId: e.target.value as number })}
           sx={{ marginRight: 1 }}
         >
           {clients.map((client: Client) => (
@@ -124,9 +118,7 @@ const ABTestManagement: React.FC = () => {
         </Select>
         <Select
           value={newTest.locationId}
-          onChange={(e) =>
-            setNewTest({ ...newTest, locationId: e.target.value as number })
-          }
+          onChange={(e) => setNewTest({ ...newTest, locationId: e.target.value as number })}
           sx={{ marginRight: 1 }}
         >
           {locations.map((location: Location) => (
@@ -135,80 +127,37 @@ const ABTestManagement: React.FC = () => {
             </MenuItem>
           ))}
         </Select>
-        <Button onClick={handleCreateTest} variant="contained">
-          Add AB Test
+        <Switch
+          checked={newTest.isActive}
+          onChange={(e) => setNewTest({ ...newTest, isActive: e.target.checked })}
+        />
+        <Button variant="contained" onClick={handleCreateTest}>
+          Create Test
         </Button>
       </Box>
-
       <List>
-        {tests.map((test) => (
+        {tests.map((test: ABTest) => (
           <ListItem key={test.id}>
             <TextField
               value={test.name}
-              onChange={(e) =>
-                handleUpdateTest({ ...test, name: e.target.value })
-              }
-              sx={{ marginRight: 1 }}
+              onChange={(e) => handleUpdateTest({ ...test, name: e.target.value })}
             />
             <TextField
               value={test.description}
-              onChange={(e) =>
-                handleUpdateTest({ ...test, description: e.target.value })
-              }
-              sx={{ marginRight: 1 }}
+              onChange={(e) => handleUpdateTest({ ...test, description: e.target.value })}
             />
             <TextField
               value={test.variantA}
-              onChange={(e) =>
-                handleUpdateTest({ ...test, variantA: e.target.value })
-              }
-              sx={{ marginRight: 1 }}
+              onChange={(e) => handleUpdateTest({ ...test, variantA: e.target.value })}
             />
             <TextField
               value={test.variantB}
-              onChange={(e) =>
-                handleUpdateTest({ ...test, variantB: e.target.value })
-              }
-              sx={{ marginRight: 1 }}
+              onChange={(e) => handleUpdateTest({ ...test, variantB: e.target.value })}
             />
             <Switch
               checked={test.isActive}
-              onChange={(e) =>
-                handleUpdateTest({ ...test, isActive: e.target.checked })
-              }
+              onChange={(e) => handleUpdateTest({ ...test, isActive: e.target.checked })}
             />
-            <Select
-              value={test.clientId}
-              onChange={(e) =>
-                handleUpdateTest({
-                  ...test,
-                  clientId: e.target.value as number,
-                })
-              }
-              sx={{ marginRight: 1 }}
-            >
-              {clients.map((client: Client) => (
-                <MenuItem key={client.id} value={client.id}>
-                  {client.name}
-                </MenuItem>
-              ))}
-            </Select>
-            <Select
-              value={test.locationId}
-              onChange={(e) =>
-                handleUpdateTest({
-                  ...test,
-                  locationId: e.target.value as number,
-                })
-              }
-              sx={{ marginRight: 1 }}
-            >
-              {locations.map((location: Location) => (
-                <MenuItem key={location.id} value={location.id}>
-                  {location.name}
-                </MenuItem>
-              ))}
-            </Select>
             <IconButton onClick={() => handleDeleteTest(test.id)}>
               <DeleteIcon />
             </IconButton>

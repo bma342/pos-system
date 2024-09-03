@@ -6,17 +6,59 @@ export interface LocationUpdateData {
 }
 
 export interface Location {
-  id: string;
+  id: number;
   name: string;
   address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
   phoneNumber: string;
-  // ... other location fields
+  email: string;
+  timezone: string;
+  isActive: boolean;
+  clientId: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface LocationCreateData {
   name: string;
   address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
   phoneNumber: string;
-  clientId: string;
-  // ... other fields needed for creating a location
+  email: string;
+  timezone: string;
+  isActive: boolean;
+  clientId: number;
+}
+
+export interface LocationHours {
+  id: number;
+  locationId: number;
+  dayOfWeek: number;
+  openTime: string;
+  closeTime: string;
+  isClosed: boolean;
+}
+
+export interface LocationMenu {
+  id: number;
+  locationId: number;
+  name: string;
+  description: string;
+  isActive: boolean;
+  items: MenuItem[];
+}
+
+export interface MenuItem {
+  id: number;
+  menuId: number;
+  name: string;
+  description: string;
+  price: number;
+  isAvailable: boolean;
 }

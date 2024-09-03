@@ -1,40 +1,34 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import {
-  fetchClientBranding as fetchClientBrandingAPI,
-  updateClientBranding as updateClientBrandingAPI,
-} from '../../api/clientApi';
-import { ClientBranding } from '../../types';
-import { createTheme } from '../../utils/themeUtils';
+import { ClientBranding } from '../../types/clientTypes';
+import { clientBrandingApi } from '../../api/clientBrandingApi';
 
-export const fetchClientBrandingAsync = createAsyncThunk(
-  'clientBranding/fetchClientBranding',
-  async () => {
-    const branding = await fetchClientBrandingAPI();
-    const theme = createTheme(branding);
-    return { branding, theme };
-  }
-);
-
-export const updateClientBrandingAsync = createAsyncThunk(
-  'clientBranding/updateClientBranding',
-  async (brandingData: ClientBranding) => {
-    const updatedBranding = await updateClientBrandingAPI(brandingData);
-    const theme = createTheme(updatedBranding);
-    return { branding: updatedBranding, theme };
-  }
-);
+interface ClientBrandingState {
+  branding: ClientBranding | null;
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  error: string | null;
+}
 
 const initialState: ClientBrandingState = {
-  branding: {
-    primaryColor: '#000000',
-    secondaryColor: '#FFFFFF',
-    fontFamily: 'Arial, sans-serif',
-    logo: '',
-    // ... other initial branding values
-  },
+  branding: null,
   status: 'idle',
   error: null,
 };
+
+export const fetchClientBranding = createAsyncThunk(
+  'clientBranding/fetchClientBranding',
+  async () => {
+    const response = await clientBrandingApi.getClientBranding();
+    return response.data;
+  }
+);
+
+export const updateClientBranding = createAsyncThunk(
+  'clientBranding/updateClientBranding',
+  async (brandingData: ClientBranding) => {
+    const response = await clientBrandingApi.updateClientBranding(brandingData);
+    return response.data;
+  }
+);
 
 const clientBrandingSlice = createSlice({
   name: 'clientBranding',
@@ -42,21 +36,19 @@ const clientBrandingSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchClientBrandingAsync.pending, (state) => {
+      .addCase(fetchClientBranding.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(fetchClientBrandingAsync.fulfilled, (state, action) => {
+      .addCase(fetchClientBranding.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.branding = action.payload.branding;
-        state.theme = action.payload.theme;
+        state.branding = action.payload;
       })
-      .addCase(fetchClientBrandingAsync.rejected, (state, action) => {
+      .addCase(fetchClientBranding.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message || null;
       })
-      .addCase(updateClientBrandingAsync.fulfilled, (state, action) => {
-        state.branding = action.payload.branding;
-        state.theme = action.payload.theme;
+      .addCase(updateClientBranding.fulfilled, (state, action) => {
+        state.branding = action.payload;
       });
   },
 });

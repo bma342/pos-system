@@ -1,55 +1,67 @@
-import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { RootState } from '../store';
-
-interface MenuItem {
-  id: string;
-  name: string;
-  price: number;
-  // Add other properties as needed
-}
-
-interface Menu {
-  id: string;
-  name: string;
-  items: MenuItem[];
-}
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { Menu, MenuStatistics } from '../../types/menuTypes';
+import { menuApi } from '../../api/menuApi';
 
 interface MenuState {
-  menus: Menu[];
-  // Add other state properties as needed
+  currentMenu: Menu | null;
+  menuStatistics: MenuStatistics | null;
+  loading: boolean;
+  error: string | null;
 }
 
 const initialState: MenuState = {
-  menus: [],
+  currentMenu: null,
+  menuStatistics: null,
+  loading: false,
+  error: null,
 };
+
+export const fetchMenu = createAsyncThunk(
+  'menu/fetchMenu',
+  async (clientId: string, { rejectWithValue }) => {
+    try {
+      const menu = await menuApi.getMenu(clientId);
+      return menu;
+    } catch (error) {
+      return rejectWithValue('Failed to fetch menu');
+    }
+  }
+);
+
+export const fetchMenuStatistics = createAsyncThunk(
+  'menu/fetchMenuStatistics',
+  async (clientId: string, { rejectWithValue }) => {
+    try {
+      const statistics = await menuApi.getMenuStatistics(clientId);
+      return statistics;
+    } catch (error) {
+      return rejectWithValue('Failed to fetch menu statistics');
+    }
+  }
+);
 
 const menuSlice = createSlice({
   name: 'menu',
   initialState,
-  reducers: {
-    updateMenuItem: (state, action: PayloadAction<MenuItem>) => {
-      const updatedItem = action.payload;
-      const menuIndex = state.menus.findIndex((menu) => menu.items.some(item => item.id === updatedItem.id));
-      if (menuIndex !== -1) {
-        state.menus[menuIndex].items = state.menus[menuIndex].items.map(
-          (item) => item.id === updatedItem.id ? updatedItem : item
-        );
-      }
-    },
-    // Add other reducers as needed
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchMenu.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchMenu.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentMenu = action.payload;
+      })
+      .addCase(fetchMenu.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(fetchMenuStatistics.fulfilled, (state, action) => {
+        state.menuStatistics = action.payload;
+      });
   },
-});
-
-export const { updateMenuItem } = menuSlice.actions;
-
-export const selectMenus = (state: RootState) => state.menu.menus;
-
-export const fetchMenus = createAsyncThunk('menu/fetchMenus', async () => {
-  // Fetch logic here
-});
-
-export const updateMenu = createAsyncThunk('menu/updateMenu', async (menu: Menu) => {
-  // Update logic here
 });
 
 export default menuSlice.reducer;

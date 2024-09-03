@@ -1,99 +1,63 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Challenge } from '../../types/challengeTypes';
-import {
-  getChallenges,
-  createChallenge,
-  updateChallenge,
-  deleteChallenge,
-} from '../../api/challengeApi';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+export type ChallengeType = 'purchase' | 'visit' | 'referral';
+export type ChallengeStatus = 'active' | 'inactive';
+
+export interface Challenge {
+  id: string;
+  name: string;
+  description: string;
+  challengeType: ChallengeType;
+  targetValue: number;
+  reward: number;
+  status: ChallengeStatus;
+}
 
 interface ChallengeState {
   challenges: Challenge[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  loading: boolean;
   error: string | null;
 }
 
 const initialState: ChallengeState = {
   challenges: [],
-  status: 'idle',
+  loading: false,
   error: null,
 };
 
-export const fetchChallenges = createAsyncThunk(
-  'challenges/fetchChallenges',
-  async () => {
-    return await getChallenges();
-  }
-);
-
-export const addChallenge = createAsyncThunk(
-  'challenges/addChallenge',
-  async (challenge: Omit<Challenge, 'id' | 'createdAt' | 'updatedAt'>) => {
-    return await createChallenge(challenge);
-  }
-);
-
-export const editChallenge = createAsyncThunk(
-  'challenges/editChallenge',
-  async ({ id, challenge }: { id: number; challenge: Partial<Challenge> }) => {
-    return await updateChallenge(id, challenge);
-  }
-);
-
-export const removeChallenge = createAsyncThunk(
-  'challenges/removeChallenge',
-  async (id: number) => {
-    await deleteChallenge(id);
-    return id;
-  }
-);
-
 const challengeSlice = createSlice({
-  name: 'challenges',
+  name: 'challenge',
   initialState,
-  reducers: {},
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchChallenges.pending, (state) => {
-        state.status = 'loading';
-      })
-      .addCase(
-        fetchChallenges.fulfilled,
-        (state, action: PayloadAction<Challenge[]>) => {
-          state.status = 'succeeded';
-          state.challenges = action.payload;
-        }
-      )
-      .addCase(fetchChallenges.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message || null;
-      })
-      .addCase(
-        addChallenge.fulfilled,
-        (state, action: PayloadAction<Challenge>) => {
-          state.challenges.push(action.payload);
-        }
-      )
-      .addCase(
-        editChallenge.fulfilled,
-        (state, action: PayloadAction<Challenge>) => {
-          const index = state.challenges.findIndex(
-            (challenge) => challenge.id === action.payload.id
-          );
-          if (index !== -1) {
-            state.challenges[index] = action.payload;
-          }
-        }
-      )
-      .addCase(
-        removeChallenge.fulfilled,
-        (state, action: PayloadAction<number>) => {
-          state.challenges = state.challenges.filter(
-            (challenge) => challenge.id !== action.payload
-          );
-        }
-      );
+  reducers: {
+    fetchChallenges: (state) => {
+      state.loading = true;
+    },
+    fetchChallengesSuccess: (state, action: PayloadAction<Challenge[]>) => {
+      state.challenges = action.payload;
+      state.loading = false;
+    },
+    fetchChallengesFailure: (state, action: PayloadAction<string>) => {
+      state.error = action.payload;
+      state.loading = false;
+    },
+    createChallenge: (state, action: PayloadAction<Challenge>) => {
+      state.challenges.push(action.payload);
+    },
+    updateChallenge: (state, action: PayloadAction<Challenge>) => {
+      const index = state.challenges.findIndex(c => c.id === action.payload.id);
+      if (index !== -1) {
+        state.challenges[index] = action.payload;
+      }
+    },
   },
 });
+
+export const {
+  fetchChallenges,
+  fetchChallengesSuccess,
+  fetchChallengesFailure,
+  createChallenge,
+  updateChallenge,
+} = challengeSlice.actions;
 
 export default challengeSlice.reducer;

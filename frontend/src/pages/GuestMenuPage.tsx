@@ -6,16 +6,16 @@ import { fetchMenuItemsAsync } from '../redux/slices/menuItemsSlice';
 import MenuItemCard from '../components/MenuItemCard';
 import MenuItemModal from '../components/MenuItemModal';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { MenuItem } from '../types';
-import useClientBranding from '../components/ClientBrandingProvider';
-import { Typography, Box, Alert } from '@mui/material';
+import { MenuItem } from '../types/menuTypes';
+import { useClientBranding } from '../hooks/useClientBranding';
+import { Typography, Box, Alert, Grid } from '@mui/material';
 
 const GuestMenuPage: React.FC = () => {
   const { locationId } = useParams<{ locationId: string }>();
   const dispatch = useDispatch<AppDispatch>();
-  const menuItems = useSelector((state: RootState) => state.menu.items);
-  const status = useSelector((state: RootState) => state.menu.status);
-  const error = useSelector((state: RootState) => state.menu.error);
+  const menuItems = useSelector((state: RootState) => state.menuItems.items);
+  const status = useSelector((state: RootState) => state.menuItems.status);
+  const error = useSelector((state: RootState) => state.menuItems.error);
   const clientBranding = useClientBranding();
 
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
@@ -37,20 +37,21 @@ const GuestMenuPage: React.FC = () => {
   return (
     <Box
       className="guest-menu-page"
-      sx={{ backgroundColor: clientBranding.backgroundColor }}
+      sx={{ backgroundColor: clientBranding?.backgroundColor }}
     >
-      <Typography variant="h1" sx={{ color: clientBranding.primaryColor }}>
-        {clientBranding.restaurantName} Menu
+      <Typography variant="h1" sx={{ color: clientBranding?.primaryColor }}>
+        {clientBranding?.restaurantName} Menu
       </Typography>
-      <div className="menu-items-grid">
-        {menuItems.map((item) => (
-          <MenuItemCard
-            key={item.id}
-            item={item}
-            onSelect={() => setSelectedItem(item)}
-          />
+      <Grid container spacing={2}>
+        {menuItems.map((item: MenuItem) => (
+          <Grid item xs={12} sm={6} md={4} key={item.id}>
+            <MenuItemCard
+              item={item}
+              onSelect={() => setSelectedItem(item)}
+            />
+          </Grid>
         ))}
-      </div>
+      </Grid>
       {selectedItem && (
         <MenuItemModal
           item={selectedItem}

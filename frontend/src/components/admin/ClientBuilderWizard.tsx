@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { createClient } from '../../redux/slices/clientSlice';
+import { createClientAsync } from '../../redux/slices/clientSlice';
 import {
   TextField,
   Button,
@@ -14,9 +14,11 @@ import {
 } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { AppDispatch } from '../../redux/store';
+import { ClientData } from '../../types/clientTypes';
 
 const ClientBuilderWizard: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const [activeStep, setActiveStep] = useState(0);
 
   const validationSchema = Yup.object({
@@ -34,7 +36,7 @@ const ClientBuilderWizard: React.FC = () => {
     }),
   });
 
-  const formik = useFormik({
+  const formik = useFormik<ClientData>({
     initialValues: {
       name: '',
       domain: '',
@@ -49,7 +51,7 @@ const ClientBuilderWizard: React.FC = () => {
     },
     validationSchema,
     onSubmit: (values) => {
-      dispatch(createClient(values));
+      dispatch(createClientAsync(values));
     },
   });
 
@@ -99,13 +101,8 @@ const ClientBuilderWizard: React.FC = () => {
               type="color"
               value={formik.values.primaryColor}
               onChange={formik.handleChange}
-              error={
-                formik.touched.primaryColor &&
-                Boolean(formik.errors.primaryColor)
-              }
-              helperText={
-                formik.touched.primaryColor && formik.errors.primaryColor
-              }
+              error={formik.touched.primaryColor && Boolean(formik.errors.primaryColor)}
+              helperText={formik.touched.primaryColor && formik.errors.primaryColor}
               fullWidth
               margin="normal"
             />
@@ -115,13 +112,8 @@ const ClientBuilderWizard: React.FC = () => {
               type="color"
               value={formik.values.secondaryColor}
               onChange={formik.handleChange}
-              error={
-                formik.touched.secondaryColor &&
-                Boolean(formik.errors.secondaryColor)
-              }
-              helperText={
-                formik.touched.secondaryColor && formik.errors.secondaryColor
-              }
+              error={formik.touched.secondaryColor && Boolean(formik.errors.secondaryColor)}
+              helperText={formik.touched.secondaryColor && formik.errors.secondaryColor}
               fullWidth
               margin="normal"
             />
@@ -180,20 +172,16 @@ const ClientBuilderWizard: React.FC = () => {
             <Typography>Name: {formik.values.name}</Typography>
             <Typography>Domain: {formik.values.domain}</Typography>
             <Typography>Primary Color: {formik.values.primaryColor}</Typography>
-            <Typography>
-              Secondary Color: {formik.values.secondaryColor}
-            </Typography>
+            <Typography>Secondary Color: {formik.values.secondaryColor}</Typography>
             <Typography>Logo: {formik.values.logo}</Typography>
-            <h3>Confirm Client Details</h3>
-            <p>Name: {clientData.name}</p>
-            <p>Domain: {clientData.domain}</p>
-            <p>Primary Color: {clientData.primaryColor}</p>
-            <p>Secondary Color: {clientData.secondaryColor}</p>
-            <p>Logo: {clientData.logo}</p>
+            <Typography>Features:</Typography>
+            <Typography>- Loyalty: {formik.values.features.loyalty ? 'Yes' : 'No'}</Typography>
+            <Typography>- Online Ordering: {formik.values.features.onlineOrdering ? 'Yes' : 'No'}</Typography>
+            <Typography>- Table Reservations: {formik.values.features.tableReservations ? 'Yes' : 'No'}</Typography>
           </Box>
         );
       default:
-        return 'Unknown step';
+        return null;
     }
   };
 
@@ -206,25 +194,25 @@ const ClientBuilderWizard: React.FC = () => {
           </Step>
         ))}
       </Stepper>
-      <Box sx={{ mt: 2 }}>
+      <form onSubmit={formik.handleSubmit}>
         {renderStepContent(activeStep)}
-        <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-          <Button
-            color="inherit"
-            disabled={activeStep === 0}
-            onClick={handleBack}
-            sx={{ mr: 1 }}
-          >
-            Back
-          </Button>
-          <Box sx={{ flex: '1 1 auto' }} />
-          {activeStep === steps.length - 1 ? (
-            <Button onClick={handleSubmit}>Create Client</Button>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+          {activeStep > 0 && (
+            <Button onClick={handleBack} sx={{ mr: 1 }}>
+              Back
+            </Button>
+          )}
+          {activeStep < steps.length - 1 ? (
+            <Button variant="contained" onClick={handleNext}>
+              Next
+            </Button>
           ) : (
-            <Button onClick={handleNext}>Next</Button>
+            <Button type="submit" variant="contained" color="primary">
+              Create Client
+            </Button>
           )}
         </Box>
-      </Box>
+      </form>
     </Box>
   );
 };

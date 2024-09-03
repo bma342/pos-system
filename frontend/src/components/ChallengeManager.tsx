@@ -1,56 +1,52 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Typography, Button, TextField, Select, MenuItem } from '@mui/material';
-import { ChallengeService } from '../services/ChallengeService';
-import { Challenge } from '../types/challengeTypes';
+import { Typography, Button, TextField, Select, MenuItem, SelectChangeEvent } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '../redux/store';
+import {
+  fetchChallenges,
+  createChallenge,
+  updateChallenge,
+  Challenge,
+  ChallengeType
+} from '../redux/slices/challengeSlice';
 
 const ChallengeManager: React.FC = () => {
-  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const dispatch = useDispatch<AppDispatch>();
+  const challenges = useSelector((state: RootState) => state.challenge.challenges);
   const [newChallenge, setNewChallenge] = useState<Partial<Challenge>>({
     name: '',
     description: '',
-    type: 'purchase',
-    target: 0,
+    challengeType: 'purchase' as ChallengeType,
+    targetValue: 0,
     reward: 0,
   });
 
-  const challengeService = React.useMemo(() => new ChallengeService(), []);
-
-  const fetchChallenges = useCallback(async () => {
-    try {
-      const fetchedChallenges = await challengeService.getChallenges();
-      setChallenges(fetchedChallenges);
-    } catch (error) {
-      console.error('Failed to fetch challenges:', error);
-    }
-  }, [challengeService]);
-
   useEffect(() => {
-    fetchChallenges();
-  }, [fetchChallenges]);
+    dispatch(fetchChallenges());
+  }, [dispatch]);
 
-  const handleCreate = async () => {
-    try {
-      await challengeService.createChallenge(newChallenge as Challenge);
-      fetchChallenges();
-      setNewChallenge({
-        name: '',
-        description: '',
-        type: 'purchase',
-        target: 0,
-        reward: 0,
-      });
-    } catch (error) {
-      console.error('Failed to create challenge:', error);
-    }
+  const handleCreate = () => {
+    dispatch(createChallenge(newChallenge as Challenge));
+    setNewChallenge({
+      name: '',
+      description: '',
+      challengeType: 'purchase' as ChallengeType,
+      targetValue: 0,
+      reward: 0,
+    });
   };
 
-  const handleUpdate = async (updatedChallenge: Challenge) => {
-    try {
-      await challengeService.updateChallenge(updatedChallenge);
-      fetchChallenges();
-    } catch (error) {
-      console.error('Failed to update challenge:', error);
-    }
+  const handleUpdate = (updatedChallenge: Challenge) => {
+    dispatch(updateChallenge(updatedChallenge));
+  };
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = event.target;
+    setNewChallenge(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (event: SelectChangeEvent<ChallengeType>) => {
+    setNewChallenge(prev => ({ ...prev, challengeType: event.target.value as ChallengeType }));
   };
 
   return (
@@ -58,47 +54,39 @@ const ChallengeManager: React.FC = () => {
       <Typography variant="h4">Challenge Manager</Typography>
       <div>
         <TextField
+          name="name"
           label="Challenge Name"
           value={newChallenge.name}
-          onChange={(e) =>
-            setNewChallenge({ ...newChallenge, name: e.target.value })
-          }
+          onChange={handleInputChange}
         />
         <TextField
+          name="description"
           label="Description"
           value={newChallenge.description}
-          onChange={(e) =>
-            setNewChallenge({ ...newChallenge, description: e.target.value })
-          }
+          onChange={handleInputChange}
         />
         <Select
-          value={newChallenge.type}
-          onChange={(e) =>
-            setNewChallenge({
-              ...newChallenge,
-              type: e.target.value as Challenge['type'],
-            })
-          }
+          value={newChallenge.challengeType}
+          onChange={handleSelectChange}
+          label="Challenge Type"
         >
           <MenuItem value="purchase">Purchase</MenuItem>
           <MenuItem value="visit">Visit</MenuItem>
           <MenuItem value="referral">Referral</MenuItem>
         </Select>
         <TextField
-          label="Target"
+          name="targetValue"
+          label="Target Value"
           type="number"
-          value={newChallenge.target}
-          onChange={(e) =>
-            setNewChallenge({ ...newChallenge, target: Number(e.target.value) })
-          }
+          value={newChallenge.targetValue}
+          onChange={handleInputChange}
         />
         <TextField
+          name="reward"
           label="Reward"
           type="number"
           value={newChallenge.reward}
-          onChange={(e) =>
-            setNewChallenge({ ...newChallenge, reward: Number(e.target.value) })
-          }
+          onChange={handleInputChange}
         />
         <Button onClick={handleCreate}>Create Challenge</Button>
       </div>
@@ -107,20 +95,14 @@ const ChallengeManager: React.FC = () => {
           <div key={challenge.id}>
             <Typography>{challenge.name}</Typography>
             <Typography>{challenge.description}</Typography>
-            <Typography>{challenge.type}</Typography>
-            <Typography>Target: {challenge.target}</Typography>
+            <Typography>Type: {challenge.challengeType}</Typography>
+            <Typography>Target: {challenge.targetValue}</Typography>
             <Typography>Reward: {challenge.reward}</Typography>
-            <Button
-              onClick={() => handleUpdate({ ...challenge, status: 'active' })}
-            >
+            <Button onClick={() => handleUpdate({ ...challenge, status: 'active' })}>
               Activate
             </Button>
-            <Button
-              onClick={() =>
-                handleUpdate({ ...challenge, status: 'completed' })
-              }
-            >
-              Complete
+            <Button onClick={() => handleUpdate({ ...challenge, status: 'inactive' })}>
+              Deactivate
             </Button>
           </div>
         ))}

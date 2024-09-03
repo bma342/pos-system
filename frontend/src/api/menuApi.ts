@@ -1,64 +1,16 @@
-import apiClient from './axios';
-import { Menu } from '../types';
+import apiClient from './apiClient';
+import { Menu, MenuStatistics } from '../types/menuTypes';
 
-export const fetchMenus = async (clientId: number): Promise<Menu[]> => {
-  const response = await apiClient.get<Menu[]>(
-    `/api/clients/${clientId}/menus`
-  );
-  return response.data;
-};
-
-export const fetchMenuWithDetails = async (
-  clientId: number,
-  menuId: number
-): Promise<Menu> => {
-  const response = await apiClient.get<Menu>(
-    `/api/clients/${clientId}/menus/${menuId}?includeDetails=true`
-  );
-  return response.data;
-};
-
-export const createMenu = async (
-  clientId: number,
-  menuData: Partial<Menu>
-): Promise<Menu> => {
-  const response = await apiClient.post<Menu>(
-    `/api/clients/${clientId}/menus`,
-    menuData
-  );
-  return response.data;
-};
-
-export const updateMenu = async (
-  clientId: number,
-  menuId: number,
-  menuData: Partial<Menu>
-): Promise<Menu> => {
-  const response = await apiClient.put<Menu>(
-    `/api/clients/${clientId}/menus/${menuId}`,
-    menuData
-  );
-  return response.data;
-};
-
-export const deleteMenu = async (
-  clientId: number,
-  menuId: number
-): Promise<void> => {
-  await apiClient.delete(`/api/clients/${clientId}/menus/${menuId}`);
-};
-
-export const syncMenus = async (clientId: number): Promise<void> => {
-  await apiClient.post(`/api/clients/${clientId}/menus/sync`);
-};
-
-export const fetchMenuItems = async (locationId: string, clientId: string) => {
-  try {
-    const response = await apiClient.get(
-      `/api/clients/${clientId}/locations/${locationId}/menu-items`
-    );
+export const menuApi = {
+  getMenu: async (clientId: string): Promise<Menu> => {
+    const response = await apiClient.get(`/menus/${clientId}`);
     return response.data;
-  } catch (error) {
-    throw new Error('Failed to fetch menu items');
-  }
+  },
+
+  getMenuStatistics: async (clientId: string): Promise<MenuStatistics> => {
+    const response = await apiClient.get(`/menus/statistics/${clientId}`);
+    return response.data;
+  },
+
+  // Add other API methods as needed
 };

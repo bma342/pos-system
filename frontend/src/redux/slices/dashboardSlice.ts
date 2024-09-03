@@ -1,25 +1,71 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { DashboardStats } from '../../types';
-import { dashboardService } from '../../services/dashboardService';
+import { Revenue, CustomerMetrics, SalesReport, InventoryItem, RealtimeMetrics } from '../../types';
+import { dashboardApi } from '../../api/dashboardApi';
 
 interface DashboardState {
-  stats: DashboardStats | null;
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  revenue: Revenue[];
+  customerMetrics: CustomerMetrics;
+  inventory: InventoryItem[];
+  salesReport: {
+    salesByCategory: any[]; // Replace 'any' with the correct type
+    topSellingItems: any[]; // Replace 'any' with the correct type
+  };
+  realtimeMetrics: RealtimeMetrics;
+  loading: boolean;
   error: string | null;
 }
 
 const initialState: DashboardState = {
-  stats: null,
-  status: 'idle',
+  revenue: [],
+  customerMetrics: {} as CustomerMetrics,
+  inventory: [],
+  salesReport: {
+    salesByCategory: [],
+    topSellingItems: [],
+  },
+  realtimeMetrics: {} as RealtimeMetrics,
+  loading: false,
   error: null,
 };
 
-export const fetchDashboardStats = createAsyncThunk(
-  'dashboard/fetchStats',
+export const fetchRevenue = createAsyncThunk(
+  'dashboard/fetchRevenue',
+  async (dateRange: { start: Date; end: Date }) => {
+    const response = await dashboardApi.getRevenue(dateRange);
+    return response.data;
+  }
+);
+
+export const fetchCustomerMetrics = createAsyncThunk(
+  'dashboard/fetchCustomerMetrics',
   async () => {
-    const response = await dashboardService.getDashboardStats();
-    return response;
+    const response = await dashboardApi.getCustomerMetrics();
+    return response.data;
+  }
+);
+
+export const fetchSalesByCategory = createAsyncThunk(
+  'dashboard/fetchSalesByCategory',
+  async (dateRange: { start: Date; end: Date }) => {
+    const response = await dashboardApi.getSalesByCategory(dateRange);
+    return response.data;
+  }
+);
+
+export const fetchTopSellingItems = createAsyncThunk(
+  'dashboard/fetchTopSellingItems',
+  async (dateRange: { start: Date; end: Date }) => {
+    const response = await dashboardApi.getTopSellingItems(dateRange);
+    return response.data;
+  }
+);
+
+export const fetchRealtimeMetrics = createAsyncThunk(
+  'dashboard/fetchRealtimeMetrics',
+  async () => {
+    const response = await dashboardApi.getRealtimeMetrics();
+    return response.data;
   }
 );
 
@@ -29,22 +75,22 @@ const dashboardSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchDashboardStats.pending, (state) => {
-        state.status = 'loading';
+      .addCase(fetchRevenue.fulfilled, (state, action) => {
+        state.revenue = action.payload;
       })
-      .addCase(fetchDashboardStats.fulfilled, (state, action: PayloadAction<DashboardStats>) => {
-        state.status = 'succeeded';
-        state.stats = action.payload;
+      .addCase(fetchCustomerMetrics.fulfilled, (state, action) => {
+        state.customerMetrics = action.payload;
       })
-      .addCase(fetchDashboardStats.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message || 'Failed to fetch dashboard stats';
+      .addCase(fetchSalesByCategory.fulfilled, (state, action) => {
+        state.salesReport.salesByCategory = action.payload;
+      })
+      .addCase(fetchTopSellingItems.fulfilled, (state, action) => {
+        state.salesReport.topSellingItems = action.payload;
+      })
+      .addCase(fetchRealtimeMetrics.fulfilled, (state, action) => {
+        state.realtimeMetrics = action.payload;
       });
   },
 });
-
-export const selectDashboardStats = (state: RootState) => state.dashboard.stats;
-export const selectDashboardStatus = (state: RootState) => state.dashboard.status;
-export const selectDashboardError = (state: RootState) => state.dashboard.error;
 
 export default dashboardSlice.reducer;

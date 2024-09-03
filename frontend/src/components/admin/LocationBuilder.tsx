@@ -1,245 +1,110 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  createLocation,
-  fetchLocations,
-  fetchLocationProfiles,
-} from '../../redux/slices/locationSlice';
-import { fetchPOSIntegrations } from '../../redux/slices/posIntegrationSlice';
-import { RootState, AppDispatch } from '../../redux/store';
-import {
-  TextField,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Checkbox,
-  FormControlLabel,
-  Box,
-  Typography,
-} from '@mui/material';
-import MenuBuilder from './MenuBuilder';
-import LocationExceptions from './LocationExceptions';
+import { updateLocation, fetchLocationProfiles } from '../../redux/slices/locationSlice';
+import { fetchPosIntegrations } from '../../redux/slices/posIntegrationSlice';
+import { Location, PosIntegration, LocationProfile } from '../../types';
+import { AppDispatch, RootState } from '../../redux/store';
+import { TextField, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { SelectChangeEvent } from '@mui/material/Select';
+import ProviderList from '../ProviderList';
+
+interface ProviderListProps {
+  locationId: string | undefined;
+  providers: string[];
+}
+
+const ProviderList: React.FC<ProviderListProps> = ({ locationId, providers }) => {
+  // ... component implementation
+};
 
 const LocationBuilder: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const locations = useSelector((state: RootState) => state.location.locations);
-  const locationProfiles = useSelector(
-    (state: RootState) => state.location.locationProfiles
-  );
-  const posIntegrations = useSelector(
-    (state: RootState) => state.posIntegration.integrations
-  );
+  const locationProfiles = useSelector((state: RootState) => state.location.locationProfiles);
+  const posIntegrations = useSelector((state: RootState) => state.posIntegration.integrations);
 
-  const [newLocation, setNewLocation] = useState({
+  const [location, setLocation] = useState<Omit<Location, 'id'>>({
     name: '',
     address: '',
+    gpsCoordinates: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    phoneNumber: '',
+    email: '',
+    latitude: 0,
+    longitude: 0,
     posIntegrationId: '',
-    copyFromLocationId: '',
-    locationProfileId: '',
-    customSettings: {
-      hasDelivery: false,
-      hasDineIn: false,
-      hasPickup: false,
-    },
-    defaultPrepTime: 15,
-    outOfStockBehavior: 'grey',
-    inventoryResetTime: '',
+    customSettings: {},
   });
 
-  const [showMenuBuilder, setShowMenuBuilder] = useState(false);
-
   useEffect(() => {
-    dispatch(fetchLocations());
     dispatch(fetchLocationProfiles());
-    dispatch(fetchPOSIntegrations());
+    dispatch(fetchPosIntegrations());
   }, [dispatch]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
-  ) => {
-    const { name, value } = e.target;
-    setNewLocation((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setNewLocation((prev) => ({
-      ...prev,
-      customSettings: { ...prev.customSettings, [name]: checked },
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    dispatch(createLocation(newLocation));
-    setShowMenuBuilder(true);
-  };
-
-  const handleCopyFromLocation = (locationId: string) => {
-    const selectedLocation = locations.find((loc) => loc.id === locationId);
-    if (selectedLocation) {
-      setNewLocation((prev) => ({
-        ...prev,
-        posIntegrationId: selectedLocation.posIntegrationId,
-        customSettings: { ...selectedLocation.customSettings },
-      }));
+  const handleSave = () => {
+    if (location.name && location.address) {
+      dispatch(updateLocation(location as Location));
     }
   };
 
-  const handleApplyLocationProfile = (profileId: string) => {
-    const selectedProfile = locationProfiles.find(
-      (profile) => profile.id === profileId
-    );
+  const handlePosIntegrationChange = (event: SelectChangeEvent<string>) => {
+    setLocation((prev) => ({ ...prev, posIntegrationId: event.target.value }));
+  };
+
+  const handleLocationProfileChange = (event: SelectChangeEvent<string>) => {
+    const profileId = event.target.value;
+    const selectedProfile = locationProfiles.find((profile: LocationProfile) => profile.id === profileId);
     if (selectedProfile) {
-      setNewLocation((prev) => ({
-        ...prev,
-        customSettings: { ...selectedProfile.settings },
-      }));
+      setLocation((prev) => ({ ...prev, ...selectedProfile }));
     }
   };
 
   return (
-    <Box>
-      <Typography variant="h4">Location Builder</Typography>
-      <form onSubmit={handleSubmit}>
-        <TextField
-          name="name"
-          label="Location Name"
-          value={newLocation.name}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          name="address"
-          label="Address"
-          value={newLocation.address}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        />
+    <div>
+      <h2>Location Builder</h2>
+      <form>
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Location Profile</InputLabel>
+          <Select value={location.posIntegrationId} onChange={handleLocationProfileChange}>
+            {locationProfiles.map((profile: LocationProfile) => (
+              <MenuItem key={profile.id} value={profile.id}>{profile.name}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
         <FormControl fullWidth margin="normal">
           <InputLabel>POS Integration</InputLabel>
-          <Select
-            name="posIntegrationId"
-            value={newLocation.posIntegrationId}
-            onChange={handleInputChange}
-          >
-            {posIntegrations.map((integration) => (
-              <MenuItem key={integration.id} value={integration.id}>
-                {integration.name}
-              </MenuItem>
+          <Select value={location.posIntegrationId} onChange={handlePosIntegrationChange}>
+            {posIntegrations.map((integration: PosIntegration) => (
+              <MenuItem key={integration.id} value={integration.id}>{integration.name}</MenuItem>
             ))}
           </Select>
         </FormControl>
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Copy Settings from Location</InputLabel>
-          <Select
-            name="copyFromLocationId"
-            value={newLocation.copyFromLocationId}
-            onChange={(e) => {
-              handleInputChange(e);
-              handleCopyFromLocation(e.target.value as string);
-            }}
-          >
-            <MenuItem value="">None</MenuItem>
-            {locations.map((location) => (
-              <MenuItem key={location.id} value={location.id}>
-                {location.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Apply Location Profile</InputLabel>
-          <Select
-            name="locationProfileId"
-            value={newLocation.locationProfileId}
-            onChange={(e) => {
-              handleInputChange(e);
-              handleApplyLocationProfile(e.target.value as string);
-            }}
-          >
-            <MenuItem value="">None</MenuItem>
-            {locationProfiles.map((profile) => (
-              <MenuItem key={profile.id} value={profile.id}>
-                {profile.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Out of Stock Behavior</InputLabel>
-          <Select
-            name="outOfStockBehavior"
-            value={newLocation.outOfStockBehavior}
-            onChange={handleInputChange}
-          >
-            <MenuItem value="grey">Grey Out</MenuItem>
-            <MenuItem value="hide">Hide</MenuItem>
-          </Select>
-        </FormControl>
+
         <TextField
-          name="inventoryResetTime"
-          label="Inventory Reset Time (HH:MM)"
-          value={newLocation.inventoryResetTime}
-          onChange={handleInputChange}
           fullWidth
           margin="normal"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={newLocation.customSettings.hasDelivery}
-              onChange={handleCheckboxChange}
-              name="hasDelivery"
-            />
-          }
-          label="Has Delivery"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={newLocation.customSettings.hasDineIn}
-              onChange={handleCheckboxChange}
-              name="hasDineIn"
-            />
-          }
-          label="Has Dine-In"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={newLocation.customSettings.hasPickup}
-              onChange={handleCheckboxChange}
-              name="hasPickup"
-            />
-          }
-          label="Has Pickup"
+          label="Name"
+          value={location.name}
+          onChange={(e) => setLocation((prev) => ({ ...prev, name: e.target.value }))}
         />
         <TextField
-          name="defaultPrepTime"
-          label="Default Prep Time (minutes)"
-          type="number"
-          value={newLocation.defaultPrepTime}
-          onChange={handleInputChange}
           fullWidth
           margin="normal"
+          label="Address"
+          value={location.address}
+          onChange={(e) => setLocation((prev) => ({ ...prev, address: e.target.value }))}
         />
-        <Button type="submit" variant="contained" color="primary">
-          Create Location
+        {/* Add other fields similarly */}
+
+        <ProviderList locationId={undefined} providers={[]} />
+
+        <Button variant="contained" color="primary" onClick={handleSave}>
+          Save Location
         </Button>
       </form>
-      {showMenuBuilder && (
-        <MenuBuilder
-          locationId={newLocation.id}
-          providers={['First Party', 'Third Party', 'Catering']}
-        />
-      )}
-      <LocationExceptions locationId={newLocation.id} />
-    </Box>
+    </div>
   );
 };
 

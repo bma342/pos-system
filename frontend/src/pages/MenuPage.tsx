@@ -1,163 +1,60 @@
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
-import { RootState, AppDispatch, Menu as MenuType, MenuGroup } from '../types';
-import { fetchMenus, updateMenu } from '../redux/slices/menuSlice';
-import MenuGroupComponent from '../components/MenuGroupComponent';
-import {
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Typography,
-  Box,
-} from '@mui/material';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import { useClientContext } from '../context/ClientContext';
+import { RootState } from '../redux/store';
+import { fetchMenu } from '../redux/slices/menuSlice';
+import { Menu, MenuGroup, MenuItem } from '../types/menuTypes';
+import { MenuService } from '../services/menuService';
+import MenuItemCard from '../components/MenuItemCard';
+import LoadingSpinner from '../components/LoadingSpinner';
+import ErrorMessage from '../components/ErrorMessage';
 
 const MenuPage: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const menus = useSelector((state: RootState) => state.menu.menus);
-  const [activeMenu, setActiveMenu] = useState<MenuType | null>(null);
-  const [isAddGroupDialogOpen, setIsAddGroupDialogOpen] = useState(false);
-  const [newGroupName, setNewGroupName] = useState('');
-  const { clientId } = useClientContext();
+  const { clientId } = useParams<{ clientId: string }>();
+  const dispatch = useDispatch();
+  const menu = useSelector((state: RootState) => state.menu.currentMenu);
+  const loading = useSelector((state: RootState) => state.menu.loading);
+  const error = useSelector((state: RootState) => state.menu.error);
+  const [menuStatistics, setMenuStatistics] = useState<MenuService.MenuStatistics | null>(null);
 
   useEffect(() => {
     if (clientId) {
-      dispatch(fetchMenus(clientId.toString()));
+      dispatch(fetchMenu(clientId));
+      MenuService.getMenuStatistics(clientId)
+        .then(stats => setMenuStatistics(stats))
+        .catch(err => console.error('Failed to fetch menu statistics:', err));
     }
-  }, [dispatch, clientId]);
+  }, [clientId, dispatch]);
 
-  useEffect(() => {
-    if (menus.length > 0 && !activeMenu) {
-      setActiveMenu(menus[0] as MenuType || null);
-    }
-  }, [menus, activeMenu]);
-
-  const handleSaveMenu = () => {
-    if (clientId && activeMenu) {
-      const updatedMenu: Menu = {
-        ...activeMenu,
-        clientId: clientId.toString(),
-        menuId: activeMenu.id.toString(),
-        menuData: activeMenu,
-      };
-      dispatch(updateMenu(updatedMenu));
-    }
-  };
-
-  const onDragEnd = (result: DropResult) => {
-    if (!result.destination || !activeMenu || !clientId) return;
-
-    const newMenu = { ...activeMenu };
-    const [sourceParentId, sourceIndex] = result.source.droppableId.split('-');
-    const [destParentId, destIndex] = result.destination.droppableId.split('-');
-
-    if (sourceParentId === 'menu' && destParentId === 'menu') {
-      const [reorderedGroup] = newMenu.groups.splice(parseInt(sourceIndex), 1);
-      newMenu.groups.splice(parseInt(destIndex), 0, reorderedGroup);
-    } else {
-      const sourceGroup = newMenu.groups.find((group) => group.id === sourceParentId);
-      const destGroup = newMenu.groups.find((group) => group.id === destParentId);
-
-      if (sourceGroup && destGroup) {
-        const [reorderedItem] = sourceGroup.items.splice(parseInt(sourceIndex), 1);
-        destGroup.items.splice(parseInt(destIndex), 0, reorderedItem);
-      }
-    }
-
-    setActiveMenu(newMenu);
-    dispatch(updateMenu({ clientId, menuId: newMenu.id.toString(), menuData: newMenu }));
-  };
-
-  const handleAddGroup = () => {
-    if (activeMenu && newGroupName) {
-      const newGroup: MenuGroup = {
-        id: Date.now().toString(),
-        name: newGroupName,
-        items: [],
-      };
-      setActiveMenu({
-        ...activeMenu,
-        groups: [...activeMenu.groups, newGroup],
-      });
-      setNewGroupName('');
-      setIsAddGroupDialogOpen(false);
-    }
-  };
+  if (loading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage message={error} />;
+  if (!menu) return <ErrorMessage message="Menu not found" />;
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4">Menu Builder</Typography>
-      <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
-        {menus.map((menu: MenuType) => (
-          <Button
-            key={menu.id}
-            onClick={() => setActiveMenu(menu)}
-            variant={activeMenu?.id === menu.id ? 'contained' : 'outlined'}
-          >
-            {menu.name}
-          </Button>
-        ))}
-      </Box>
-      {activeMenu && (
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable droppableId="menu-0" type="group">
-            {(provided) => (
-              <Box
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-              >
-                {activeMenu.groups.map((group, index) => (
-                  <MenuGroupComponent
-                    key={group.id}
-                    group={group}
-                    index={index}
-                    menuId={activeMenu.id.toString()}
-                  />
-                ))}
-                {provided.placeholder}
-              </Box>
-            )}
-          </Droppable>
-        </DragDropContext>
+    <div className="menu-page">
+      <h1>{menu.name}</h1>
+      {menuStatistics && (
+        <div className="menu-statistics">
+          <p>Total Items: {menuStatistics.totalItems}</p>
+          <h3>Most Popular Items:</h3>
+          <ul>
+            {menuStatistics.mostPopularItems.map((item) => (
+              <li key={item.name}>{item.name} - Ordered {item.orderCount} times</li>
+            ))}
+          </ul>
+        </div>
       )}
-      <Button
-        startIcon={<AddCircleOutlineIcon />}
-        onClick={() => setIsAddGroupDialogOpen(true)}
-        sx={{ mt: 2 }}
-      >
-        Add Group
-      </Button>
-      <Dialog
-        open={isAddGroupDialogOpen}
-        onClose={() => setIsAddGroupDialogOpen(false)}
-      >
-        <DialogTitle>Add New Group</DialogTitle>
-        <DialogContent>
-          <TextField
-            margin="dense"
-            label="Group Name"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={newGroupName}
-            onChange={(e) => setNewGroupName(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsAddGroupDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleAddGroup}>Add</Button>
-        </DialogActions>
-      </Dialog>
-      <Button onClick={handleSaveMenu} sx={{ mt: 2 }}>
-        Save Menu
-      </Button>
-    </Box>
+      {menu.menuGroups.map((group: MenuGroup) => (
+        <div key={group.id} className="menu-group">
+          <h2>{group.name}</h2>
+          <div className="menu-items">
+            {group.items.map((item: MenuItem) => (
+              <MenuItemCard key={item.id} item={item} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 };
 

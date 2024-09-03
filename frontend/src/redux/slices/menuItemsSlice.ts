@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { fetchMenuItems } from '../../api/menuApi';
-import { MenuItem } from '../../types';
+import { MenuItem } from '../../types/menuTypes';
+import { menuApi } from '../../api/menuApi';
 
 interface MenuItemsState {
   items: MenuItem[];
@@ -16,9 +16,9 @@ const initialState: MenuItemsState = {
 
 export const fetchMenuItemsAsync = createAsyncThunk(
   'menuItems/fetchMenuItems',
-  async (locationId: string, clientId: string) => {
-    const response = await fetchMenuItems(locationId, clientId);
-    return response;
+  async (locationId: string) => {
+    const response = await menuApi.getMenuItems(locationId);
+    return response.data;
   }
 );
 
@@ -37,7 +37,7 @@ const menuItemsSlice = createSlice({
       })
       .addCase(fetchMenuItemsAsync.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.error.message || null;
+        state.error = action.error.message || 'An error occurred';
       });
   },
 });

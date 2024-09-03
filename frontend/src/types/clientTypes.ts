@@ -1,26 +1,39 @@
 import { POSType } from './posIntegrationTypes';
 
 export interface ClientPreferences {
-  theme: string;
+  id: number;
+  clientId: number;
   language: string;
-  notifications: boolean;
-  preferredPOS: POSType;
-  // ... other preference fields
+  currency: string;
+  timeFormat: '12h' | '24h';
+  dateFormat: string;
+  timezone: string;
 }
 
 export interface Client {
-  id: string;
+  id: number;
   name: string;
-  preferences: ClientPreferences;
-  posType: POSType;
-  // ... other client fields
+  subdomain: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ClientBranding {
+  id: number;
+  clientId: number;
+  logoUrl: string;
   primaryColor: string;
   secondaryColor: string;
-  logo: string;
-  // ... other branding fields
+  fontFamily: string;
+  customCss: string;
 }
 
 export interface ClientConfig {
@@ -28,4 +41,29 @@ export interface ClientConfig {
   name: string;
   settings: Record<string, any>;
   // Add other properties as needed
+}
+
+export interface ClientData {
+  name: string;
+  domain: string;
+  primaryColor: string;
+  secondaryColor: string;
+  logo: string;
+  features: {
+    loyalty: boolean;
+    onlineOrdering: boolean;
+    tableReservations: boolean;
+  };
+}
+
+export interface ClientCreateData {
+  name: string;
+  subdomain: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
 }

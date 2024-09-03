@@ -15,11 +15,15 @@ export interface MenuItem {
   name: string;
   description: string;
   price: number;
-  modifiers: Modifier[];
+  image: string;
 }
 
-export interface Modifier {
-  id: string;
+export interface MenuStatistics {
+  totalItems: number;
+  mostPopularItems: PopularItem[];
+}
+
+export interface PopularItem {
   name: string;
-  price: number;
+  orderCount: number;
 }

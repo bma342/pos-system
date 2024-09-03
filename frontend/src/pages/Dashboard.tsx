@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
-import CateringOrderService from '../services/CateringOrderService';
-import MenuService from '../services/MenuService';
+import React, { useEffect, useState } from 'react';
+import { useClientContext } from '../context/ClientContext';
+import { CateringOrderService } from '../services/CateringOrderService';
+import { MenuService } from '../services/MenuService';
 import {
   Typography,
   Grid,
@@ -20,56 +19,46 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { OrderStatistics } from '../types/cateringTypes';
+import { OrderStatistics } from '../types/cateringOrderTypes';
 import { MenuStatistics } from '../types/menuTypes';
 
 const Dashboard: React.FC = () => {
-  const user = useSelector((state: RootState) => state.auth.user);
+  const { user } = useClientContext();
   const [orderStats, setOrderStats] = useState<OrderStatistics | null>(null);
   const [menuStats, setMenuStats] = useState<MenuStatistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const cateringOrderService = useMemo(() => new CateringOrderService(), []);
-  const menuService = useMemo(() => new MenuService(), []);
-
-  const fetchData = useCallback(async () => {
-    if (!user || !user.clientId) return;
-
-    try {
-      const endDate = new Date().toISOString();
-      const startDate = new Date(
-        Date.now() - 30 * 24 * 60 * 60 * 1000
-      ).toISOString(); // Last 30 days
-      const [orderStatsData, menuStatsData] = await Promise.all([
-        cateringOrderService.getOrderStatistics(
-          user.clientId,
-          startDate,
-          endDate
-        ),
-        menuService.getMenuStatistics(user.clientId, startDate, endDate),
-      ]);
-      setOrderStats(orderStatsData);
-      setMenuStats(menuStatsData);
-      setLoading(false);
-    } catch (err) {
-      setError('Failed to load dashboard data. Please try again.');
-      setLoading(false);
-    }
-  }, [cateringOrderService, menuService, user]);
-
   useEffect(() => {
+    const fetchData = async () => {
+      if (!user?.clientId) return;
+
+      try {
+        const endDate = new Date().toISOString();
+        const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(); // Last 30 days
+        const [orderStatsData, menuStatsData] = await Promise.all([
+          CateringOrderService.getOrderStatistics(user.clientId, startDate, endDate),
+          MenuService.getMenuStatistics(user.clientId, startDate, endDate),
+        ]);
+        setOrderStats(orderStatsData);
+        setMenuStats(menuStatsData);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to load dashboard data. Please try again.');
+        setLoading(false);
+      }
+    };
+
     fetchData();
-  }, [fetchData]);
+  }, [user?.clientId]);
 
   if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
 
-  const popularItemsData =
-    menuStats?.mostPopularItems.map((item) => ({
-      name: item.name,
-      orders: item.orderCount,
-    })) || [];
+  const popularItemsData = menuStats?.mostPopularItems.map((item) => ({
+    name: item.name,
+    orders: item.orderCount,
+  })) || [];
 
   return (
     <div>

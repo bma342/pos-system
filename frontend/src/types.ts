@@ -8,11 +8,11 @@ export type AppDispatch = typeof store.dispatch;
 export type UserRole = 'admin' | 'manager' | 'user';
 
 // Define the OrderType
-export type OrderType = 'pickup' | 'delivery' | 'dine-in';
+export type OrderType = 'pickup' | 'delivery' | 'dine-in' | 'catering';
 
 // Define the Reward interface
 export interface Reward {
-  id: number;
+  id: string;
   name: string;
   description: string;
   pointsRequired: number;
@@ -141,10 +141,10 @@ export interface Order {
 }
 
 export interface OrderItem {
-  id: number;
-  menuItemId: number;
+  id: string;
+  name: string;
   quantity: number;
-  price: number;
+  modifications?: string[];
 }
 
 export interface Role {
@@ -196,9 +196,17 @@ export interface LoyaltyConfig {
 }
 
 export interface CartItem {
-  menuItem: MenuItem;
+  menuItem: {
+    id: string;
+    name: string;
+    price: number;
+  };
   quantity: number;
-  selectedModifiers: Modifier[];
+  selectedModifiers: {
+    id: string;
+    name: string;
+    price: number;
+  }[];
 }
 
 export interface DashboardStat {

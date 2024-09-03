@@ -136,42 +136,14 @@ const ClientBrandingManager: React.FC = () => {
         multiline
         rows={4}
       />
-      <Box display="flex" justifyContent="space-between" mt={2}>
-        <Box>
-          <Typography variant="subtitle1">Primary Color</Typography>
-          <SketchPicker
-            color={localBranding.primaryColor}
-            onChangeComplete={(color: ColorResult) =>
-              handleColorChange(color, 'primaryColor')
-            }
-          />
-        </Box>
-        <Box>
-          <Typography variant="subtitle1">Secondary Color</Typography>
-          <SketchPicker
-            color={localBranding.secondaryColor}
-            onChangeComplete={(color: ColorResult) =>
-              handleColorChange(color, 'secondaryColor')
-            }
-          />
-        </Box>
-        <Box>
-          <Typography variant="subtitle1">Accent Color</Typography>
-          <SketchPicker
-            color={localBranding.accentColor}
-            onChangeComplete={(color: ColorResult) =>
-              handleColorChange(color, 'accentColor')
-            }
-          />
-        </Box>
+      <Box mt={2}>
+        <Typography>Accent Color</Typography>
+        <SketchPicker
+          color={localBranding.accentColor}
+          onChangeComplete={(color) => handleColorChange(color, 'accentColor')}
+        />
       </Box>
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        fullWidth
-        sx={{ mt: 2 }}
-      >
+      <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
         Save Branding
       </Button>
     </Box>

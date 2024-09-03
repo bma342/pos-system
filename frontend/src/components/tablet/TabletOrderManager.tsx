@@ -6,14 +6,8 @@ import {
   cancelOrder,
   markItemOutOfStock,
 } from '../../redux/slices/orderSlice';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
 import { Order, OrderItem } from '../../types';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native-web';
 
 const TabletOrderManager: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -44,7 +38,7 @@ const TabletOrderManager: React.FC = () => {
       <Text>{item.name}</Text>
       <Text>Quantity: {item.quantity}</Text>
       {item.modifications &&
-        item.modifications.map((mod, index) => (
+        item.modifications.map((mod: string, index: number) => (
           <Text key={index} style={styles.modification}>
             {mod}
           </Text>
