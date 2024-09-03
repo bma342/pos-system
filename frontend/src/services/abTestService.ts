@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ABTest } from '../types';
+import { ABTest } from '../types/abTestTypes';
 
 const API_URL = '/api/ab-tests';
 

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { SalesByCategory } from '../types/analyticsTypes';
+import { SalesByCategory, TopSellingItem } from '../types/analyticsTypes';
 
 export class AnalyticsService {
   async getSalesByCategory(
@@ -19,6 +19,24 @@ export class AnalyticsService {
     const response = await axios.get('/api/analytics/top-selling-items', {
       params: { startDate, endDate },
     });
+    return response.data;
+  }
+
+  async getTopSellingItemsCustom(
+    startDate: Date,
+    endDate: Date,
+    limit: number
+  ): Promise<TopSellingItem[]> {
+    // ... implementation
+  }
+
+  async function getTopSellingItems(): Promise<TopSellingItem[]> {
+    // Your implementation here
+    return []; // Return an empty array if no data
+  }
+
+  async getTopSellingItemsDefault(): Promise<TopSellingItem[]> {
+    const response = await axios.get('/api/analytics/top-selling-items-default');
     return response.data;
   }
 

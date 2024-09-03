@@ -1,10 +1,15 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { RootState, Order, OrderState } from '../../types';
+import { RootState, Order } from '../../types';
 import * as orderApi from '../../api/orderApi';
+
+interface OrderState {
+  orders: Order[];
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  error: string | null;
+}
 
 const initialState: OrderState = {
   orders: [],
-  activeOrders: [],
   status: 'idle',
   error: null,
 };

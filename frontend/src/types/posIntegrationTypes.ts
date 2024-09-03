@@ -13,3 +13,14 @@ export enum POSType {
   CLOVER = 'CLOVER',
   REVEL = 'REVEL',
 }
+
+export interface POSProfile {
+  id: number;
+  tenantId: string;
+  posType: POSType;
+  apiKey: string;
+  isActive: boolean;
+  lastSyncDate: string;
+  name: string;
+  apiEndpoint: string;
+}

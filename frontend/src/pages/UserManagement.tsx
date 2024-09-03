@@ -55,7 +55,7 @@ const UserManagement: React.FC = () => {
       id: 0,
       username: '',
       email: '',
-      role: UserRole.STAFF,
+      role: UserRole.EMPLOYEE,
       tenantId: '',
     });
     setIsModalOpen(true);
@@ -70,7 +70,7 @@ const UserManagement: React.FC = () => {
     if (!selectedUser) return;
 
     try {
-      let updatedUser;
+      let updatedUser: User;
       if (selectedUser.id === 0) {
         updatedUser = await userService.createUser(selectedUser);
         setUsers([...users, updatedUser]);
@@ -144,7 +144,7 @@ const UserManagement: React.FC = () => {
                 <TableCell>{user.id}</TableCell>
                 <TableCell>{user.username}</TableCell>
                 <TableCell>{user.email}</TableCell>
-                <TableCell>{user.role}</TableCell>
+                <TableCell>{user.roles.join(', ')}</TableCell>
                 <TableCell>
                   <Button onClick={() => handleEditUser(user)}>Edit</Button>
                   <Button
@@ -202,11 +202,11 @@ const UserManagement: React.FC = () => {
               <FormControl fullWidth margin="normal">
                 <InputLabel>Role</InputLabel>
                 <Select
-                  value={selectedUser.role}
+                  value={selectedUser.roles[0]}
                   onChange={(e) =>
                     setSelectedUser({
                       ...selectedUser,
-                      role: e.target.value as UserRole,
+                      roles: [e.target.value as UserRole],
                     })
                   }
                 >

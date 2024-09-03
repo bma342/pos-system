@@ -34,6 +34,8 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({
   const [subdomain, setSubdomain] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [clientId, setClientId] = useState<number | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const loadClient = async () => {
@@ -61,13 +63,13 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({
     <ClientContext.Provider
       value={{
         client,
-        clientId: null,
+        clientId,
         subdomain,
-        isAuthenticated: false,
+        isAuthenticated,
         isLoading,
         error,
-        setClientId: () => {},
-        setIsAuthenticated: () => {},
+        setClientId,
+        setIsAuthenticated,
       }}
     >
       {children}

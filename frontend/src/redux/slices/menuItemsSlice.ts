@@ -16,8 +16,8 @@ const initialState: MenuItemsState = {
 
 export const fetchMenuItemsAsync = createAsyncThunk(
   'menuItems/fetchMenuItems',
-  async (locationId: string) => {
-    const response = await fetchMenuItems(locationId);
+  async (locationId: string, clientId: string) => {
+    const response = await fetchMenuItems(locationId, clientId);
     return response;
   }
 );

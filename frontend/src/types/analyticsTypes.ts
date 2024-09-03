@@ -4,8 +4,10 @@ export interface SalesByCategory {
 }
 
 export interface TopSellingItem {
+  id: string;
   name: string;
   quantity: number;
+  revenue: number;
 }
 
 // Add other analytics-related types as needed

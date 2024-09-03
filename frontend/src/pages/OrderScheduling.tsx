@@ -9,7 +9,7 @@ const OrderScheduling: React.FC = () => {
   const locations = useSelector(
     (state: RootState) => state.locations.locations
   );
-  const status = useSelector((state: RootState) => state.locations.status);
+  const status = useSelector((state: RootState) => state.location.status);
 
   useEffect(() => {
     dispatch(fetchLocations());

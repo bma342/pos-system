@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { RevenueData } from '../../types';
+import { RevenueData } from '../../types/revenueTypes';
 import { fetchRevenueData } from '../../api/revenueApi';
 
 interface RevenueState {

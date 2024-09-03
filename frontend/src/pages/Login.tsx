@@ -13,21 +13,20 @@ const Login: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { client } = useClientContext();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
-
-    if (!client) {
-      setError('Client information not available');
-      return;
-    }
-
     try {
-      await dispatch(loginUser({ email, password, clientId: client.id })).unwrap();
+      await dispatch(
+        loginUser({
+          email,
+          password,
+          clientId: client.id,
+          subdomain: client.subdomain,
+        })
+      );
       navigate('/dashboard');
-    } catch (err) {
-      setError('Invalid email or password');
-      console.error(err);
+    } catch (error) {
+      setError('Invalid credentials');
     }
   };
 

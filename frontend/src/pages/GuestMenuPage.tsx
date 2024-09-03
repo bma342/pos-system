@@ -7,15 +7,15 @@ import MenuItemCard from '../components/MenuItemCard';
 import MenuItemModal from '../components/MenuItemModal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { MenuItem } from '../types';
-import { useClientBranding } from '../components/ClientBrandingProvider';
+import useClientBranding from '../components/ClientBrandingProvider';
 import { Typography, Box, Alert } from '@mui/material';
 
 const GuestMenuPage: React.FC = () => {
   const { locationId } = useParams<{ locationId: string }>();
   const dispatch = useDispatch<AppDispatch>();
-  const menuItems = useSelector((state: RootState) => state.menuItems.items);
-  const status = useSelector((state: RootState) => state.menuItems.status);
-  const error = useSelector((state: RootState) => state.menuItems.error);
+  const menuItems = useSelector((state: RootState) => state.menu.items);
+  const status = useSelector((state: RootState) => state.menu.status);
+  const error = useSelector((state: RootState) => state.menu.error);
   const clientBranding = useClientBranding();
 
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);

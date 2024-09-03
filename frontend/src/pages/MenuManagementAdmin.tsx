@@ -25,7 +25,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import SyncIcon from '@mui/icons-material/Sync';
 import { useParams } from 'react-router-dom';
-import { MenuService } from '../services/MenuService';
+import { MenuService } from '../services/menuService';
 import { useAuth } from '../contexts/AuthContext';
 import { Menu, MenuGroup, MenuItem, Modifier } from '../types/menuTypes';
 
@@ -100,7 +100,7 @@ const MenuManagementAdmin: React.FC = () => {
     if (!selectedItem || !clientId) return;
     setIsSaving(true);
     try {
-      let result;
+      let result: Menu | MenuGroup | MenuItem;
       switch (modalType) {
         case 'menu':
           result =

@@ -17,9 +17,7 @@ import { Location } from '../types';
 
 const GuestLandingPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const locations = useSelector(
-    (state: RootState) => state.locations.locations
-  );
+  const locations = useSelector((state: RootState) => state.location.locations);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {

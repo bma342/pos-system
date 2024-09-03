@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CorePOSProfile } from '../types';
+import { POSProfile } from '../types';
 
 const API_URL = '/api/core-pos-profiles';
 

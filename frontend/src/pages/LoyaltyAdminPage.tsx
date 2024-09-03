@@ -9,7 +9,7 @@ import ClientAdminHub from '../components/ClientAdminHub';
 
 const LoyaltyAdminPage: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
-  const isClientAdmin = user?.role === 'clientAdmin';
+  const isClientAdmin = user?.roles.includes(UserRole.CLIENT_ADMIN);
 
   return (
     <div>
@@ -20,8 +20,8 @@ const LoyaltyAdminPage: React.FC = () => {
         <>
           <LoyaltyChallengeManager />
           <WalletDrop />
-          <DiscountBuilder isClientAdmin={false} />
-          <POSDiscountSync isClientAdmin={false} />
+          <DiscountBuilder />
+          <POSDiscountSync />
         </>
       )}
     </div>

@@ -46,11 +46,11 @@ const posProfileSlice = createSlice({
 });
 
 export const selectPOSProfiles = (state: RootState) =>
-  state.posProfiles.profiles;
-export const selectPOSProfilesStatus = (state: RootState) =>
-  state.posProfiles.status;
-export const selectPOSProfilesError = (state: RootState) =>
-  state.posProfiles.error;
+  state.posProfile.profiles;
+export const selectPOSProfileStatus = (state: RootState) =>
+  state.posProfile.status;
+export const selectPOSProfileError = (state: RootState) =>
+  state.posProfile.error;
 
 export const { addProfile } = posProfileSlice.actions;
 

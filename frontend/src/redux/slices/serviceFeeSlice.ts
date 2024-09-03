@@ -87,10 +87,10 @@ const serviceFeeSlice = createSlice({
 });
 
 export const selectServiceFees = (state: RootState) =>
-  state.serviceFees.serviceFees;
+  state.serviceFee.serviceFees;
 export const selectServiceFeeStatus = (state: RootState) =>
-  state.serviceFees.status;
+  state.serviceFee.status;
 export const selectServiceFeeError = (state: RootState) =>
-  state.serviceFees.error;
+  state.serviceFee.error;
 
 export default serviceFeeSlice.reducer;

@@ -58,10 +58,9 @@ const discountSlice = createSlice({
   },
 });
 
-export const selectDiscounts = (state: RootState) => state.discounts.discounts;
-export const selectDiscountsStatus = (state: RootState) =>
-  state.discounts.status;
-export const selectDiscountsError = (state: RootState) => state.discounts.error;
+export const selectDiscounts = (state: RootState) => state.discount.discounts;
+export const selectDiscountStatus = (state: RootState) => state.discount.status;
+export const selectDiscountsError = (state: RootState) => state.discount.error;
 
 export const { addDiscount, updateDiscount } = discountSlice.actions;
 

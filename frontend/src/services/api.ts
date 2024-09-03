@@ -8,7 +8,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = store.getState().auth.token;
+  const token = store.getState().auth.user?.token;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -30,7 +30,7 @@ api.interceptors.response.use(
         store.dispatch({ type: 'auth/setToken', payload: newToken });
 
         // Retry the original request
-        return api(error.config);
+        return api(error.config as AxiosRequestConfig);
       } catch (refreshError) {
         store.dispatch(logoutAction());
         if (isAxiosError(refreshError)) {

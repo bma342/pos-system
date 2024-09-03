@@ -24,14 +24,21 @@ export const updateClientBrandingAsync = createAsyncThunk(
   }
 );
 
+const initialState: ClientBrandingState = {
+  branding: {
+    primaryColor: '#000000',
+    secondaryColor: '#FFFFFF',
+    fontFamily: 'Arial, sans-serif',
+    logo: '',
+    // ... other initial branding values
+  },
+  status: 'idle',
+  error: null,
+};
+
 const clientBrandingSlice = createSlice({
   name: 'clientBranding',
-  initialState: {
-    branding: null as ClientBranding | null,
-    theme: null,
-    status: 'idle',
-    error: null as string | null,
-  },
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder

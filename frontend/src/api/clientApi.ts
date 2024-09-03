@@ -9,9 +9,15 @@ import apiClient from './apiClient';
 const API_BASE_URL =
   process.env.REACT_APP_API_BASE_URL || 'https://api.eatsuite.net';
 
+// Use API_BASE_URL in your axios calls
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+});
+
+// Replace all axios calls with apiClient
 export const fetchClientId = async (): Promise<number | null> => {
   try {
-    const response = await axios.get<number>('/api/clients/get-client-id');
+    const response = await apiClient.get<number>('/api/clients/get-client-id');
     return response.data;
   } catch (error) {
     console.error('Error fetching client ID:', error);
@@ -24,7 +30,7 @@ export const updateClientDetails = async (
   clientData: Partial<Client>
 ): Promise<Client | null> => {
   try {
-    const response = await axios.put<Client>(
+    const response = await apiClient.put<Client>(
       `/api/clients/${clientId}`,
       clientData
     );
@@ -37,7 +43,7 @@ export const updateClientDetails = async (
 
 export const deleteClient = async (clientId: number): Promise<boolean> => {
   try {
-    await axios.delete(`/api/clients/${clientId}`);
+    await apiClient.delete(`/api/clients/${clientId}`);
     return true;
   } catch (error) {
     console.error('Error deleting client:', error);
@@ -78,7 +84,7 @@ export const updateClientPreferences = async (
   clientId: string,
   preferences: Partial<ClientPreferences>
 ): Promise<Client> => {
-  const response = await axios.put<Client>(
+  const response = await apiClient.put<Client>(
     `/api/clients/${clientId}/preferences`,
     preferences
   );
@@ -89,7 +95,7 @@ export const fetchClientBySubdomain = async (
   subdomain: string
 ): Promise<Client> => {
   try {
-    const response = await axios.get<Client>(
+    const response = await apiClient.get<Client>(
       `/api/clients/subdomain/${subdomain}`
     );
     return response.data;

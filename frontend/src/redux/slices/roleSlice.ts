@@ -38,9 +38,9 @@ const roleSlice = createSlice({
   },
 });
 
-export const selectRoles = (state: RootState) => state.roles.roles;
-export const selectRoleStatus = (state: RootState) => state.roles.status;
-export const selectRoleError = (state: RootState) => state.roles.error;
+export const selectRoles = (state: RootState) => state.role.roles;
+export const selectRoleStatus = (state: RootState) => state.role.status;
+export const selectRoleError = (state: RootState) => state.role.error;
 
 export const { addRole, updateRole } = roleSlice.actions;
 

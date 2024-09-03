@@ -1,17 +1,16 @@
+export enum UserRole {
+  GUEST = 'GUEST',
+  CLIENT_ADMIN = 'CLIENT_ADMIN',
+  SUPER_ADMIN = 'SUPER_ADMIN',
+}
+
 export interface User {
   id: number;
   email: string;
   firstName: string;
   lastName: string;
-  role: UserRole;
-  tenantId: string;
-  restaurantName?: string;
-}
-
-export enum UserRole {
-  ADMIN = 'ADMIN',
-  MANAGER = 'MANAGER',
-  STAFF = 'STAFF',
+  roles: UserRole[];
+  clientId: number;
 }
 
 export interface AuthResponse {

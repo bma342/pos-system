@@ -1,5 +1,20 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as reviewApi from '../../api/reviewApi';
+import { Review } from '../../types/reviewTypes';
+
+interface ReviewState {
+  itemReviews: { [key: number]: Review[] };
+  pendingReviews: Review[];
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  error: string | null;
+}
+
+const initialState: ReviewState = {
+  itemReviews: {},
+  pendingReviews: [],
+  status: 'idle',
+  error: null,
+};
 
 export const fetchReviewsForMenuItem = createAsyncThunk(
   'reviews/fetchForMenuItem',
@@ -33,12 +48,7 @@ export const deleteReview = createAsyncThunk(
 
 const reviewSlice = createSlice({
   name: 'reviews',
-  initialState: {
-    itemReviews: {},
-    pendingReviews: [],
-    loading: false,
-    error: null,
-  },
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder

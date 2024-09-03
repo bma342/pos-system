@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Challenge } from '../../types';
+import { Challenge } from '../../types/challengeTypes';
 import {
   getChallenges,
   createChallenge,

@@ -54,10 +54,10 @@ const providerSlice = createSlice({
   },
 });
 
-export const selectProviders = (state: RootState) => state.providers.providers;
+export const selectProviders = (state: RootState) => state.provider.providers;
 export const selectProvidersStatus = (state: RootState) =>
-  state.providers.status;
-export const selectProvidersError = (state: RootState) => state.providers.error;
+  state.provider.status;
+export const selectProvidersError = (state: RootState) => state.provider.error;
 
 export const { addProvider } = providerSlice.actions;
 

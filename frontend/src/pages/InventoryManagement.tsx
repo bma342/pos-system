@@ -16,7 +16,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { InventoryItem } from '../types/inventoryTypes';
-import { InventoryService } from '../services/InventoryService';
+import { InventoryService } from '../services/inventoryService';
 import { useAuth } from '../contexts/AuthContext';
 
 const InventoryManagement: React.FC = () => {

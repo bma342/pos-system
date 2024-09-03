@@ -43,7 +43,9 @@ const Wallet: React.FC = () => {
           {discounts.map((discount) => (
             <li key={discount.id}>
               {discount.name}: {discount.value}% (Expires:{' '}
-              {new Date(discount.expirationDate).toLocaleDateString()})
+              {discount.expirationDate &&
+                new Date(discount.expirationDate).toLocaleDateString()}
+              )
             </li>
           ))}
         </ul>

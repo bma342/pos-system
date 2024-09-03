@@ -1,17 +1,19 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState, CateringOrder } from '../../types';
 import axios from 'axios';
 
 interface CateringOrderState {
-  orders: CateringOrder[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
-  error: string | null;
+  cateringOrder: {
+    orders: CateringOrder[];
+    status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  };
 }
 
 const initialState: CateringOrderState = {
-  orders: [],
-  status: 'idle',
-  error: null,
+  cateringOrder: {
+    orders: [],
+    status: 'idle',
+  },
 };
 
 export const fetchCateringOrders = createAsyncThunk(
@@ -41,36 +43,22 @@ export const createCateringOrder = createAsyncThunk(
   }
 );
 
-const cateringOrderSlice = createSlice({
-  name: 'cateringOrders',
+const cateringOrdersSlice = createSlice({
+  name: 'cateringOrder',
   initialState,
-  reducers: {},
+  reducers: {
+    // ... other reducers
+  },
   extraReducers: (builder) => {
-    builder
-      .addCase(fetchCateringOrders.pending, (state) => {
-        state.status = 'loading';
-      })
-      .addCase(
-        fetchCateringOrders.fulfilled,
-        (state, action: PayloadAction<CateringOrder[]>) => {
-          state.status = 'succeeded';
-          state.orders = action.payload;
-        }
-      )
-      .addCase(fetchCateringOrders.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload as string;
-      })
-      .addCase(
-        createCateringOrder.fulfilled,
-        (state, action: PayloadAction<CateringOrder>) => {
-          state.orders.push(action.payload);
-        }
-      );
+    builder.addCase(fetchCateringOrders.fulfilled, (state, action) => {
+      state.cateringOrder.orders = action.payload;
+      state.cateringOrder.status = 'succeeded';
+    });
+    // ... other cases
   },
 });
 
-export default cateringOrderSlice.reducer;
+export default cateringOrdersSlice.reducer;
 
 export const selectCateringOrders = (state: RootState) =>
-  state.cateringOrders.orders;
+  state.cateringOrder.cateringOrder.orders;

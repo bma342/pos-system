@@ -1,86 +1,78 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Grid, Paper } from '@mui/material';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../redux/store';
-import { LocationService } from '../../services/LocationService';
-import { Location } from '../../types/locationTypes';
+import { Typography, Grid, CircularProgress } from '@mui/material';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../../redux/store';
+import { fetchClients } from '../../redux/slices/clientSlice';
+import {
+  dashboardService,
+  DashboardData,
+} from '../../services/dashboardService';
+import 'jspdf-autotable';
 
 const ExecutiveDashboard: React.FC = () => {
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [totalRevenue, setTotalRevenue] = useState<number>(0);
-  const [totalOrders, setTotalOrders] = useState<number>(0);
-  const [averageOrderValue, setAverageOrderValue] = useState<number>(0);
-  const [topSellingItems, setTopSellingItems] = useState<string[]>([]);
-
-  const clientId = useSelector(
-    (state: RootState) => state.client.currentClient?.id
+  const dispatch = useDispatch<AppDispatch>();
+  const [selectedClientId, setSelectedClientId] = useState<string | 'all'>(
+    'all'
   );
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(
+    null
+  );
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (isGlobalAdmin) {
+      dispatch(fetchClients());
+    }
+    if (authToken) {
+      dashboardService.setAuthToken(authToken);
+    }
+  }, [dispatch, isGlobalAdmin, authToken]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-      if (clientId) {
-        const locationService = new LocationService();
-        const fetchedLocations =
-          await locationService.getClientLocations(clientId);
-        setLocations(fetchedLocations);
-
-        // Fetch and set other dashboard data
-        // This is a placeholder for actual API calls
-        setTotalRevenue(1000000);
-        setTotalOrders(5000);
-        setAverageOrderValue(200);
-        setTopSellingItems(['Item 1', 'Item 2', 'Item 3']);
+      setIsLoading(true);
+      try {
+        const data = await dashboardService.getDashboardData(selectedClientId);
+        if (selectedClientId !== 'all') {
+          const locationData =
+            await dashboardService.getLocationData(selectedClientId);
+          data.totalLocations = locationData.totalLocations;
+        }
+        setDashboardData(data);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchDashboardData();
-  }, [clientId]);
+  }, [selectedClientId]);
+
+  const handleRefresh = () => {
+    fetchDashboardData();
+  };
+
+  if (isLoading) {
+    return <CircularProgress />;
+  }
+
+  if (!dashboardData) {
+    return <Typography>Loading...</Typography>;
+  }
 
   return (
-    <div className="executive-dashboard">
-      <Typography variant="h4" gutterBottom>
-        Executive Dashboard
-      </Typography>
+    <div role="main" aria-label="Executive Dashboard">
+      <h1 tabIndex={0}>Executive Dashboard</h1>
       <Grid container spacing={3}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper elevation={3} style={{ padding: '20px' }}>
-            <Typography variant="h6">Total Revenue</Typography>
-            <Typography variant="h4">
-              ${totalRevenue.toLocaleString()}
-            </Typography>
-          </Paper>
+        <Grid item xs={12} md={6} lg={4}>
+          {/* Dashboard item */}
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper elevation={3} style={{ padding: '20px' }}>
-            <Typography variant="h6">Total Orders</Typography>
-            <Typography variant="h4">{totalOrders.toLocaleString()}</Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper elevation={3} style={{ padding: '20px' }}>
-            <Typography variant="h6">Average Order Value</Typography>
-            <Typography variant="h4">
-              ${averageOrderValue.toLocaleString()}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper elevation={3} style={{ padding: '20px' }}>
-            <Typography variant="h6">Total Locations</Typography>
-            <Typography variant="h4">{locations.length}</Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12}>
-          <Paper elevation={3} style={{ padding: '20px' }}>
-            <Typography variant="h6">Top Selling Items</Typography>
-            <ul>
-              {topSellingItems.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
-          </Paper>
-        </Grid>
+        {/* ... more grid items ... */}
       </Grid>
+      <button aria-label="Refresh dashboard data" onClick={handleRefresh}>
+        Refresh
+      </button>
     </div>
   );
 };

@@ -9,8 +9,15 @@ interface RealtimeMetricsState {
 }
 
 const initialState: RealtimeMetricsState = {
-  metrics: {},
-  loading: false,
+  metrics: {
+    todaySales: 0,
+    todayOrders: 0,
+    averageOrderValue: 0,
+    newGuests: 0,
+    activeGuests: 0,
+    topSellingItems: [],
+  },
+  status: 'idle',
   error: null,
 };
 
@@ -28,7 +35,7 @@ const realtimeMetricsSlice = createSlice({
   reducers: {
     updateMetric: (
       state,
-      action: PayloadAction<{ key: string; value: number }>
+      action: PayloadAction<{ key: keyof RealtimeMetrics; value: number }>
     ) => {
       const { key, value } = action.payload;
       state.metrics[key] = value;

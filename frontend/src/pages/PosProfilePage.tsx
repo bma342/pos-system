@@ -6,10 +6,8 @@ import { POSProfile } from '../types';
 
 const PosProfilePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const profiles = useSelector(
-    (state: RootState) => state.posProfiles.profiles
-  );
-  const status = useSelector((state: RootState) => state.posProfiles.status);
+  const profiles = useSelector((state: RootState) => state.posProfile.profiles);
+  const status = useSelector((state: RootState) => state.posProfile.status);
 
   useEffect(() => {
     dispatch(fetchPOSProfiles());

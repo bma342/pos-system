@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { MenuItem, Category } from '../types/menuTypes';
+import { MenuItem, MenuGroup } from '../types/menuTypes';
 
 const API_BASE_URL =
   process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000/api';
@@ -48,7 +48,7 @@ export class MenuItemService {
     );
   }
 
-  async getAllCategories(tenantId: string): Promise<Category[]> {
+  async getAllCategories(tenantId: string): Promise<MenuGroup[]> {
     const response = await axios.get(
       `${API_BASE_URL}/tenants/${tenantId}/categories`
     );

@@ -1,47 +1,50 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../redux/store';
-import { Box, Tabs, Tab, Typography } from '@mui/material';
-import ExecutiveDashboard from './ExecutiveDashboard';
-import LocationManager from './LocationManager';
-import MenuManager from './MenuManager';
-import OrderManager from './OrderManager';
-import ReviewManager from './ReviewManager';
-import UserManager from './UserManager';
-import SettingsManager from './SettingsManager';
+import React from 'react';
+import {
+  Grid,
+  Paper,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+} from '@mui/material';
+import { Link } from 'react-router-dom';
 
 const AdminPanel: React.FC = () => {
-  const [currentTab, setCurrentTab] = useState(0);
-  const user = useSelector((state: RootState) => state.auth.user);
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setCurrentTab(newValue);
-  };
-
-  if (!user || !user.roles.includes('clientAdmin')) {
-    return <Typography>Access Denied</Typography>;
-  }
-
   return (
-    <Box>
-      <Typography variant="h4">Admin Panel</Typography>
-      <Tabs value={currentTab} onChange={handleTabChange}>
-        <Tab label="Dashboard" />
-        <Tab label="Locations" />
-        <Tab label="Menu" />
-        <Tab label="Orders" />
-        <Tab label="Reviews" />
-        <Tab label="Users" />
-        <Tab label="Settings" />
-      </Tabs>
-      {currentTab === 0 && <ExecutiveDashboard />}
-      {currentTab === 1 && <LocationManager />}
-      {currentTab === 2 && <MenuManager />}
-      {currentTab === 3 && <OrderManager />}
-      {currentTab === 4 && <ReviewManager />}
-      {currentTab === 5 && <UserManager />}
-      {currentTab === 6 && <SettingsManager />}
-    </Box>
+    <Grid container spacing={3}>
+      <Grid item xs={12}>
+        <Typography variant="h4">Global Admin Dashboard</Typography>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Paper>
+          <List>
+            <ListItem button component={Link} to="/admin/clients">
+              <ListItemText primary="Client Management" />
+            </ListItem>
+            <ListItem button component={Link} to="/admin/users">
+              <ListItemText primary="User Management" />
+            </ListItem>
+            <ListItem button component={Link} to="/admin/roles">
+              <ListItemText primary="Role Management" />
+            </ListItem>
+            <ListItem button component={Link} to="/admin/permissions">
+              <ListItemText primary="Permission Management" />
+            </ListItem>
+            <ListItem button component={Link} to="/admin/pos-integrations">
+              <ListItemText primary="POS Integrations" />
+            </ListItem>
+          </List>
+        </Paper>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Paper>
+          <Typography variant="h6" padding={2}>
+            Quick Stats
+          </Typography>
+          {/* Add quick statistics here */}
+        </Paper>
+      </Grid>
+    </Grid>
   );
 };
 

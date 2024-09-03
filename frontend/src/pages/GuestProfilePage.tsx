@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getGuestProfile } from '../api/guestApi';
+import { fetchGuestProfile } from '../api/guestApi';
 import {
   getLoyaltyChallenges,
   getGuestChallengeProgress,
@@ -10,7 +10,7 @@ import {
   LoyaltyChallenge,
   LoyaltyChallengeProgress,
 } from '../types';
-import LoyaltyChallengeProgress from '../components/LoyaltyChallengeProgress';
+import LoyaltyChallengeProgressComponent from '../components/LoyaltyChallengeProgressComponent';
 
 const GuestProfilePage: React.FC = () => {
   const { guestId } = useParams<{ guestId: string }>();
@@ -23,7 +23,7 @@ const GuestProfilePage: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const profile = await getGuestProfile(parseInt(guestId));
+        const profile = await fetchGuestProfile(parseInt(guestId));
         setGuestProfile(profile);
 
         const allChallenges = await getLoyaltyChallenges();
@@ -61,7 +61,7 @@ const GuestProfilePage: React.FC = () => {
           (p) => p.challengeId === challenge.id
         );
         return progress ? (
-          <LoyaltyChallengeProgress
+          <LoyaltyChallengeProgressComponent
             key={challenge.id}
             challenge={challenge}
             progress={progress}

@@ -5,7 +5,6 @@ import {
   fetchClients,
   createClient,
   updateClient,
-  deleteClient,
 } from '../redux/slices/clientSlice';
 import { Client } from '../types';
 import {

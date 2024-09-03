@@ -26,3 +26,4 @@ export * from './menuTypes';
 export * from './posIntegrationTypes';
 export * from './reviewTypes';
 export * from './userTypes';
+export * from './posTypes';
