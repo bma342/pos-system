@@ -1,6 +1,7 @@
 import { Order, OrderItem } from './orderTypes';
 
-export interface CateringOrder extends Order {
+export interface CateringOrder extends Omit<Order, 'id'> {
+  id: number; // Override the id type to number
   eventDate: Date;
   eventType: string;
   deliveryAddress: string;
@@ -8,17 +9,11 @@ export interface CateringOrder extends Order {
 }
 
 export interface CateringOrderItem extends OrderItem {
-  cateringSpecificField?: string; // Add any catering-specific fields here
+  cateringSpecificField?: string;
 }
 
-export interface CateringOrder {
-  id: number;
-  customerName: string;
-  orderDate: string;
-  status: OrderStatus;
-  totalAmount: number;
-  // Add other relevant fields
-}
+// Remove the duplicate CateringOrder interface
+// export interface CateringOrder { ... }
 
 export type OrderStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 
@@ -30,3 +25,14 @@ export interface OrderStatistics {
 }
 
 // ... other types
+
+export interface Provider {
+  // Define provider properties
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+}

@@ -1,45 +1,31 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Client } from '../../types/clientTypes';
-import { clientApi } from '../../api/clientApi';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { ClientService } from '../../services/clientService';
+import { ClientMetrics } from '../../types/clientTypes';
 
 interface ClientState {
-  clients: Client[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  metrics: ClientMetrics | null;
+  loading: boolean;
   error: string | null;
 }
 
 const initialState: ClientState = {
-  clients: [],
-  status: 'idle',
+  metrics: null,
+  loading: false,
   error: null,
 };
 
-export const fetchClients = createAsyncThunk('client/fetchClients', async () => {
-  const response = await clientApi.getClients();
-  return response.data;
-});
-
-export const createClient = createAsyncThunk(
-  'client/createClient',
-  async (newClient: Partial<Client>) => {
-    const response = await clientApi.createClient(newClient);
-    return response.data;
-  }
-);
-
-export const updateClient = createAsyncThunk(
-  'client/updateClient',
-  async (updatedClient: Client) => {
-    const response = await clientApi.updateClient(updatedClient);
-    return response.data;
-  }
-);
-
-export const deleteClient = createAsyncThunk(
-  'client/deleteClient',
-  async (id: string) => {
-    await clientApi.deleteClient(id);
-    return id;
+export const fetchClientMetrics = createAsyncThunk<
+  ClientMetrics,
+  string,
+  { rejectValue: string }
+>(
+  'client/fetchMetrics',
+  async (locationId, { rejectWithValue }) => {
+    try {
+      return await ClientService.fetchClientMetrics(locationId);
+    } catch (error) {
+      return rejectWithValue('Failed to fetch client metrics');
+    }
   }
 );
 
@@ -49,28 +35,16 @@ const clientSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchClients.pending, (state) => {
-        state.status = 'loading';
+      .addCase(fetchClientMetrics.pending, (state) => {
+        state.loading = true;
       })
-      .addCase(fetchClients.fulfilled, (state, action: PayloadAction<Client[]>) => {
-        state.status = 'succeeded';
-        state.clients = action.payload;
+      .addCase(fetchClientMetrics.fulfilled, (state, action) => {
+        state.loading = false;
+        state.metrics = action.payload;
       })
-      .addCase(fetchClients.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message || 'Failed to fetch clients';
-      })
-      .addCase(createClient.fulfilled, (state, action: PayloadAction<Client>) => {
-        state.clients.push(action.payload);
-      })
-      .addCase(updateClient.fulfilled, (state, action: PayloadAction<Client>) => {
-        const index = state.clients.findIndex((client) => client.id === action.payload.id);
-        if (index !== -1) {
-          state.clients[index] = action.payload;
-        }
-      })
-      .addCase(deleteClient.fulfilled, (state, action: PayloadAction<string>) => {
-        state.clients = state.clients.filter((client) => client.id !== action.payload);
+      .addCase(fetchClientMetrics.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'An unknown error occurred';
       });
   },
 });

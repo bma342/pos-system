@@ -1,27 +1,53 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
-import { RootState, GuestProfile as GuestProfileType } from '../types';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../redux/store';
+import { fetchGuestProfile } from '../redux/slices/guestSlice';
+import { GuestProfile as GuestProfileType } from '../types/guestTypes';
+import { Typography, Box, CircularProgress } from '@mui/material';
 
 const GuestProfile: React.FC = () => {
-  const guestProfile = useSelector(
-    (state: RootState) => state.guest.profile as GuestProfileType
-  );
+  const dispatch = useDispatch<AppDispatch>();
+  const guestProfile = useSelector((state: RootState) => state.guest.profile as GuestProfileType);
+  const loading = useSelector((state: RootState) => state.guest.loading);
+  const error = useSelector((state: RootState) => state.guest.error);
+
+  useEffect(() => {
+    dispatch(fetchGuestProfile());
+  }, [dispatch]);
+
+  if (loading) {
+    return <CircularProgress />;
+  }
+
+  if (error) {
+    return <Typography color="error">{error}</Typography>;
+  }
 
   if (!guestProfile) {
-    return <div>Loading guest profile...</div>;
+    return <Typography>No guest profile found.</Typography>;
   }
 
   return (
-    <div>
-      <h2>Guest Profile</h2>
-      <p>
+    <Box>
+      <Typography variant="h2">Guest Profile</Typography>
+      <Typography variant="body1">
         Name: {guestProfile.firstName} {guestProfile.lastName}
-      </p>
-      <p>Loyalty Points: {guestProfile.loyaltyPoints}</p>
+      </Typography>
+      <Typography variant="body1">
+        Email: {guestProfile.email}
+      </Typography>
+      <Typography variant="body1">
+        Phone: {guestProfile.phoneNumber}
+      </Typography>
+      <Typography variant="body1">
+        Loyalty Points: {guestProfile.loyaltyPoints}
+      </Typography>
       {guestProfile.loyaltyTier && (
-        <p>Loyalty Tier: {guestProfile.loyaltyTier}</p>
+        <Typography variant="body1">
+          Loyalty Tier: {guestProfile.loyaltyTier}
+        </Typography>
       )}
-    </div>
+    </Box>
   );
 };
 

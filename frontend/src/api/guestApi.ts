@@ -1,8 +1,6 @@
 import apiClient from './apiClient';
 import { Reward, CartItem } from '../types';
 
-// ... existing functions
-
 export const fetchGuestRewards = async (guestId: number): Promise<Reward[]> => {
   try {
     const response = await apiClient.get(`/api/guests/${guestId}/rewards`);
@@ -12,9 +10,7 @@ export const fetchGuestRewards = async (guestId: number): Promise<Reward[]> => {
   }
 };
 
-export const checkInventory = async (
-  cartItems: CartItem[]
-): Promise<boolean> => {
+export const checkInventory = async (cartItems: CartItem[]): Promise<boolean> => {
   try {
     const response = await apiClient.post('/api/check-inventory', {
       items: cartItems,
@@ -25,9 +21,7 @@ export const checkInventory = async (
   }
 };
 
-export const getEstimatedPrepTime = async (
-  cartItems: CartItem[]
-): Promise<string> => {
+export const getEstimatedPrepTime = async (cartItems: CartItem[]): Promise<string> => {
   try {
     const response = await apiClient.post('/api/estimated-prep-time', {
       items: cartItems,

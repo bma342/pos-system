@@ -3,6 +3,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
 import { fetchMarketingMetricsAsync } from '../redux/slices/marketingSlice';
 import ABTestManager from './ABTestManager';
+import MarketingCampaigns from './MarketingCampaigns';
+import {
+  Typography,
+  Grid,
+  Paper,
+  Box,
+  CircularProgress,
+} from '@mui/material';
 
 const MarketingDashboard: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -14,32 +22,47 @@ const MarketingDashboard: React.FC = () => {
     dispatch(fetchMarketingMetricsAsync());
   }, [dispatch]);
 
-  if (status === 'loading') return <div>Loading...</div>;
-  if (status === 'failed') return <div>Error: {error}</div>;
+  if (status === 'loading') return <CircularProgress />;
+  if (status === 'failed') return <Typography color="error">Error: {error}</Typography>;
 
   return (
-    <div className="marketing-dashboard">
-      <h2>Marketing Dashboard</h2>
-      <div className="metrics-overview">
-        <div className="metric">
-          <h3>Customer Acquisition Cost</h3>
-          <p>${metrics.customerAcquisitionCost.toFixed(2)}</p>
-        </div>
-        <div className="metric">
-          <h3>Customer Lifetime Value</h3>
-          <p>${metrics.customerLifetimeValue.toFixed(2)}</p>
-        </div>
-        <div className="metric">
-          <h3>Conversion Rate</h3>
-          <p>{(metrics.conversionRate * 100).toFixed(2)}%</p>
-        </div>
-        <div className="metric">
-          <h3>Average Order Value</h3>
-          <p>${metrics.averageOrderValue.toFixed(2)}</p>
-        </div>
-      </div>
-      <ABTestManager />
-    </div>
+    <Box className="marketing-dashboard">
+      <Typography variant="h4" gutterBottom>Marketing Dashboard</Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6} lg={3}>
+          <Paper elevation={3} sx={{ p: 2 }}>
+            <Typography variant="h6">Customer Acquisition Cost</Typography>
+            <Typography variant="h4">${metrics.customerAcquisitionCost.toFixed(2)}</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={6} lg={3}>
+          <Paper elevation={3} sx={{ p: 2 }}>
+            <Typography variant="h6">Customer Lifetime Value</Typography>
+            <Typography variant="h4">${metrics.customerLifetimeValue.toFixed(2)}</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={6} lg={3}>
+          <Paper elevation={3} sx={{ p: 2 }}>
+            <Typography variant="h6">Conversion Rate</Typography>
+            <Typography variant="h4">{(metrics.conversionRate * 100).toFixed(2)}%</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={6} lg={3}>
+          <Paper elevation={3} sx={{ p: 2 }}>
+            <Typography variant="h6">Average Order Value</Typography>
+            <Typography variant="h4">${metrics.averageOrderValue.toFixed(2)}</Typography>
+          </Paper>
+        </Grid>
+      </Grid>
+      <Box mt={4}>
+        <Typography variant="h5" gutterBottom>A/B Testing</Typography>
+        <ABTestManager />
+      </Box>
+      <Box mt={4}>
+        <Typography variant="h5" gutterBottom>Marketing Campaigns</Typography>
+        <MarketingCampaigns />
+      </Box>
+    </Box>
   );
 };
 

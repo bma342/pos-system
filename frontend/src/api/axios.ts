@@ -1,6 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { store } from '../redux/store';
-import { refreshToken, logout } from '../redux/slices/authSlice';
+import refreshTokenAction, { logout } from '../redux/slices/authSlice'; // Corrected import
 import { handleApiError } from '../utils/errorHandler';
 
 const axiosInstance = axios.create({
@@ -12,7 +12,7 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = store.getState().auth.token;
+    const token = store.getState().auth.token; // Ensure auth state has 'token' property
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
@@ -35,8 +35,8 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const action = await store.dispatch(refreshToken());
-        if (refreshToken.fulfilled.match(action)) {
+        const action = await store.dispatch(refreshTokenAction({}));
+        if (refreshTokenAction.fulfilled.match(action)) {
           return axiosInstance(originalRequest);
         }
       } catch (refreshError) {

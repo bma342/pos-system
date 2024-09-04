@@ -4,7 +4,6 @@ import {
   ClientPreferences,
   ClientBranding,
 } from '../types/clientTypes';
-import apiClient from './apiClient';
 
 const API_BASE_URL =
   process.env.REACT_APP_API_BASE_URL || 'https://api.eatsuite.net';

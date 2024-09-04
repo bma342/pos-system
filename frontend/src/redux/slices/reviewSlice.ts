@@ -1,15 +1,7 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { reviewService } from '../../services/reviewService';
-
-interface Review {
-  id: string;
-  rating: number;
-  comment: string;
-  userId: string;
-  itemId: string;
-  createdAt: string;
-}
+import { Review } from '../../types/reviewTypes'; // Import the Review type from your types file
 
 interface ReviewState {
   reviews: Review[];
@@ -23,13 +15,17 @@ const initialState: ReviewState = {
   error: null,
 };
 
-export const fetchReviews = createAsyncThunk(
-  'reviews/fetchReviews',
-  async (itemId: string, { rejectWithValue }) => {
+export const fetchReviews = createAsyncThunk<
+  Review[],
+  string,
+  { rejectValue: string }
+>(
+  'review/fetchReviews',
+  async (itemId, { rejectWithValue }) => {
     try {
       const reviews = await reviewService.getReviews(itemId);
       return reviews;
-    } catch (error: unknown) {
+    } catch (error) {
       if (error instanceof Error) {
         return rejectWithValue(error.message);
       }
@@ -39,7 +35,7 @@ export const fetchReviews = createAsyncThunk(
 );
 
 const reviewSlice = createSlice({
-  name: 'reviews',
+  name: 'review',
   initialState,
   reducers: {
     addReview: (state, action: PayloadAction<Review>) => {
@@ -67,15 +63,15 @@ const reviewSlice = createSlice({
       })
       .addCase(fetchReviews.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.payload || 'An unknown error occurred';
       });
   },
 });
 
 export const { addReview, updateReview, deleteReview } = reviewSlice.actions;
 
-export const selectReviews = (state: RootState) => state.reviews.reviews;
-export const selectReviewsLoading = (state: RootState) => state.reviews.loading;
-export const selectReviewsError = (state: RootState) => state.reviews.error;
+export const selectReviews = (state: RootState) => state.review.reviews;
+export const selectReviewsLoading = (state: RootState) => state.review.loading;
+export const selectReviewsError = (state: RootState) => state.review.error;
 
 export default reviewSlice.reducer;

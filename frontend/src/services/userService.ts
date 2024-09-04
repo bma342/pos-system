@@ -1,6 +1,5 @@
-import axios from 'axios';
+import apiClient from '../api/apiClient';
 import { User } from '../types/userTypes';
-import { apiClient } from '../api/apiClient';
 
 export class userService {
   async getUsers(): Promise<User[]> {

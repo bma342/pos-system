@@ -3,6 +3,8 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { ClientBrandingService } from '../services/ClientBrandingService';
 import { ClientBranding } from '../types/clientTypes';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 
 const ClientBrandingProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -29,20 +31,39 @@ const ClientBrandingProvider: React.FC<{ children: React.ReactNode }> = ({
     fetchBranding();
   }, [clientId, clientBrandingService]);
 
+  const theme = useMemo(() => {
+    if (!branding) return createTheme();
+
+    return createTheme({
+      palette: {
+        primary: {
+          main: branding.primaryColor,
+        },
+        secondary: {
+          main: branding.secondaryColor,
+        },
+        text: {
+          primary: branding.fontColor,
+          secondary: branding.secondaryFontColor,
+        },
+      },
+      typography: {
+        fontFamily: branding.fontFamily,
+      },
+    });
+  }, [branding]);
+
   if (!branding) {
     return null; // Or a loading component
   }
 
   return (
-    <div
-      style={{
-        backgroundColor: branding.primaryColor,
-        color: branding.textColor,
-        fontFamily: branding.fontFamily,
-      }}
-    >
-      {children}
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <div className="min-h-screen" style={{ backgroundColor: branding.primaryColor }}>
+        {children}
+      </div>
+    </ThemeProvider>
   );
 };
 

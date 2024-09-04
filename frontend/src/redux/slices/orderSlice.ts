@@ -3,12 +3,38 @@ import { RootState } from '../store';
 
 interface Order {
   id: string;
-  // Add other order properties
+  clientId: string;
+  customerId: string;
+  items: OrderItem[];
+  total: number;
+  status: OrderStatus;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface OrderItem {
+  id: string;
+  menuItemId: string;
+  quantity: number;
+  price: number;
+  modifiers?: Modifier[];
+}
+
+interface Modifier {
+  id: string;
+  name: string;
+  price: number;
+}
+
+enum OrderStatus {
+  PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED'
 }
 
 interface OrderState {
   activeOrders: Order[];
-  // Add other state properties as needed
 }
 
 const initialState: OrderState = {
@@ -32,7 +58,6 @@ const orderSlice = createSlice({
         order.id === action.payload.id ? action.payload : order
       );
     },
-    // Add other reducers as needed
   },
 });
 

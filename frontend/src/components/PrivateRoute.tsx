@@ -4,20 +4,22 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { useClientContext } from '../context/ClientContext';
 import { UserRole } from '../types/userTypes';
+import { CircularProgress, Box } from '@mui/material';
 
 interface PrivateRouteProps {
   allowedRoles: UserRole[];
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ allowedRoles }) => {
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated
-  );
-  const user = useSelector((state: RootState) => state.auth.user);
+  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   const { client, isLoading } = useClientContext();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (!client) {
@@ -28,7 +30,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ allowedRoles }) => {
     return <Navigate to="/login" replace />;
   }
 
-  const hasAllowedRole = user.roles.some((role) => allowedRoles.includes(role));
+  const hasAllowedRole = user.roles.some((role) => allowedRoles.includes(role as UserRole));
 
   if (!hasAllowedRole) {
     return <Navigate to="/" replace />;

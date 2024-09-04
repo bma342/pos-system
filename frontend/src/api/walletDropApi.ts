@@ -1,5 +1,5 @@
 import apiClient from './axios';
-import { WalletDrop } from '../types';
+import { WalletDrop } from '../types/walletTypes';
 
 export const getWalletDropsByUser = async (
   userId: number

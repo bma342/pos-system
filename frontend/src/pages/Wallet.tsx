@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   loadWalletData,
+  fetchWalletBalance,
   selectWalletBalance,
   selectWalletRewards,
   selectWalletDiscounts,
@@ -20,12 +21,13 @@ interface Discount {
 
 const Wallet: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const balance = useSelector(selectWalletBalance) as number;
-  const rewards = useSelector(selectWalletRewards) as Reward[];
-  const discounts = useSelector(selectWalletDiscounts) as Discount[];
+  const balance = useSelector(selectWalletBalance);
+  const rewards = useSelector(selectWalletRewards);
+  const discounts = useSelector(selectWalletDiscounts);
 
   useEffect(() => {
     dispatch(loadWalletData());
+    dispatch(fetchWalletBalance());
   }, [dispatch]);
 
   return (

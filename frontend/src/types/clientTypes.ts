@@ -40,6 +40,8 @@ export interface ClientConfig {
   id: string;
   name: string;
   settings: Record<string, any>;
+  theme: string;
+  features: string[]
   // Add other properties as needed
 }
 
@@ -66,4 +68,23 @@ export interface ClientCreateData {
   state: string;
   zipCode: string;
   country: string;
+}
+
+export interface ClientMetrics {
+  totalClients: number;
+  newClients: number;
+  activeClients: number;
+  averageOrderValue: number;
+  repeatClientRate: number;
+  clientRetentionRate: number;
+  clientLifetimeValue: number;
+  averageOrdersPerClient: number;
+  topClients: {
+    clientId: string;
+    name: string;
+    totalOrders: number;
+    totalSpent: number;
+  }[];
+  clientSatisfactionScore: number;
+  lastUpdated: string; // ISO date string
 }

@@ -203,10 +203,8 @@ export interface CartItem {
   };
   quantity: number;
   selectedModifiers: {
-    id: string;
-    name: string;
-    price: number;
-  }[];
+    [key: string]: string | number | boolean;
+  };
 }
 
 export interface DashboardStat {

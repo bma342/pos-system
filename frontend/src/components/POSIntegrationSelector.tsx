@@ -17,26 +17,26 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Paper,
+  Box,
 } from '@mui/material';
 import SyncIcon from '@mui/icons-material/Sync';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { POSIntegrationService } from '../services/POSIntegrationService';
-import { POSType } from '../types/posIntegrationTypes';
-
-interface POSProfile {
-  id: number;
-  tenantId: string;
-  posType: POSType;
-  apiKey: string;
-  isActive: boolean;
-  lastSyncDate: string;
-  name: string;
-  apiEndpoint: string;
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '../redux/store';
+import {
+  fetchProfiles,
+  createProfile,
+  updateProfile,
+  deleteProfile,
+  syncProfile,
+} from '../redux/slices/posIntegrationSlice';
+import { POSType, POSProfile } from '../types/posIntegrationTypes';
 
 const POSIntegrationSelector: React.FC = () => {
-  const [profiles, setProfiles] = useState<POSProfile[]>([]);
+  const dispatch = useDispatch<AppDispatch>();
+  const { profiles, status, error } = useSelector((state: RootState) => state.posIntegration);
   const [newProfile, setNewProfile] = useState<Partial<POSProfile>>({
     name: '',
     posType: POSType.TOAST,
@@ -46,41 +46,25 @@ const POSIntegrationSelector: React.FC = () => {
   const [editingProfile, setEditingProfile] = useState<POSProfile | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const posIntegrationService = new POSIntegrationService();
-
   useEffect(() => {
-    fetchProfiles();
-  }, []);
-
-  const fetchProfiles = async () => {
-    try {
-      const fetchedProfiles = await posIntegrationService.getProfiles();
-      setProfiles(fetchedProfiles);
-    } catch (error) {
-      console.error('Failed to fetch POS profiles:', error);
-    }
-  };
+    dispatch(fetchProfiles());
+  }, [dispatch]);
 
   const handleProfileInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
   ) => {
     const { name, value } = event.target;
-    setNewProfile({ ...newProfile, [name]: value });
+    setNewProfile((prev) => ({ ...prev, [name as string]: value }));
   };
 
   const handleCreateProfile = async () => {
-    try {
-      await posIntegrationService.createProfile(newProfile as POSProfile);
-      setNewProfile({
-        name: '',
-        posType: POSType.TOAST,
-        apiEndpoint: '',
-        apiKey: '',
-      });
-      fetchProfiles();
-    } catch (error) {
-      console.error('Failed to create POS profile:', error);
-    }
+    dispatch(createProfile(newProfile as POSProfile));
+    setNewProfile({
+      name: '',
+      posType: POSType.TOAST,
+      apiEndpoint: '',
+      apiKey: '',
+    });
   };
 
   const handleEditProfile = (profile: POSProfile) => {
@@ -90,127 +74,123 @@ const POSIntegrationSelector: React.FC = () => {
 
   const handleUpdateProfile = async () => {
     if (editingProfile) {
-      try {
-        await posIntegrationService.updateProfile(editingProfile);
-        setIsDialogOpen(false);
-        fetchProfiles();
-      } catch (error) {
-        console.error('Failed to update POS profile:', error);
-      }
+      dispatch(updateProfile(editingProfile));
+      setIsDialogOpen(false);
     }
   };
 
   const handleDeleteProfile = async (profileId: number) => {
     if (window.confirm('Are you sure you want to delete this profile?')) {
-      try {
-        await posIntegrationService.deleteProfile(profileId);
-        fetchProfiles();
-      } catch (error) {
-        console.error('Failed to delete POS profile:', error);
-      }
+      dispatch(deleteProfile(profileId));
     }
   };
 
   const handleSyncProfile = async (profileId: number) => {
-    try {
-      await posIntegrationService.syncProfile(profileId);
-      alert('Sync initiated successfully');
-    } catch (error) {
-      console.error('Failed to sync POS profile:', error);
-      alert('Error initiating sync');
-    }
+    dispatch(syncProfile(profileId));
   };
 
+  if (status === 'loading') {
+    return <Typography>Loading POS profiles...</Typography>;
+  }
+
+  if (status === 'failed') {
+    return <Typography color="error">Error: {error}</Typography>;
+  }
+
   return (
-    <Grid container spacing={3}>
-      <Grid item xs={12}>
-        <Typography variant="h4">POS Integration Manager</Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography variant="h5">Create New POS Profile</Typography>
-        <TextField
-          name="name"
-          label="Profile Name"
-          value={newProfile.name}
-          onChange={handleProfileInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <FormControl fullWidth margin="normal">
-          <InputLabel id="pos-type-select-label">POS Type</InputLabel>
-          <Select
-            labelId="pos-type-select-label"
-            name="posType"
-            value={newProfile.posType}
-            onChange={handleProfileInputChange as any}
-          >
-            {Object.values(POSType).map((type) => (
-              <MenuItem key={type} value={type}>
-                {type}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <TextField
-          name="apiEndpoint"
-          label="API Endpoint"
-          value={newProfile.apiEndpoint}
-          onChange={handleProfileInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          name="apiKey"
-          label="API Key"
-          value={newProfile.apiKey}
-          onChange={handleProfileInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <Button
-          onClick={handleCreateProfile}
-          variant="contained"
-          color="primary"
-        >
-          Create Profile
-        </Button>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography variant="h5">Existing POS Profiles</Typography>
-        <List>
-          {profiles.map((profile) => (
-            <ListItem key={profile.id}>
-              <ListItemText
-                primary={profile.name}
-                secondary={`${profile.posType} - ${profile.apiEndpoint}`}
-              />
-              <ListItemSecondaryAction>
-                <IconButton
-                  edge="end"
-                  aria-label="edit"
-                  onClick={() => handleEditProfile(profile)}
-                >
-                  <EditIcon />
-                </IconButton>
-                <IconButton
-                  edge="end"
-                  aria-label="delete"
-                  onClick={() => handleDeleteProfile(profile.id)}
-                >
-                  <DeleteIcon />
-                </IconButton>
-                <IconButton
-                  edge="end"
-                  aria-label="sync"
-                  onClick={() => handleSyncProfile(profile.id)}
-                >
-                  <SyncIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-          ))}
-        </List>
-      </Grid>
+    <Paper elevation={3}>
+      <Box p={2}>
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <Typography variant="h4" gutterBottom>POS Integration Manager</Typography>
+          </Grid>
+          <Grid item xs={12}>
+            <Typography variant="h5" gutterBottom>Create New POS Profile</Typography>
+            <TextField
+              name="name"
+              label="Profile Name"
+              value={newProfile.name}
+              onChange={handleProfileInputChange}
+              fullWidth
+              margin="normal"
+            />
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="pos-type-select-label">POS Type</InputLabel>
+              <Select
+                labelId="pos-type-select-label"
+                name="posType"
+                value={newProfile.posType}
+                onChange={handleProfileInputChange}
+              >
+                {Object.values(POSType).map((type) => (
+                  <MenuItem key={type} value={type}>
+                    {type}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField
+              name="apiEndpoint"
+              label="API Endpoint"
+              value={newProfile.apiEndpoint}
+              onChange={handleProfileInputChange}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              name="apiKey"
+              label="API Key"
+              value={newProfile.apiKey}
+              onChange={handleProfileInputChange}
+              fullWidth
+              margin="normal"
+            />
+            <Button
+              onClick={handleCreateProfile}
+              variant="contained"
+              color="primary"
+            >
+              Create Profile
+            </Button>
+          </Grid>
+          <Grid item xs={12}>
+            <Typography variant="h5" gutterBottom>Existing POS Profiles</Typography>
+            <List>
+              {profiles.map((profile) => (
+                <ListItem key={profile.id}>
+                  <ListItemText
+                    primary={profile.name}
+                    secondary={`${profile.posType} - ${profile.apiEndpoint}`}
+                  />
+                  <ListItemSecondaryAction>
+                    <IconButton
+                      edge="end"
+                      aria-label="edit"
+                      onClick={() => handleEditProfile(profile)}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      edge="end"
+                      aria-label="delete"
+                      onClick={() => handleDeleteProfile(profile.id)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                    <IconButton
+                      edge="end"
+                      aria-label="sync"
+                      onClick={() => handleSyncProfile(profile.id)}
+                    >
+                      <SyncIcon />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </List>
+          </Grid>
+        </Grid>
+      </Box>
       <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
         <DialogTitle>Edit POS Profile</DialogTitle>
         <DialogContent>
@@ -289,7 +269,7 @@ const POSIntegrationSelector: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Grid>
+    </Paper>
   );
 };
 

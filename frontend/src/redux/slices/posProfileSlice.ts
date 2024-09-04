@@ -1,35 +1,32 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { posProfileService } from '../../services/posProfileService';
-
-interface POSProfile {
-  id: string;
-  // Add other POS profile properties
-}
+import { LocationPOSProfile } from '../../types/posTypes';
+import api from '../../services/api';
 
 interface POSProfileState {
-  profiles: POSProfile[];
+  locationProfiles: LocationPOSProfile[];
   loading: boolean;
   error: string | null;
 }
 
 const initialState: POSProfileState = {
-  profiles: [],
+  locationProfiles: [],
   loading: false,
   error: null,
 };
 
-export const fetchPOSProfiles = createAsyncThunk(
-  'posProfile/fetchProfiles',
-  async (_, { rejectWithValue }) => {
+export const fetchLocationPOSProfiles = createAsyncThunk<
+  LocationPOSProfile[],
+  string,
+  { rejectValue: string }
+>(
+  'posProfile/fetchLocationProfiles',
+  async (locationId, { rejectWithValue }) => {
     try {
-      const profiles = await posProfileService.getProfiles();
-      return profiles;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('An unknown error occurred');
+      const response = await api.get(`/locations/${locationId}/pos-profiles`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue('Failed to fetch location POS profiles');
     }
   }
 );
@@ -40,22 +37,23 @@ const posProfileSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchPOSProfiles.pending, (state) => {
+      .addCase(fetchLocationPOSProfiles.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
-      .addCase(fetchPOSProfiles.fulfilled, (state, action) => {
-        state.profiles = action.payload;
+      .addCase(fetchLocationPOSProfiles.fulfilled, (state, action) => {
+        state.locationProfiles = action.payload;
         state.loading = false;
       })
-      .addCase(fetchPOSProfiles.rejected, (state, action) => {
-        state.error = action.payload as string;
+      .addCase(fetchLocationPOSProfiles.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload || 'An error occurred';
       });
   },
 });
 
-export const selectPOSProfiles = (state: RootState) => state.posProfile.profiles;
-export const selectPOSProfilesLoading = (state: RootState) => state.posProfile.loading;
-export const selectPOSProfilesError = (state: RootState) => state.posProfile.error;
+export const selectLocationPOSProfiles = (state: RootState) => state.posProfile.locationProfiles;
+export const selectPOSProfileLoading = (state: RootState) => state.posProfile.loading;
+export const selectPOSProfileError = (state: RootState) => state.posProfile.error;
 
 export default posProfileSlice.reducer;

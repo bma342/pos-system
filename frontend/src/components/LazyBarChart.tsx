@@ -1,16 +1,14 @@
 import React from 'react';
+import { Bar } from 'react-chartjs-2';
+import { ChartData } from '../types/dashboardTypes';
 
 interface LazyBarChartProps {
-  data: any; // Replace 'any' with the appropriate type for your chart data
+  data: ChartData;
+  title: string;
 }
 
-const LazyBarChart: React.FC<LazyBarChartProps> = ({ data }) => {
-  // Implement your bar chart logic here
-  return (
-    <div>
-      {/* Your bar chart UI */}
-    </div>
-  );
+const LazyBarChart: React.FC<LazyBarChartProps> = ({ data, title }) => {
+  // ... (component implementation)
 };
 
 export default LazyBarChart;

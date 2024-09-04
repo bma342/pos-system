@@ -14,14 +14,18 @@ import { MenuItem } from '../types/menuTypes';
 interface MenuItemModalProps {
   item: MenuItem;
   onClose: () => void;
+  onAddToCart: (item: MenuItem, quantity: number) => void;
 }
 
-const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
+const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose, onAddToCart }) => {
   const [quantity, setQuantity] = useState(1);
 
+  const handleQuantityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setQuantity(Math.max(1, parseInt(event.target.value) || 1));
+  };
+
   const handleAddToCart = () => {
-    // Implement add to cart logic here
-    console.log(`Added ${quantity} ${item.name}(s) to cart`);
+    onAddToCart(item, quantity);
     onClose();
   };
 
@@ -39,7 +43,7 @@ const MenuItemModal: React.FC<MenuItemModalProps> = ({ item, onClose }) => {
             label="Quantity"
             type="number"
             value={quantity}
-            onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+            onChange={handleQuantityChange}
             InputProps={{ inputProps: { min: 1 } }}
           />
         </Box>

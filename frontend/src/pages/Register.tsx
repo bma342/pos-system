@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store';
-import { register as registerUser } from '../redux/slices/authSlice';
+import { register, selectAuthStatus } from '../redux/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 
 const Register: React.FC = () => {
@@ -13,7 +13,13 @@ const Register: React.FC = () => {
 
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { status } = useSelector((state: RootState) => state.auth);
+  const status = useSelector(selectAuthStatus);
+
+  useEffect(() => {
+    if (status === 'succeeded') {
+      navigate('/login');
+    }
+  }, [status, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,8 +31,7 @@ const Register: React.FC = () => {
     }
 
     try {
-      await dispatch(registerUser({ username, email, password })).unwrap();
-      navigate('/login');
+      await dispatch(register({ username, email, password })).unwrap();
     } catch (err) {
       setError('Registration failed. Please try again.');
     }
@@ -34,7 +39,7 @@ const Register: React.FC = () => {
 
   return (
     <div className="register-page">
-      <h2>Register</h2>
+      <h2>Register for Our Restaurant Ordering Hub</h2>
       {error && <div className="error">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div>

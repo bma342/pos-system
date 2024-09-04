@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../store'; // Updated import path
+import { RootState } from '../rootReducer';
 
 interface Role {
   id: string;

@@ -1,5 +1,5 @@
 import apiClient from './axios';
-import { Challenge } from '../types';
+import { Challenge } from '../types/challengeTypes';
 
 export const getChallenges = async (): Promise<Challenge[]> => {
   const response = await apiClient.get<Challenge[]>('/api/challenges');

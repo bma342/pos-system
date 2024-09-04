@@ -13,6 +13,7 @@ import {
   TextField,
   Typography,
   Box,
+  CircularProgress,
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { useClientContext } from '../context/ClientContext';
@@ -20,6 +21,8 @@ import { useClientContext } from '../context/ClientContext';
 const MenuBuilder: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const menus = useSelector((state: RootState) => state.menu.menus);
+  const loading = useSelector((state: RootState) => state.menu.loading);
+  const error = useSelector((state: RootState) => state.menu.error);
   const [activeMenu, setActiveMenu] = useState<Menu | null>(null);
   const [isAddGroupDialogOpen, setIsAddGroupDialogOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
@@ -27,7 +30,7 @@ const MenuBuilder: React.FC = () => {
 
   useEffect(() => {
     if (clientId) {
-      dispatch(fetchMenus(clientId));
+      dispatch(fetchMenus(clientId.toString()));
     }
   }, [dispatch, clientId]);
 
@@ -46,7 +49,7 @@ const MenuBuilder: React.FC = () => {
     };
 
     setActiveMenu(updatedMenu);
-    dispatch(updateMenu({ clientId, menuId: activeMenu.id, menuData: updatedMenu }));
+    dispatch(updateMenu({ clientId: clientId.toString(), menuId: activeMenu.id, menuData: updatedMenu }));
   };
 
   const handleAddGroup = () => {
@@ -58,36 +61,45 @@ const MenuBuilder: React.FC = () => {
           { id: Date.now().toString(), name: newGroupName.trim(), items: [] },
         ],
       };
-      dispatch(updateMenu({ clientId, menuId: activeMenu.id, menuData: updatedMenu }));
+      dispatch(updateMenu({ clientId: clientId.toString(), menuId: activeMenu.id, menuData: updatedMenu }));
       setIsAddGroupDialogOpen(false);
       setNewGroupName('');
     }
   };
 
+  if (loading) {
+    return <CircularProgress />;
+  }
+
+  if (error) {
+    return <Typography color="error">{error}</Typography>;
+  }
+
   return (
-    <div>
+    <Box>
       <Typography variant="h4" gutterBottom>
         Menu Builder
       </Typography>
-      {menus.map((menu) => (
-        <Box key={menu.id} mb={2}>
+      <Box display="flex" flexWrap="wrap" gap={2} mb={2}>
+        {menus.map((menu) => (
           <Button
+            key={menu.id}
             variant={activeMenu?.id === menu.id ? 'contained' : 'outlined'}
             onClick={() => setActiveMenu(menu)}
           >
             {menu.name}
           </Button>
-        </Box>
-      ))}
+        ))}
+      </Box>
       {activeMenu && (
         <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId="menu">
             {(provided) => (
-              <div {...provided.droppableProps} ref={provided.innerRef}>
+              <Box {...provided.droppableProps} ref={provided.innerRef}>
                 {activeMenu.groups.map((group, index) => (
                   <Draggable key={group.id} draggableId={group.id} index={index}>
                     {(provided) => (
-                      <div
+                      <Box
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
@@ -97,12 +109,12 @@ const MenuBuilder: React.FC = () => {
                           index={index}
                           menuId={activeMenu.id}
                         />
-                      </div>
+                      </Box>
                     )}
                   </Draggable>
                 ))}
                 {provided.placeholder}
-              </div>
+              </Box>
             )}
           </Droppable>
         </DragDropContext>
@@ -120,7 +132,6 @@ const MenuBuilder: React.FC = () => {
         <DialogTitle>Add New Group</DialogTitle>
         <DialogContent>
           <TextField
-            autoFocus
             margin="dense"
             label="Group Name"
             fullWidth
@@ -135,7 +146,7 @@ const MenuBuilder: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </Box>
   );
 };
 

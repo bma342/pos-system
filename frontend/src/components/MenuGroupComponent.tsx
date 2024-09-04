@@ -1,148 +1,90 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useDispatch } from 'react-redux';
-import { Draggable, Droppable } from 'react-beautiful-dnd';
+import { AppDispatch } from '../redux/store';
 import { updateMenu } from '../redux/slices/menuSlice';
-import { MenuGroup, MenuItem, AppDispatch } from '../types';
-import {
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Typography,
-  Box,
-  Paper,
-} from '@mui/material';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import { Menu, MenuGroup, MenuItem } from '../types/menuTypes';
 
 interface MenuGroupComponentProps {
+  menu: Menu;
   group: MenuGroup;
-  index: number;
-  menuId: string;
 }
 
-const MenuGroupComponent: React.FC<MenuGroupComponentProps> = ({
-  group,
-  index,
-  menuId,
-}) => {
+const MenuGroupComponent: React.FC<MenuGroupComponentProps> = ({ menu, group }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
-  const [newItemName, setNewItemName] = useState('');
-  const [newItemPrice, setNewItemPrice] = useState('');
 
-  const handleAddItem = () => {
-    if (!newItemName || !newItemPrice) return;
-
-    const newItem: MenuItem = {
-      id: Date.now(),
-      name: newItemName,
-      price: parseFloat(newItemPrice),
-      description: '',
+  const handleAddItem = (newItem: Omit<MenuItem, 'id' | 'isModified'>) => {
+    const updatedGroup = {
+      ...group,
+      items: [...group.items, { ...newItem, id: Date.now().toString(), isModified: true }],
+      isModified: true,
     };
+    const updatedMenu = {
+      ...menu,
+      groups: menu.groups.map((g: MenuGroup) => g.id === group.id ? updatedGroup : g),
+      isModified: true,
+    };
+    dispatch(updateMenu({
+      locationId: menu.locationId,
+      menuId: menu.id,
+      menuData: updatedMenu,
+    }));
+  };
 
-    const updatedGroup = { ...group, items: [...group.items, newItem] };
-    dispatch(
-      updateMenu({
-        clientId: parseInt(menuId),
-        menuId: parseInt(menuId),
-        menuData: { groups: [updatedGroup] },
-      })
-    );
+  const handleUpdateItem = (updatedItem: MenuItem) => {
+    const updatedGroup = {
+      ...group,
+      items: group.items.map((item: MenuItem) => 
+        item.id === updatedItem.id ? { ...updatedItem, isModified: true } : item
+      ),
+      isModified: true,
+    };
+    const updatedMenu = {
+      ...menu,
+      groups: menu.groups.map((g: MenuGroup) => g.id === group.id ? updatedGroup : g),
+      isModified: true,
+    };
+    dispatch(updateMenu({
+      locationId: menu.locationId,
+      menuId: menu.id,
+      menuData: updatedMenu,
+    }));
+  };
 
-    setNewItemName('');
-    setNewItemPrice('');
-    setIsAddItemDialogOpen(false);
+  const handleRemoveItem = (itemId: string) => {
+    const updatedGroup = {
+      ...group,
+      items: group.items.filter((item: MenuItem) => item.id !== itemId),
+      isModified: true,
+    };
+    const updatedMenu = {
+      ...menu,
+      groups: menu.groups.map((g: MenuGroup) => g.id === group.id ? updatedGroup : g),
+      isModified: true,
+    };
+    dispatch(updateMenu({
+      locationId: menu.locationId,
+      menuId: menu.id,
+      menuData: updatedMenu,
+    }));
   };
 
   return (
-    <Draggable draggableId={`group-${group.id}`} index={index}>
-      {(provided) => (
-        <Paper
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          elevation={3}
-          sx={{ p: 2, mb: 2 }}
-        >
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            {group.name}
-          </Typography>
-          <Droppable droppableId={`group-${group.id}`} type="item">
-            {(provided) => (
-              <Box
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
-              >
-                {group.items.map((item, index) => (
-                  <Draggable
-                    key={item.id}
-                    draggableId={`item-${item.id}`}
-                    index={index}
-                  >
-                    {(provided) => (
-                      <Paper
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        elevation={1}
-                        sx={{ p: 1 }}
-                      >
-                        <Typography>
-                          {item.name} - ${item.price.toFixed(2)}
-                        </Typography>
-                      </Paper>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </Box>
-            )}
-          </Droppable>
-          <Button
-            startIcon={<AddCircleOutlineIcon />}
-            onClick={() => setIsAddItemDialogOpen(true)}
-            sx={{ mt: 2 }}
-          >
-            Add Item
-          </Button>
-          <Dialog
-            open={isAddItemDialogOpen}
-            onClose={() => setIsAddItemDialogOpen(false)}
-          >
-            <DialogTitle>Add New Item</DialogTitle>
-            <DialogContent>
-              <TextField
-                margin="dense"
-                label="Item Name"
-                type="text"
-                fullWidth
-                variant="outlined"
-                value={newItemName}
-                onChange={(e) => setNewItemName(e.target.value)}
-              />
-              <TextField
-                margin="dense"
-                label="Item Price"
-                type="number"
-                fullWidth
-                variant="outlined"
-                value={newItemPrice}
-                onChange={(e) => setNewItemPrice(e.target.value)}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setIsAddItemDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleAddItem}>Add</Button>
-            </DialogActions>
-          </Dialog>
-        </Paper>
-      )}
-    </Draggable>
+    <div>
+      <h2>{group.name}</h2>
+      {group.items.map((item) => (
+        <div key={item.id}>
+          <span>{item.name} - ${item.price}</span>
+          {item.isModified && <span> (Modified)</span>}
+          <button onClick={() => handleUpdateItem({ ...item, price: item.price + 1 })}>
+            Increase Price
+          </button>
+          <button onClick={() => handleRemoveItem(item.id)}>Remove</button>
+        </div>
+      ))}
+      <button onClick={() => handleAddItem({ name: 'New Item', price: 9.99 })}>
+        Add New Item
+      </button>
+    </div>
   );
 };
 

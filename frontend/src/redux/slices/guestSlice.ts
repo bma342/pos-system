@@ -1,49 +1,52 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../store';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { GuestMetrics } from '../../types/guestTypes';
+import { GuestService } from '../../services/guestService';
 
 interface GuestState {
-  profile: {
-    id: number;
-    firstName: string;
-    lastName: string;
-    loyaltyPoints: number;
-  };
-  status: 'idle' | 'loading' | 'failed';
+  metrics: GuestMetrics | null;
+  loading: boolean;
   error: string | null;
 }
 
 const initialState: GuestState = {
-  profile: {
-    id: 0,
-    firstName: '',
-    lastName: '',
-    loyaltyPoints: 0,
-  },
-  status: 'idle',
+  metrics: null,
+  loading: false,
   error: null,
 };
+
+export const fetchGuestMetrics = createAsyncThunk<
+  GuestMetrics,
+  string,
+  { rejectValue: string }
+>(
+  'guest/fetchMetrics',
+  async (locationId, { rejectWithValue }) => {
+    try {
+      return await GuestService.fetchGuestMetrics(locationId);
+    } catch (error) {
+      return rejectWithValue('Failed to fetch guest metrics');
+    }
+  }
+);
 
 const guestSlice = createSlice({
   name: 'guest',
   initialState,
-  reducers: {
-    setGuestProfile(state, action: PayloadAction<GuestState['profile']>) {
-      state.profile = action.payload;
-    },
-    setGuestStatus(state, action: PayloadAction<GuestState['status']>) {
-      state.status = action.payload;
-    },
-    setGuestError(state, action: PayloadAction<string | null>) {
-      state.error = action.payload;
-    },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchGuestMetrics.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchGuestMetrics.fulfilled, (state, action) => {
+        state.loading = false;
+        state.metrics = action.payload;
+      })
+      .addCase(fetchGuestMetrics.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'An unknown error occurred';
+      });
   },
 });
-
-export const { setGuestProfile, setGuestStatus, setGuestError } =
-  guestSlice.actions;
-
-export const selectGuestProfile = (state: RootState) => state.guest.profile;
-export const selectGuestStatus = (state: RootState) => state.guest.status;
-export const selectGuestError = (state: RootState) => state.guest.error;
 
 export default guestSlice.reducer;

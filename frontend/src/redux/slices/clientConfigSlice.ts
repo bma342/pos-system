@@ -1,54 +1,54 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../store';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { ClientService } from '../../services/clientService';
 import { ClientConfig } from '../../types/clientTypes';
-import { clientConfigService } from '../../services/clientConfigService';
+import { RootState } from '../store'; // Add this import
 
-interface ClientConfigState {
-  config: ClientConfig | null;
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
-  error: string | null;
-}
-
-const initialState: ClientConfigState = {
-  config: null,
-  status: 'idle',
-  error: null,
-};
-
-export const fetchClientConfig = createAsyncThunk(
+export const fetchClientConfig = createAsyncThunk<
+  ClientConfig,
+  void,
+  { rejectValue: string }
+>(
   'clientConfig/fetchClientConfig',
-  async (clientId: string, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const config = await clientConfigService.getClientConfig(clientId);
+      const config = await ClientService.fetchClientConfig();
       return config;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('An unknown error occurred');
     }
   }
 );
 
 const clientConfigSlice = createSlice({
   name: 'clientConfig',
-  initialState,
+  initialState: {
+    config: null as ClientConfig | null,
+    status: 'idle' as 'idle' | 'loading' | 'succeeded' | 'failed',
+    error: null as string | null,
+  },
   reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchClientConfig.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(fetchClientConfig.fulfilled, (state, action: PayloadAction<ClientConfig>) => {
+      .addCase(fetchClientConfig.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.config = action.payload;
       })
       .addCase(fetchClientConfig.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.payload as string;
+        state.error = action.payload || 'An unknown error occurred';
       });
   },
 });
 
+export default clientConfigSlice.reducer;
+
+// Selectors
 export const selectClientConfig = (state: RootState) => state.clientConfig.config;
 export const selectClientConfigStatus = (state: RootState) => state.clientConfig.status;
 export const selectClientConfigError = (state: RootState) => state.clientConfig.error;
-
-export default clientConfigSlice.reducer;

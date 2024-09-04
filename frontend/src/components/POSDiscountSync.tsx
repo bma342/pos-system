@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button, Typography, CircularProgress } from '@mui/material';
+import { Button, Typography, CircularProgress, Paper, Box } from '@mui/material';
 import { POSIntegrationService } from '../services/POSIntegrationService';
 import { useAuth } from '../contexts/AuthContext';
 import { User } from '../types/userTypes';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '../redux/store';
+import { syncDiscounts, fetchLastSyncTime } from '../redux/slices/posDiscountSlice';
 
 const POSDiscountSync: React.FC = () => {
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
+  const { isSyncing, lastSyncTime, error } = useSelector((state: RootState) => state.posDiscount);
   const { user } = useAuth();
 
   const posIntegrationService = React.useMemo(
@@ -15,56 +17,41 @@ const POSDiscountSync: React.FC = () => {
     []
   );
 
-  const fetchLastSyncTime = useCallback(async () => {
+  const fetchLastSync = useCallback(() => {
     if (user && (user as User).clientId) {
-      try {
-        const time = await posIntegrationService.getLastDiscountSyncTime(
-          (user as User).clientId
-        );
-        setLastSyncTime(new Date(time));
-      } catch (err) {
-        console.error('Failed to fetch last sync time:', err);
-        setError('Failed to fetch last sync time. Please try again.');
-      }
+      dispatch(fetchLastSyncTime((user as User).clientId));
     }
-  }, [user, posIntegrationService]);
+  }, [user, dispatch]);
 
   useEffect(() => {
-    fetchLastSyncTime();
-  }, [fetchLastSyncTime]);
+    fetchLastSync();
+  }, [fetchLastSync]);
 
   const handleSync = async () => {
-    setIsSyncing(true);
-    setError(null);
-    try {
-      if (user && (user as User).clientId) {
-        await posIntegrationService.syncDiscounts((user as User).clientId);
-        setLastSyncTime(new Date());
-      }
-    } catch (err) {
-      setError('Failed to sync discounts. Please try again.');
-      console.error('Discount sync failed:', err);
-    } finally {
-      setIsSyncing(false);
+    if (user && (user as User).clientId) {
+      dispatch(syncDiscounts((user as User).clientId));
     }
   };
 
   return (
-    <div>
-      <Typography variant="h6">POS Discount Sync</Typography>
-      <Typography>
-        Last sync: {lastSyncTime ? lastSyncTime.toLocaleString() : 'Never'}
-      </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleSync}
-        disabled={isSyncing}
-      >
-        {isSyncing ? <CircularProgress size={24} /> : 'Sync Discounts'}
-      </Button>
-      {error && <Typography color="error">{error}</Typography>}
-    </div>
+    <Paper elevation={3}>
+      <Box p={2}>
+        <Typography variant="h6" gutterBottom>POS Discount Sync</Typography>
+        <Typography variant="body1" gutterBottom>
+          Last sync: {lastSyncTime ? new Date(lastSyncTime).toLocaleString() : 'Never'}
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSync}
+          disabled={isSyncing}
+          startIcon={isSyncing ? <CircularProgress size={20} color="inherit" /> : null}
+        >
+          {isSyncing ? 'Syncing...' : 'Sync Discounts'}
+        </Button>
+        {error && <Typography color="error" mt={2}>{error}</Typography>}
+      </Box>
+    </Paper>
   );
 };
 

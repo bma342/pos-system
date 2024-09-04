@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { ABTestService } from '../../services/abTestService';
 import { ABTest } from '../../types/abTestTypes';
-import { abTestApi } from '../../api/abTestApi';
+import { RootState } from '../rootReducer'; // Update this import if necessary
 
 interface ABTestState {
   tests: ABTest[];
@@ -14,35 +15,36 @@ const initialState: ABTestState = {
   error: null,
 };
 
-export const fetchABTestsAsync = createAsyncThunk(
+export const fetchABTests = createAsyncThunk<ABTest[], void, { rejectValue: string }>(
   'abTest/fetchABTests',
-  async () => {
-    const response = await abTestApi.getABTests();
-    return response.data;
+  async (_, { rejectWithValue }) => {
+    try {
+      return await ABTestService.fetchABTests();
+    } catch (error) {
+      return rejectWithValue('Failed to fetch AB tests');
+    }
   }
 );
 
-export const createABTestAsync = createAsyncThunk(
+export const createABTest = createAsyncThunk<ABTest, Omit<ABTest, 'id'>, { rejectValue: string }>(
   'abTest/createABTest',
-  async (abTest: ABTest) => {
-    const response = await abTestApi.createABTest(abTest);
-    return response.data;
+  async (abTest, { rejectWithValue }) => {
+    try {
+      return await ABTestService.createABTest(abTest);
+    } catch (error) {
+      return rejectWithValue('Failed to create AB test');
+    }
   }
 );
 
-export const updateABTestAsync = createAsyncThunk(
+export const updateABTest = createAsyncThunk<ABTest, { id: string; abTest: Partial<ABTest> }, { rejectValue: string }>(
   'abTest/updateABTest',
-  async (abTest: ABTest) => {
-    const response = await abTestApi.updateABTest(abTest);
-    return response.data;
-  }
-);
-
-export const deleteABTestAsync = createAsyncThunk(
-  'abTest/deleteABTest',
-  async (id: number) => {
-    await abTestApi.deleteABTest(id);
-    return id;
+  async ({ id, abTest }, { rejectWithValue }) => {
+    try {
+      return await ABTestService.updateABTest(id, abTest);
+    } catch (error) {
+      return rejectWithValue('Failed to update AB test');
+    }
   }
 );
 
@@ -52,30 +54,32 @@ const abTestSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchABTestsAsync.pending, (state) => {
+      .addCase(fetchABTests.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(fetchABTestsAsync.fulfilled, (state, action) => {
+      .addCase(fetchABTests.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.tests = action.payload;
       })
-      .addCase(fetchABTestsAsync.rejected, (state, action) => {
+      .addCase(fetchABTests.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.error.message || null;
+        state.error = action.payload || 'An unknown error occurred';
       })
-      .addCase(createABTestAsync.fulfilled, (state, action) => {
+      .addCase(createABTest.fulfilled, (state, action) => {
         state.tests.push(action.payload);
       })
-      .addCase(updateABTestAsync.fulfilled, (state, action) => {
-        const index = state.tests.findIndex((test) => test.id === action.payload.id);
+      .addCase(updateABTest.fulfilled, (state, action) => {
+        const index = state.tests.findIndex(test => test.id === action.payload.id);
         if (index !== -1) {
           state.tests[index] = action.payload;
         }
-      })
-      .addCase(deleteABTestAsync.fulfilled, (state, action) => {
-        state.tests = state.tests.filter((test) => test.id !== action.payload);
       });
   },
 });
 
 export default abTestSlice.reducer;
+
+// Selectors
+export const selectABTests = (state: RootState) => state.abTest.tests;
+export const selectABTestStatus = (state: RootState) => state.abTest.status;
+export const selectABTestError = (state: RootState) => state.abTest.error;

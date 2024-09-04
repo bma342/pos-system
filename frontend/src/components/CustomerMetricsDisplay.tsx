@@ -1,5 +1,5 @@
 import React from 'react';
-import { CustomerMetrics } from '../types';
+import { CustomerMetrics } from '../types/analyticsTypes';
 
 interface Props {
   metrics: CustomerMetrics;

@@ -6,14 +6,17 @@ import {
   ListItemText,
   Typography,
   CircularProgress,
+  Box,
+  Button,
 } from '@mui/material';
 import {
   fetchLocations,
   selectLocations,
   selectLocationStatus,
   selectLocationError,
-} from '../redux/slices/locationSlice'; // Corrected relative import path
+} from '../redux/slices/locationSlice';
 import { Location, RootState, AppDispatch } from '../types';
+import { Link } from 'react-router-dom';
 
 const LocationList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -38,16 +41,25 @@ const LocationList: React.FC = () => {
   }
 
   return (
-    <List>
-      {locations.map((location: Location) => (
-        <ListItem key={location.id}>
-          <ListItemText
-            primary={location.name}
-            secondary={`${location.address}, ${location.city}, ${location.state}`}
-          />
-        </ListItem>
-      ))}
-    </List>
+    <Box>
+      <Typography variant="h2">Locations</Typography>
+      <List>
+        {locations.map((location: Location) => (
+          <ListItem key={location.id}>
+            <ListItemText
+              primary={location.name}
+              secondary={`${location.address}, ${location.city}, ${location.state} ${location.zipCode}`}
+            />
+            <Button component={Link} to={`/locations/${location.id}`} variant="outlined">
+              View Details
+            </Button>
+          </ListItem>
+        ))}
+      </List>
+      <Button component={Link} to="/locations/new" variant="contained" color="primary">
+        Add New Location
+      </Button>
+    </Box>
   );
 };
 

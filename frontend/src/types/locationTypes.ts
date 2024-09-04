@@ -1,3 +1,28 @@
+export interface LocationProfile {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  gpsCoordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  standardHours: {
+    open: string;
+    close: string;
+  }[];
+  temporaryHours?: {
+    startDate: string;
+    endDate: string;
+    open: string;
+    close: string;
+  }[];
+  image?: string;
+}
+
 export interface LocationUpdateData {
   name?: string;
   address?: string;
@@ -56,3 +81,4 @@ export interface MenuItem {
   price: number;
   isAvailable: boolean;
 }
+

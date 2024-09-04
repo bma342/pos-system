@@ -1,4 +1,4 @@
-import api from './api';
+import api from './axios';
 import { ServiceFee } from '../types/serviceFeeTypes';
 import logger from '../utils/logger';
 

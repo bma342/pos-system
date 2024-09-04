@@ -1,5 +1,5 @@
 import apiClient from './axios';
-import { LoyaltyChallenge } from '../types';
+import { LoyaltyChallenge, LoyaltyChallengeProgress } from '../types/loyaltyTypes';
 
 export const getLoyaltyChallenges = async (): Promise<LoyaltyChallenge[]> => {
   const response = await apiClient.get('/api/loyalty-challenges');

@@ -1,5 +1,5 @@
 import React from 'react';
-import { RevenueData, CustomerMetrics } from '../types';
+import { RevenueData, CustomerMetrics } from '../types/analyticsTypes';
 
 interface Props {
   revenue: RevenueData[];

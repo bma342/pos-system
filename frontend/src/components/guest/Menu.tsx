@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchMenu } from '../../api/guestApi';
 import { MenuItem } from '../../types';
-import { useSocket } from '../../contexts/SocketContext';
+import { useSocket } from '../../context/SocketContext';
 
 const Menu: React.FC = () => {
   const { locationId } = useParams<{ locationId: string }>();

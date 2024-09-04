@@ -1,14 +1,22 @@
-import type { POSType as ImportedPOSType, CorePOSProfile, LocationPOSProfile, POSMenuItem, POSCategory, POSOrder, POSOrderItem } from './posTypes';
+import type {
+  POSType as ImportedPOSType,
+  CorePOSProfile,
+  LocationPOSProfile,
+  POSMenuItem,
+  POSCategory,
+  POSOrder,
+  POSOrderItem,
+} from './posTypes';
 import type { User } from './userTypes';
 import type { Order, OrderItem, OrderStatus } from './orderTypes';
 import type { POSIntegration as POSIntegrationType } from './posIntegrationTypes';
 import type { Provider } from './providerTypes';
 import type { PaginatedResponse } from './paginationTypes';
+import type { LocationProfile } from './locationTypes';
+import type { Menu, MenuGroup } from './menuTypes';
 
-// Import and export types from providerTypes and paginationTypes
 export type { Provider, PaginatedResponse };
 
-// Export types from other files
 export * from './userTypes';
 export * from './clientTypes';
 export * from './locationTypes';
@@ -25,10 +33,8 @@ export * from './revenueTypes';
 export * from './serviceFeeTypes';
 export * from './discountTypes';
 
-// Re-export specific types with aliases
 export type { POSType as POSTypeAlias } from './posTypes';
 
-// Define core interfaces
 export interface RealtimeMetrics {
   todaySales: number;
   todayOrders: number;
@@ -74,7 +80,6 @@ export type UserRole = 'admin' | 'manager' | 'staff' | 'customer';
 
 export type POSType = ImportedPOSType;
 
-// Service Fee related types
 export interface ServiceFee {
   id: string;
   clientId: string;
@@ -83,7 +88,6 @@ export interface ServiceFee {
   type: 'FIXED' | 'PERCENTAGE';
 }
 
-// Dashboard related types
 export interface DashboardStats {
   totalOrders: number;
   totalRevenue: number;
@@ -91,7 +95,6 @@ export interface DashboardStats {
   topSellingItems: { itemId: string; itemName: string; quantity: number }[];
 }
 
-// Inventory related types
 export interface InventoryItem {
   id: string;
   name: string;
@@ -100,7 +103,6 @@ export interface InventoryItem {
   lowStockThreshold: number;
 }
 
-// Discount related types
 export interface Discount {
   id: string;
   clientId: string;
@@ -113,7 +115,6 @@ export interface Discount {
   isActive: boolean;
 }
 
-// Guest related types
 export interface Guest {
   id: string;
   name: string;
@@ -122,7 +123,6 @@ export interface Guest {
   lastVisit?: string;
 }
 
-// Catering Order related types
 export interface CateringOrder extends Order {
   eventDate: string;
   eventType: string;
@@ -130,14 +130,12 @@ export interface CateringOrder extends Order {
   specialInstructions?: string;
 }
 
-// Revenue related types
 export interface RevenueData {
   date: string;
   totalRevenue: number;
   orderCount: number;
 }
 
-// Settings related types
 export interface Settings {
   id: string;
   clientId: string;
@@ -151,61 +149,7 @@ export interface Settings {
     sms: boolean;
     push: boolean;
   };
-  // Add other settings as needed
 }
 
-// Re-export POS-related types
-export type {
-  CorePOSProfile,
-  LocationPOSProfile,
-  POSMenuItem,
-  POSCategory,
-  POSOrder,
-  POSOrderItem,
-  POSIntegrationType as POSIntegration
-};
-
-// Add any other shared interfaces or types here
-
-// Add these export statements if they don't exist
-export type { RealtimeMetrics } from './realtimeMetricsTypes';
-export type { RevenueData } from './revenueTypes';
-export type { Review } from './reviewTypes';
-
-export interface MenuItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-  reviewsEnabled: boolean;
-  averageRating?: number;
-  reviewCount?: number;
-  showQuantityAvailable: boolean;
-  quantityAvailable?: number;
-}
-
-export interface Modifier {
-  id: string;
-  name: string;
-  price: number;
-}
-
-export interface Menu {
-  id: string;
-  name: string;
-  groups: MenuGroup[];
-}
-
-export interface MenuGroup {
-  id: string;
-  name: string;
-  items: MenuItem[];
-}
-
-export interface MenuItem {
-  id: string;
-  name: string;
-  description?: string;
-  price: number;
-}
+export type { Menu, MenuGroup, MenuItem } from './menuTypes';
+export type { LocationProfile } from './locationTypes';

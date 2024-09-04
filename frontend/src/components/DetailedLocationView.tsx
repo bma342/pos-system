@@ -1,5 +1,5 @@
 import React from 'react';
-import { Location } from '../types';
+import { Location } from '../types/locationTypes';
 
 interface Props {
   locations: Location[];
@@ -22,7 +22,13 @@ const DetailedLocationView: React.FC<Props> = ({
             {location.isOpen ? 'Close' : 'Open'}
           </button>
           {location.isUsingNonStandardHours && <p>Using non-standard hours</p>}
-          {/* Add more location details as needed */}
+          <p>Phone: {location.phoneNumber}</p>
+          <p>Email: {location.email}</p>
+          <p>City: {location.city}</p>
+          <p>State: {location.state}</p>
+          <p>Zip Code: {location.zipCode}</p>
+          <p>Latitude: {location.latitude}</p>
+          <p>Longitude: {location.longitude}</p>
         </div>
       ))}
     </div>

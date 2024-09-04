@@ -5,7 +5,7 @@ import {
   fetchLoyaltyConfig,
   updateLoyaltyConfig,
 } from '../redux/slices/loyaltySlice';
-import { LoyaltyConfig } from '../types';
+import { LoyaltyConfig, LoyaltyTier } from '../types';
 import {
   TextField,
   Button,
@@ -13,8 +13,12 @@ import {
   ListItem,
   IconButton,
   Typography,
+  Box,
+  Paper,
+  CircularProgress,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 
 const LoyaltyTiers: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -43,9 +47,14 @@ const LoyaltyTiers: React.FC = () => {
 
   const handleAddTier = () => {
     if (editingConfig) {
+      const newTier: LoyaltyTier = { 
+        tierName: '',
+        pointThreshold: 0,
+        benefits: [],
+      };
       setEditingConfig({
         ...editingConfig,
-        tiers: [...editingConfig.tiers, { tierName: '' }],
+        tiers: [...editingConfig.tiers, newTier],
       });
     }
   };
@@ -57,26 +66,39 @@ const LoyaltyTiers: React.FC = () => {
     }
   };
 
-  if (status === 'loading') return <Typography>Loading...</Typography>;
-  if (status === 'failed') return <Typography>Error: {error}</Typography>;
+  const handleTierChange = (index: number, field: keyof LoyaltyTier, value: string | number) => {
+    if (editingConfig) {
+      const newTiers = [...editingConfig.tiers];
+      newTiers[index] = { ...newTiers[index], [field]: value };
+      setEditingConfig({ ...editingConfig, tiers: newTiers });
+    }
+  };
+
+  if (status === 'loading') return <CircularProgress />;
+  if (status === 'failed') return <Typography color="error">Error: {error}</Typography>;
 
   return (
-    <div>
-      <Typography variant="h6" gutterBottom>
+    <Box>
+      <Typography variant="h4" gutterBottom>
         Loyalty Tiers
       </Typography>
       {editingConfig && (
-        <>
+        <Paper elevation={3} sx={{ p: 2 }}>
           <List>
             {editingConfig.tiers.map((tier, index) => (
-              <ListItem key={index}>
+              <ListItem key={index} sx={{ mb: 2 }}>
                 <TextField
+                  label="Tier Name"
                   value={tier.tierName}
-                  onChange={(e) => {
-                    const newTiers = [...editingConfig.tiers];
-                    newTiers[index] = { tierName: e.target.value };
-                    setEditingConfig({ ...editingConfig, tiers: newTiers });
-                  }}
+                  onChange={(e) => handleTierChange(index, 'tierName', e.target.value)}
+                  sx={{ mr: 2 }}
+                />
+                <TextField
+                  label="Point Threshold"
+                  type="number"
+                  value={tier.pointThreshold}
+                  onChange={(e) => handleTierChange(index, 'pointThreshold', parseInt(e.target.value))}
+                  sx={{ mr: 2 }}
                 />
                 <IconButton onClick={() => handleRemoveTier(index)}>
                   <DeleteIcon />
@@ -84,11 +106,15 @@ const LoyaltyTiers: React.FC = () => {
               </ListItem>
             ))}
           </List>
-          <Button onClick={handleAddTier}>Add Tier</Button>
-          <Button onClick={handleUpdateConfig}>Save Configuration</Button>
-        </>
+          <Button startIcon={<AddIcon />} onClick={handleAddTier} sx={{ mt: 2 }}>
+            Add Tier
+          </Button>
+          <Button variant="contained" color="primary" onClick={handleUpdateConfig} sx={{ mt: 2, ml: 2 }}>
+            Save Configuration
+          </Button>
+        </Paper>
       )}
-    </div>
+    </Box>
   );
 };
 

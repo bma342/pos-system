@@ -10,7 +10,7 @@ export interface LocationPOSProfile {
   corePOSProfileId: string;
   lastSyncStatus: 'SUCCESS' | 'FAILED' | 'IN_PROGRESS' | 'NOT_SYNCED';
   lastSyncError?: string;
-  customSettings: Record<string, any>;
+  customSettings: Record<string, string | number | boolean>;
 }
 
 export interface POSMenuItem {

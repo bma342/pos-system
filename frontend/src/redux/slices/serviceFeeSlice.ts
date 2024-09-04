@@ -1,6 +1,7 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { RootState } from '../store';
+import { ServiceFeeApi } from '../../api/serviceFeeApi';
 import { ServiceFee } from '../../types/serviceFeeTypes';
-import { serviceFeeApi } from '../../api/serviceFeeApi';
 
 interface ServiceFeeState {
   serviceFees: ServiceFee[];
@@ -14,19 +15,20 @@ const initialState: ServiceFeeState = {
   error: null,
 };
 
+// Use ServiceFeeApi instead of serviceFeeApi
 export const fetchServiceFees = createAsyncThunk(
-  'serviceFee/fetchServiceFees',
-  async () => {
-    const response = await serviceFeeApi.getServiceFees();
-    return response.data;
+  'serviceFees/fetchServiceFees',
+  async (clientId: string) => {
+    const response = await ServiceFeeApi.getServiceFees(clientId);
+    return response;
   }
 );
 
 export const createServiceFee = createAsyncThunk(
-  'serviceFee/createServiceFee',
-  async (newFee: ServiceFee) => {
-    const response = await serviceFeeApi.createServiceFee(newFee);
-    return response.data;
+  'serviceFees/createServiceFee',
+  async ({ clientId, serviceFee }: { clientId: string; serviceFee: Omit<ServiceFee, 'id'> }) => {
+    const response = await ServiceFeeApi.createServiceFee(clientId, serviceFee);
+    return response;
   }
 );
 

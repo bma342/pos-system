@@ -6,18 +6,15 @@ import {
   updateCorePOSProfile,
   deleteCorePOSProfile,
   syncPOSProfile,
-  selectCorePOSProfiles,
-  selectCorePOSProfileStatus,
-  selectCorePOSProfileError,
 } from '../redux/slices/corePOSProfileSlice';
 import { CorePOSProfile } from '../types/posTypes';
-import { AppDispatch } from '../redux/store';
+import { AppDispatch, RootState } from '../redux/store';
 
 const CorePOSProfileManager: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const profiles = useSelector(selectCorePOSProfiles);
-  const status = useSelector(selectCorePOSProfileStatus);
-  const error = useSelector(selectCorePOSProfileError);
+  const profiles = useSelector((state: RootState) => state.corePOSProfile.profiles);
+  const status = useSelector((state: RootState) => state.corePOSProfile.status);
+  const error = useSelector((state: RootState) => state.corePOSProfile.error);
 
   const [selectedProfile, setSelectedProfile] = useState<CorePOSProfile | null>(
     null
@@ -97,7 +94,10 @@ const CorePOSProfileManager: React.FC = () => {
         <button
           onClick={() =>
             handleCreateProfile({
-              /* new profile data */
+              name: 'New Profile',
+              apiEndpoint: 'https://api.example.com',
+              apiKey: 'your-api-key',
+              // Add other necessary fields
             })
           }
         >

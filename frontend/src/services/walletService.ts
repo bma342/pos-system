@@ -1,4 +1,4 @@
-import { apiClient } from '../api/apiClient';
+import apiClient from '../api/apiClient';
 
 class WalletService {
   async getBalance(): Promise<number> {

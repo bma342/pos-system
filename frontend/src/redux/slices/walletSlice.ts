@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../store';
+import { RootState } from '../rootReducer';
 import { walletService } from '../../services/walletService';
 import { Wallet, WalletTransaction } from '../../types/walletTypes';
 
@@ -55,6 +55,21 @@ export const addFunds = createAsyncThunk(
   }
 );
 
+// Ensure this async thunk is exported
+export const loadWalletData = createAsyncThunk(
+  'wallet/loadData',
+  async (_, { rejectWithValue }) => {
+    try {
+      // Replace this with your actual API call
+      const response = await fetch('/api/wallet');
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      return rejectWithValue('Failed to load wallet data');
+    }
+  }
+);
+
 const walletSlice = createSlice({
   name: 'wallet',
   initialState,
@@ -90,8 +105,12 @@ const walletSlice = createSlice({
   },
 });
 
+// Export the reducer
+export default walletSlice.reducer;
+
+// Export selectors
 export const selectWalletBalance = (state: RootState) => state.wallet.balance;
+export const selectWalletRewards = (state: RootState) => state.wallet.rewards;
+export const selectWalletDiscounts = (state: RootState) => state.wallet.discounts;
 export const selectWalletLoading = (state: RootState) => state.wallet.loading;
 export const selectWalletError = (state: RootState) => state.wallet.error;
-
-export default walletSlice.reducer;

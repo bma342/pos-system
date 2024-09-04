@@ -10,7 +10,8 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { RevenueData } from '../types';
+import { RevenueData } from '../types/revenueTypes';
+import { Box, Paper, Typography, TextField } from '@mui/material';
 
 ChartJS.register(
   CategoryScale,
@@ -65,27 +66,36 @@ const RevenueChart: React.FC<Props> = ({ data, dateRange, setDateRange }) => {
   };
 
   return (
-    <div>
-      <div>
-        <label>
-          Start Date:
-          <input
+    <Paper elevation={3}>
+      <Box p={3}>
+        <Typography variant="h5" gutterBottom>
+          Revenue Chart
+        </Typography>
+        <Box display="flex" justifyContent="space-between" mb={2}>
+          <TextField
+            label="Start Date"
             type="date"
             value={dateRange.start.toISOString().split('T')[0]}
             onChange={(e) => handleDateChange(e, 'start')}
+            InputLabelProps={{
+              shrink: true,
+            }}
           />
-        </label>
-        <label>
-          End Date:
-          <input
+          <TextField
+            label="End Date"
             type="date"
             value={dateRange.end.toISOString().split('T')[0]}
             onChange={(e) => handleDateChange(e, 'end')}
+            InputLabelProps={{
+              shrink: true,
+            }}
           />
-        </label>
-      </div>
-      <Line data={chartData} options={options} />
-    </div>
+        </Box>
+        <Box height={400}>
+          <Line data={chartData} options={options} />
+        </Box>
+      </Box>
+    </Paper>
   );
 };
 

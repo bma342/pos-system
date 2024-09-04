@@ -46,6 +46,7 @@ export const ClientProvider: React.FC<{ children: ReactNode }> = ({
         try {
           const clientData = await fetchClientBySubdomain(detectedSubdomain);
           setClient(clientData);
+          setClientId(clientData.id); // Set clientId here
         } catch (err) {
           setError('Failed to load client data');
           console.error(err);

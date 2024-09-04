@@ -1,5 +1,5 @@
 import React, { useState, KeyboardEvent } from 'react';
-import { Typography, Box, Button } from '@mui/material';
+import { Typography, Box, Button, Collapse, Paper } from '@mui/material';
 import { MenuItem } from '../types/menuTypes';
 
 interface MenuItemDisplayProps {
@@ -24,13 +24,17 @@ const MenuItemDisplay: React.FC<MenuItemDisplayProps> = ({
   };
 
   return (
-    <Box
+    <Paper
+      elevation={3}
       sx={{
         border: '1px solid #ddd',
         borderRadius: '4px',
         padding: '16px',
         marginBottom: '16px',
         cursor: 'pointer',
+        '&:hover': {
+          boxShadow: 6,
+        },
       }}
       onClick={toggleExpanded}
       onKeyDown={handleKeyDown}
@@ -38,15 +42,26 @@ const MenuItemDisplay: React.FC<MenuItemDisplayProps> = ({
       role="button"
       aria-expanded={expanded}
     >
-      <Typography variant="h6">{item.name}</Typography>
-      <Typography>{item.description}</Typography>
-      <Typography variant="h6">${item.price.toFixed(2)}</Typography>
-      {expanded && (
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Typography variant="h6">{item.name}</Typography>
+        <Typography variant="h6" color="primary">${item.price.toFixed(2)}</Typography>
+      </Box>
+      <Typography variant="body2" color="text.secondary">{item.description}</Typography>
+      <Collapse in={expanded}>
         <Box mt={2}>
-          <Typography variant="body2">Calories: {item.calories}</Typography>
-          <Typography variant="body2">
-            Allergens: {item.allergens.join(', ')}
-          </Typography>
+          {item.calories && (
+            <Typography variant="body2">Calories: {item.calories}</Typography>
+          )}
+          {item.allergens && item.allergens.length > 0 && (
+            <Typography variant="body2">
+              Allergens: {item.allergens.join(', ')}
+            </Typography>
+          )}
+          {item.nutritionalInfo && (
+            <Typography variant="body2">
+              Nutritional Info: {item.nutritionalInfo}
+            </Typography>
+          )}
           <Button
             variant="contained"
             color="primary"
@@ -54,12 +69,13 @@ const MenuItemDisplay: React.FC<MenuItemDisplayProps> = ({
               e.stopPropagation();
               onAddToCart(item);
             }}
+            sx={{ mt: 2 }}
           >
             Add to Cart
           </Button>
         </Box>
-      )}
-    </Box>
+      </Collapse>
+    </Paper>
   );
 };
 

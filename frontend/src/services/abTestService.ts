@@ -1,25 +1,17 @@
-import axios from 'axios';
+import api from './api';
 import { ABTest } from '../types/abTestTypes';
 
-const API_URL = '/api/ab-tests';
-
-export const abTestService = {
-  getABTests: async (): Promise<ABTest[]> => {
-    const response = await axios.get(API_URL);
+export const ABTestService = {
+  fetchABTests: async (): Promise<ABTest[]> => {
+    const response = await api.get('/ab-tests');
     return response.data;
   },
-
-  createABTest: async (testData: Partial<ABTest>): Promise<ABTest> => {
-    const response = await axios.post(API_URL, testData);
+  createABTest: async (abTest: Omit<ABTest, 'id'>): Promise<ABTest> => {
+    const response = await api.post('/ab-tests', abTest);
     return response.data;
   },
-
-  updateABTest: async (testData: ABTest): Promise<ABTest> => {
-    const response = await axios.put(`${API_URL}/${testData.id}`, testData);
+  updateABTest: async (id: string, abTest: Partial<ABTest>): Promise<ABTest> => {
+    const response = await api.put(`/ab-tests/${id}`, abTest);
     return response.data;
-  },
-
-  deleteABTest: async (id: number): Promise<void> => {
-    await axios.delete(`${API_URL}/${id}`);
   },
 };

@@ -1,19 +1,13 @@
 export interface Provider {
   id: string;
   name: string;
-  email: string;
-  phone: string;
-  address: string;
-  isActive: boolean;
-  clientId: string;
-  createdAt: string;
-  updatedAt: string;
+  // Add other provider properties as needed
 }
 
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;
   page: number;
-  pageSize: number;
-  totalPages: number;
+  limit: number;
+  totalPages: number; // Add this line
 }

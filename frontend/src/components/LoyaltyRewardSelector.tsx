@@ -7,13 +7,13 @@ import {
   selectLoyaltyRewards,
   selectLoyaltyStatus,
 } from '../redux/slices/loyaltySlice';
-import { AppDispatch, RootState } from '../types'; // Make sure RootState is used
+import { AppDispatch, RootState } from '../types';
+import { Typography, List, ListItem, ListItemText, CircularProgress } from '@mui/material';
 
 const LoyaltyRewardSelector: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { clientId } = useParams<{ clientId: string }>(); // Fetch the clientId from route params
+  const { clientId } = useParams<{ clientId: string }>();
 
-  // Use RootState for selecting the state from Redux
   const loyaltyRewards = useSelector((state: RootState) =>
     selectLoyaltyRewards(state)
   );
@@ -21,29 +21,32 @@ const LoyaltyRewardSelector: React.FC = () => {
 
   useEffect(() => {
     if (status === 'idle' && clientId) {
-      dispatch(fetchLoyaltyConfig(Number(clientId))); // Pass clientId when fetching the configuration
-      dispatch(fetchLoyaltyRewards(Number(clientId))); // Fetch rewards based on clientId
+      dispatch(fetchLoyaltyConfig(Number(clientId)));
+      dispatch(fetchLoyaltyRewards(Number(clientId)));
     }
   }, [status, clientId, dispatch]);
 
   if (status === 'loading') {
-    return <div>Loading...</div>;
+    return <CircularProgress />;
   }
 
   if (status === 'failed') {
-    return <div>Failed to load loyalty rewards. Please try again later.</div>;
+    return <Typography color="error">Failed to load loyalty rewards. Please try again later.</Typography>;
   }
 
   return (
     <div>
-      <h2>Select Loyalty Reward</h2>
-      <ul>
+      <Typography variant="h2">Select Loyalty Reward</Typography>
+      <List>
         {loyaltyRewards.map((reward) => (
-          <li key={reward.id}>
-            {reward.name} - {reward.pointsRequired} points
-          </li>
+          <ListItem key={reward.id}>
+            <ListItemText 
+              primary={reward.name} 
+              secondary={`${reward.pointsRequired} points`} 
+            />
+          </ListItem>
         ))}
-      </ul>
+      </List>
     </div>
   );
 };

@@ -21,8 +21,8 @@ const CheckoutPage: React.FC = () => {
   const guest = useSelector((state: RootState) => state.auth.currentGuest);
 
   const [orderType, setOrderType] = useState<OrderType>('pickup');
-  const [kitchenTip, setKitchenTip] = useState(0);
-  const [driverTip, setDriverTip] = useState(0);
+  const [kitchenTip, setKitchenTip] = useState<number>(0);
+  const [driverTip, setDriverTip] = useState<number>(0);
   const [appliedDiscounts, setAppliedDiscounts] = useState<string[]>([]);
   const [availableRewards, setAvailableRewards] = useState<Reward[]>([]);
 
@@ -33,6 +33,7 @@ const CheckoutPage: React.FC = () => {
   }, [guest]);
 
   const handleQuantityChange = (index: number, newQuantity: number) => {
+    if (newQuantity < 1) return;
     dispatch(updateCartItemQuantity({ index, quantity: newQuantity }));
   };
 
@@ -112,6 +113,7 @@ const CheckoutPage: React.FC = () => {
           <select
             value={orderType}
             onChange={(e) => setOrderType(e.target.value as OrderType)}
+            aria-label="Select Order Type"
           >
             <option value="pickup">Pickup</option>
             <option value="delivery">Delivery</option>
@@ -128,9 +130,10 @@ const CheckoutPage: React.FC = () => {
               type="number"
               value={item.quantity}
               onChange={(e) =>
-                handleQuantityChange(index, parseInt(e.target.value))
+                handleQuantityChange(index, parseInt(e.target.value, 10))
               }
               min="1"
+              aria-label="Item Quantity"
             />
           </p>
           <p>Price: ${calculateItemTotal(item).toFixed(2)}</p>
@@ -160,6 +163,7 @@ const CheckoutPage: React.FC = () => {
                 onChange={(e) => setKitchenTip(parseFloat(e.target.value))}
                 min="0"
                 step="0.01"
+                aria-label="Kitchen Tip"
               />
             </label>
             <label>
@@ -170,6 +174,7 @@ const CheckoutPage: React.FC = () => {
                 onChange={(e) => setDriverTip(parseFloat(e.target.value))}
                 min="0"
                 step="0.01"
+                aria-label="Driver Tip"
               />
             </label>
           </>

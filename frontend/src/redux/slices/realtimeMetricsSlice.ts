@@ -5,6 +5,7 @@ interface TopSellingItem {
   id: string;
   name: string;
   quantity: number;
+  revenue: number;
 }
 
 interface RealtimeMetrics {
@@ -12,6 +13,7 @@ interface RealtimeMetrics {
   todayOrders: number;
   averageOrderValue: number;
   newGuests: number;
+  activeGuests: number;
   topSellingItems: TopSellingItem[];
 }
 
@@ -27,6 +29,7 @@ const initialState: RealtimeMetricsState = {
     todayOrders: 0,
     averageOrderValue: 0,
     newGuests: 0,
+    activeGuests: 0,
     topSellingItems: [],
   },
   loading: false,
