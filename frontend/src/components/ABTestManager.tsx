@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Typography, Button, TextField, Select, MenuItem } from '@mui/material';
 import { ABTestService } from '../services/ABTestService';
 import { ABTest } from '../types/abTestTypes';
+import { fetchABTests } from 'frontend/src/api/abTestApi';
 
 const ABTestManager: React.FC = () => {
   const [tests, setTests] = useState<ABTest[]>([]);

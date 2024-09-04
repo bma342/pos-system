@@ -8,8 +8,11 @@ import {
   deleteLoyaltyReward,
   fetchLoyaltyConfig,
   updateLoyaltyConfig,
+  fetchLoyaltyProgram,
+  updateLoyaltyProgram,
 } from '../redux/slices/loyaltySlice';
 import { LoyaltyReward, LoyaltyConfig } from '../types';
+import { fetchLoyaltyProgram, updateLoyaltyProgram } from 'frontend/src/api/loyaltyApi';
 
 const LoyaltyManagement: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

@@ -1,4 +1,4 @@
-import api from './api';
+import api from '../api/apiClient';
 import { Provider, PaginatedResponse } from '../types/providerTypes';
 
 export const providerService = {
@@ -6,5 +6,4 @@ export const providerService = {
     const response = await api.get('/providers', { params: { page, limit } });
     return response.data;
   },
-  // Add other provider-related methods as needed
 };

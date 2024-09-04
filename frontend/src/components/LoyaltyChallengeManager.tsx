@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  getLoyaltyChallenges,
+  fetchLoyaltyChallenges,
   createLoyaltyChallenge,
   updateLoyaltyChallenge,
   deleteLoyaltyChallenge,
@@ -57,7 +57,7 @@ const LoyaltyChallengeManager: React.FC = () => {
 
   const fetchChallenges = async () => {
     try {
-      const fetchedChallenges = await getLoyaltyChallenges();
+      const fetchedChallenges = await fetchLoyaltyChallenges();
       setChallenges(fetchedChallenges);
     } catch (error) {
       console.error('Error fetching loyalty challenges:', error);

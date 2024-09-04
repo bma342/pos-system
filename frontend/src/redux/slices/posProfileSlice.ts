@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { LocationPOSProfile } from '../../types/posTypes';
-import api from '../../services/api';
+import { fetchPOSProfiles } from 'frontend/src/api/posProfileApi';
 
 interface POSProfileState {
   locationProfiles: LocationPOSProfile[];

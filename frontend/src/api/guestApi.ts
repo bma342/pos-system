@@ -31,3 +31,8 @@ export const getEstimatedPrepTime = async (cartItems: CartItem[]): Promise<strin
     throw new Error('Failed to get estimated prep time');
   }
 };
+
+export const fetchGuestMetrics = async (clientId: string, guestId: number): Promise<GuestMetrics> => {
+  const response = await apiClient.get(`/clients/${clientId}/guests/${guestId}/metrics`);
+  return response.data;
+};

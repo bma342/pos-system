@@ -1,4 +1,4 @@
-import api from './api';
+import api from '../api/apiClient';
 import { POSSettings } from '../types/posSettingsTypes';
 
 export const posSettingService = {

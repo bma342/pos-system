@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { GuestMetrics } from '../../types/guestTypes';
 import { GuestService } from '../../services/guestService';
+import { fetchGuests } from 'frontend/src/api/guestApi';
 
 interface GuestState {
   metrics: GuestMetrics | null;

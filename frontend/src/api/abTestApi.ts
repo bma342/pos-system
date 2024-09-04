@@ -1,6 +1,22 @@
 import { ABTest } from '../types/abTestTypes';
 import apiClient from './apiClient';
 
+export const fetchABTests = async (clientId: string): Promise<ABTest[]> => {
+  const response = await apiClient.get<ABTest[]>(`/clients/${clientId}/ab-tests`);
+  return response.data;
+};
+
+export const createABTest = async (clientId: string, abTest: Omit<ABTest, 'id'>): Promise<ABTest> => {
+  const response = await apiClient.post<ABTest>(`/clients/${clientId}/ab-tests`, abTest);
+  return response.data;
+};
+
+export const updateABTest = async (clientId: string, abTest: ABTest): Promise<ABTest> => {
+  const response = await apiClient.put<ABTest>(`/clients/${clientId}/ab-tests/${abTest.id}`, abTest);
+  return response.data;
+};
+
+// Keep the existing abTestApi object
 export const abTestApi = {
   getABTests: async (): Promise<ABTest[]> => {
     try {

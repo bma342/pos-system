@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { TextField, Button, Typography, Box } from '@mui/material';
 import { WalletDropService } from '../services/WalletDropService';
 import { WalletDrop as WalletDropType } from '../types/walletTypes';
+import { fetchWalletDrops } from 'frontend/src/api/walletDropApi';
 
 const WalletDrop: React.FC = () => {
   const [walletDrop, setWalletDrop] = useState<WalletDropType>({

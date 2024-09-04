@@ -1,17 +1,13 @@
-import api from './api';
 import { Location } from '../types/locationTypes';
+import { getLocations, getLocation } from '../api/locationApi';
 
 export class LocationService {
-  async getLocations(): Promise<Location[]> {
-    const response = await api.get('/locations');
-    return response.data;
+  async getLocations(clientId: string): Promise<Location[]> {
+    return getLocations(clientId);
   }
 
-  async getLocation(id: string): Promise<Location> {
-    const response = await api.get(`/locations/${id}`);
-    return response.data;
+  async getLocation(clientId: string, id: string): Promise<Location> {
+    return getLocation(clientId, id);
   }
-
-  // Add other location-related methods as needed
 }
 

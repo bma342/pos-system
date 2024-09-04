@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import api from '../../services/api';
+import { fetchUsers } from 'frontend/src/api/userApi';
 
 export interface User {
   id: string;

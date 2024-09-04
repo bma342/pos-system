@@ -1,57 +1,35 @@
-import axios from 'axios';
 import { MenuItem, MenuGroup } from '../types/menuTypes';
-
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000/api';
+import {
+  getAllMenuItems,
+  getMenuItem,
+  createMenuItem,
+  updateMenuItem,
+  deleteMenuItem,
+  getAllCategories
+} from '../api/menuApi';
 
 export class MenuItemService {
-  async getAllMenuItems(tenantId: string): Promise<MenuItem[]> {
-    const response = await axios.get(
-      `${API_BASE_URL}/tenants/${tenantId}/menu-items`
-    );
-    return response.data;
+  async getAllMenuItems(clientId: string, locationId: string): Promise<MenuItem[]> {
+    return getAllMenuItems(clientId, locationId);
   }
 
-  async getMenuItem(tenantId: string, menuItemId: number): Promise<MenuItem> {
-    const response = await axios.get(
-      `${API_BASE_URL}/tenants/${tenantId}/menu-items/${menuItemId}`
-    );
-    return response.data;
+  async getMenuItem(clientId: string, locationId: string, menuItemId: number): Promise<MenuItem> {
+    return getMenuItem(clientId, locationId, menuItemId);
   }
 
-  async createMenuItem(
-    tenantId: string,
-    menuItem: Omit<MenuItem, 'id'>
-  ): Promise<MenuItem> {
-    const response = await axios.post(
-      `${API_BASE_URL}/tenants/${tenantId}/menu-items`,
-      menuItem
-    );
-    return response.data;
+  async createMenuItem(clientId: string, locationId: string, menuItem: Omit<MenuItem, 'id'>): Promise<MenuItem> {
+    return createMenuItem(clientId, locationId, menuItem);
   }
 
-  async updateMenuItem(
-    tenantId: string,
-    menuItemId: number,
-    menuItem: MenuItem
-  ): Promise<MenuItem> {
-    const response = await axios.put(
-      `${API_BASE_URL}/tenants/${tenantId}/menu-items/${menuItemId}`,
-      menuItem
-    );
-    return response.data;
+  async updateMenuItem(clientId: string, locationId: string, menuItemId: number, menuItem: MenuItem): Promise<MenuItem> {
+    return updateMenuItem(clientId, locationId, menuItemId, menuItem);
   }
 
-  async deleteMenuItem(tenantId: string, menuItemId: number): Promise<void> {
-    await axios.delete(
-      `${API_BASE_URL}/tenants/${tenantId}/menu-items/${menuItemId}`
-    );
+  async deleteMenuItem(clientId: string, locationId: string, menuItemId: number): Promise<void> {
+    return deleteMenuItem(clientId, locationId, menuItemId);
   }
 
-  async getAllCategories(tenantId: string): Promise<MenuGroup[]> {
-    const response = await axios.get(
-      `${API_BASE_URL}/tenants/${tenantId}/categories`
-    );
-    return response.data;
+  async getAllCategories(clientId: string, locationId: string): Promise<MenuGroup[]> {
+    return getAllCategories(clientId, locationId);
   }
 }

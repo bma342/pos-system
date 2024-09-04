@@ -1,4 +1,4 @@
-import api from './api';
+import api from '../api/apiClient';
 import { Review } from '../types/reviewTypes';
 
 export const reviewService = {
@@ -6,5 +6,4 @@ export const reviewService = {
     const response = await api.get(`/reviews/${itemId}`);
     return response.data;
   },
-  // Add other review-related methods as needed
 };

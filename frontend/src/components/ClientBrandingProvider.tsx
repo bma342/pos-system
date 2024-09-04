@@ -5,6 +5,7 @@ import { ClientBrandingService } from '../services/ClientBrandingService';
 import { ClientBranding } from '../types/clientTypes';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import { fetchClientBranding } from 'frontend/src/api/clientApi';
 
 const ClientBrandingProvider: React.FC<{ children: React.ReactNode }> = ({
   children,

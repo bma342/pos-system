@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { InventoryItem } from '../../types';
-import { inventoryService } from '../../services/inventoryService';
+import { fetchInventory } from 'frontend/src/api/inventoryApi';
 
 interface InventoryState {
   items: InventoryItem[];

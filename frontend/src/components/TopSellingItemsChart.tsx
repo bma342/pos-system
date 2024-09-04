@@ -14,6 +14,7 @@ import {
 import { format } from 'date-fns';
 import { TopSellingItem } from '../types/analyticsTypes';
 import { AnalyticsService } from '../services/AnalyticsService';
+import { fetchTopSellingItems } from '../api/analyticsApi';
 
 const TopSellingItemsChart: React.FC = () => {
   const [topSellingItems, setTopSellingItems] = useState<TopSellingItem[]>([]);

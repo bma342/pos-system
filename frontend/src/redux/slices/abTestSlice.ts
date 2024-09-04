@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { ABTestService } from '../../services/abTestService';
 import { ABTest } from '../../types/abTestTypes';
 import { RootState } from '../rootReducer'; // Update this import if necessary
+import { fetchABTests } from 'frontend/src/api/abTestApi';
 
 interface ABTestState {
   tests: ABTest[];

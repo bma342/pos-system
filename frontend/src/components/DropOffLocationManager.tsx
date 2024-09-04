@@ -15,6 +15,7 @@ import {
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { DropOffLocationService } from '../services/DropOffLocationService';
 import { DropOffLocation } from '../types/locationTypes';
+import { fetchDropOffLocations } from 'frontend/src/api/locationApi';
 
 const DropOffLocationManager: React.FC = () => {
   const [locations, setLocations] = useState<DropOffLocation[]>([]);

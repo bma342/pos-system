@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../rootReducer';
-import { walletService } from '../../services/walletService';
 import { Wallet, WalletTransaction } from '../../types/walletTypes';
+import { fetchWallets } from 'frontend/src/api/walletApi';
 
 interface Reward {
   id: string;

@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { ClientService } from '../../services/clientService';
 import { ClientConfig } from '../../types/clientTypes';
 import { RootState } from '../store'; // Add this import
+import { fetchClientConfig } from 'frontend/src/api/clientApi';
 
 export const fetchClientConfig = createAsyncThunk<
   ClientConfig,

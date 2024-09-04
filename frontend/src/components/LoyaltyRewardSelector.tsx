@@ -9,6 +9,7 @@ import {
 } from '../redux/slices/loyaltySlice';
 import { AppDispatch, RootState } from '../types';
 import { Typography, List, ListItem, ListItemText, CircularProgress } from '@mui/material';
+import { fetchLoyaltyRewards } from 'frontend/src/api/loyaltyApi';
 
 const LoyaltyRewardSelector: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

@@ -1,16 +1,14 @@
-import api from './api';
-import { LocationPOSProfile } from '../types/posTypes';
+import api from '../api/apiClient';
+import { POSSettings } from '../types/posSettingsTypes';
 
 export const posProfileService = {
-  getLocationProfiles: async (locationId: string): Promise<LocationPOSProfile[]> => {
+  getLocationProfiles: async (locationId: string): Promise<POSSettings[]> => {
     const response = await api.get(`/locations/${locationId}/pos-profiles`);
     return response.data;
   },
 
-  updateLocationProfile: async (locationId: string, profile: Partial<LocationPOSProfile>): Promise<LocationPOSProfile> => {
+  updateLocationProfile: async (locationId: string, profile: Partial<POSSettings>): Promise<POSSettings> => {
     const response = await api.put(`/locations/${locationId}/pos-profiles/${profile.id}`, profile);
     return response.data;
   },
-
-  // Add other methods as needed
 };

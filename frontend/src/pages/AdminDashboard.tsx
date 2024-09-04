@@ -1,6 +1,6 @@
 import React from 'react';
-import ClientBrandingManager from '../components/admin/ClientBrandingManager';
-import POSSettingsForm from '../components/admin/POSSettingsForm';
+import ClientBrandingManager from '../components/ClientBrandingManager';
+import POSSettingsForm from '../components/POSSettingsForm';
 // ... other imports ...
 
 const AdminDashboard: React.FC = () => {

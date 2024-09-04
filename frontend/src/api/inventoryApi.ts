@@ -88,3 +88,10 @@ export const updateInventoryQuantity = async (
     throw error;
   }
 };
+
+export const getInventory = async (clientId: string, locationId: string) => {
+  return fetchInventoryItems(clientId, locationId);
+};
+export const getInventoryItem = async (clientId: string, locationId: string, itemId: string) => {
+  return getInventoryItemById(clientId, locationId, itemId);
+};

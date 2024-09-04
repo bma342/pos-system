@@ -21,6 +21,8 @@ import {
 } from 'recharts';
 import { OrderStatistics } from '../types/cateringOrderTypes';
 import { MenuStatistics } from '../types/menuTypes';
+import { fetchCateringOrders } from 'frontend/src/api/cateringOrderApi';
+import { fetchMenuSummary } from 'frontend/src/api/menuApi';
 
 const Dashboard: React.FC = () => {
   const { user } = useClientContext();

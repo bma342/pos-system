@@ -103,3 +103,23 @@ export const fetchClientBySubdomain = async (
     throw error;
   }
 };
+
+export const fetchClientConfig = async (clientId: string): Promise<ClientConfig> => {
+  const response = await apiClient.get<ClientConfig>(`/clients/${clientId}/config`);
+  return response.data;
+};
+
+export const updateClientConfig = async (clientId: string, config: Partial<ClientConfig>): Promise<ClientConfig> => {
+  const response = await apiClient.put<ClientConfig>(`/clients/${clientId}/config`, config);
+  return response.data;
+};
+
+export const fetchClientData = async (clientId: string): Promise<Client> => {
+  const response = await apiClient.get<Client>(`/clients/${clientId}`);
+  return response.data;
+};
+
+export const fetchClientMetrics = async (clientId: string): Promise<ClientMetrics> => {
+  const response = await apiClient.get<ClientMetrics>(`/clients/${clientId}/metrics`);
+  return response.data;
+};

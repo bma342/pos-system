@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { reviewService } from '../../services/reviewService';
-import { Review } from '../../types/reviewTypes'; // Import the Review type from your types file
+import { Review } from '../../types/reviewTypes';
+import { fetchReviews } from 'frontend/src/api/reviewApi';
 
 interface ReviewState {
   reviews: Review[];

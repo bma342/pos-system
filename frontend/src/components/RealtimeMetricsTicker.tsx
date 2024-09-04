@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Typography, Box, Paper } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
-import { fetchRealtimeMetrics } from '../redux/slices/realtimeMetricsSlice';
+import { fetchRealtimeMetrics } from '../api/metricsApi';
 
 const RealtimeMetricsTicker: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

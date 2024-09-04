@@ -44,3 +44,29 @@ export const deleteLoyaltyChallenge = async (
 ): Promise<void> => {
   await apiClient.delete(`/api/loyalty/challenge/${challengeId}`);
 };
+
+export const getLoyaltyRewards = async (clientId: string) => fetchLoyaltyRewards(clientId);
+
+export const createLoyaltyReward = async (clientId: string, reward: Omit<LoyaltyReward, 'id'>): Promise<LoyaltyReward> => {
+  const response = await apiClient.post<LoyaltyReward>(`/clients/${clientId}/loyalty/rewards`, reward);
+  return response.data;
+};
+
+export const updateLoyaltyReward = async (clientId: string, id: number, reward: Partial<LoyaltyReward>): Promise<LoyaltyReward> => {
+  const response = await apiClient.put<LoyaltyReward>(`/clients/${clientId}/loyalty/rewards/${id}`, reward);
+  return response.data;
+};
+
+export const deleteLoyaltyReward = async (clientId: string, id: number): Promise<void> => {
+  await apiClient.delete(`/clients/${clientId}/loyalty/rewards/${id}`);
+};
+
+export const getLoyaltyConfig = async (clientId: string): Promise<LoyaltyConfig> => {
+  const response = await apiClient.get<LoyaltyConfig>(`/clients/${clientId}/loyalty/config`);
+  return response.data;
+};
+
+export const updateLoyaltyConfig = async (clientId: string, config: Partial<LoyaltyConfig>): Promise<LoyaltyConfig> => {
+  const response = await apiClient.put<LoyaltyConfig>(`/clients/${clientId}/loyalty/config`, config);
+  return response.data;
+};

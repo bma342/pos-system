@@ -1,14 +1,13 @@
-import api from './api';
+import { fetchClientId, fetchClientData, fetchClientConfig, fetchClientMetrics } from '../api/clientApi';
 import { ClientConfig, ClientMetrics } from '../types/clientTypes';
 
 export const ClientService = {
   fetchClientConfig: async (): Promise<ClientConfig> => {
-    const response = await api.get('/client-config');
-    return response.data;
+    const clientId = await fetchClientId();
+    return fetchClientConfig(clientId?.toString() || '');
   },
-  fetchClientMetrics: async (locationId: string): Promise<ClientMetrics> => {
-    const response = await api.get(`/locations/${locationId}/client-metrics`);
-    return response.data;
+  fetchClientMetrics: async (): Promise<ClientMetrics> => {
+    const clientId = await fetchClientId();
+    return fetchClientMetrics(clientId?.toString() || '');
   },
-  // ... other client-related methods
 };

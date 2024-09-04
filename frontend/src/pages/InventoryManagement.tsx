@@ -18,6 +18,7 @@ import {
 import { InventoryItem } from '../types/inventoryTypes';
 import { InventoryService } from '../services/inventoryService';
 import { useAuth } from '../contexts/AuthContext';
+import { fetchInventory, updateInventory } from 'frontend/src/api/inventoryApi';
 
 const InventoryManagement: React.FC = () => {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);

@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../rootReducer';
 import { Menu, MenuStatistics } from '../../types/menuTypes';
-import { menuService } from '../../services/menuService'; // Corrected import
+import { fetchMenu } from 'frontend/src/api/menuApi';
 
 interface MenuState {
   menu: Menu | null;

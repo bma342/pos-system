@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
+import { fetchOrders } from 'frontend/src/api/orderApi';
 
 interface Order {
   id: string;

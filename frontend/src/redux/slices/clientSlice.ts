@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { ClientService } from '../../services/clientService';
 import { ClientMetrics } from '../../types/clientTypes';
+import { fetchClient } from 'frontend/src/api/clientApi';
 
 interface ClientState {
   metrics: ClientMetrics | null;

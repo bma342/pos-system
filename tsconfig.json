@@ -17,5 +17,5 @@
     "isolatedModules": true,
     "noEmit": true
   },
-  "include": ["src"]
+  "include": ["src", "frontend/src/api/analyticsApi.ts", "frontend/src/api/cateringApi.ts", "frontend/src/api/posProfileApi.ts", "frontend/src/api/providerApi.ts", "frontend/src/api/roleApi.ts", "frontend/src/api/userApi.ts"]
 }

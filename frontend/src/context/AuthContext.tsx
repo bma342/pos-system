@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import api from '../services/api';
+import { login, logout } from 'frontend/src/api/authApi';
 
 interface User {
   id: string;

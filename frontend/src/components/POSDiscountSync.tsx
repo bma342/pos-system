@@ -6,6 +6,7 @@ import { User } from '../types/userTypes';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
 import { syncDiscounts, fetchLastSyncTime } from '../redux/slices/posDiscountSlice';
+import { syncPOSDiscounts } from 'frontend/src/api/discountApi';
 
 const POSDiscountSync: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

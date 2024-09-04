@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { LoyaltyReward, LoyaltyConfig } from '../../types';
-import { loyaltyService } from '../../services/loyaltyService';
+import { fetchLoyaltyProgram } from 'frontend/src/api/loyaltyApi';
 
 interface LoyaltyState {
   rewards: LoyaltyReward[];

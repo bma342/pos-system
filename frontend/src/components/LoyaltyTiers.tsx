@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import { fetchLoyaltyTiers } from 'frontend/src/api/loyaltyApi';
 
 const LoyaltyTiers: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

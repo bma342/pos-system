@@ -1,135 +1,129 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { RootState, AppDispatch, Menu, MenuGroup } from '../types';
-import { fetchMenus, updateMenu } from '../redux/slices/menuSlice';
-import MenuGroupComponent from './MenuGroupComponent';
+import { RootState, AppDispatch } from '../redux/store';
+import { MenuService } from '../../services/MenuService';
+import { Menu, MenuGroup } from '../types/menuTypes';
+import { updateLocationMenu } from '../redux/slices/menuSlice';
 import {
+  Box,
+  Typography,
   Button,
+  TextField,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
-  Typography,
-  Box,
-  CircularProgress,
 } from '@mui/material';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import { useClientContext } from '../context/ClientContext';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
+import { fetchMenuItems, updateMenuItem } from 'frontend/src/api/menuApi';
 
 const MenuBuilder: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const menus = useSelector((state: RootState) => state.menu.menus);
-  const loading = useSelector((state: RootState) => state.menu.loading);
-  const error = useSelector((state: RootState) => state.menu.error);
-  const [activeMenu, setActiveMenu] = useState<Menu | null>(null);
-  const [isAddGroupDialogOpen, setIsAddGroupDialogOpen] = useState(false);
+  const locationId = useSelector(
+    (state: RootState) => state.location.currentLocation?.id
+  );
+  const menu = useSelector((state: RootState) => state.menu.locationMenu);
+
+  const [isAddingGroup, setIsAddingGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
-  const { clientId } = useClientContext();
+  const [editingGroup, setEditingGroup] = useState<MenuGroup | null>(null);
+
+  const menuService = React.useMemo(() => new MenuService(), []);
+
+  const fetchMenu = useCallback(async () => {
+    if (locationId) {
+      try {
+        const fetchedMenu: Menu = await menuService.getLocationMenu(locationId);
+        dispatch(updateLocationMenu(fetchedMenu));
+      } catch (error) {
+        console.error('Failed to fetch menu:', error);
+      }
+    }
+  }, [locationId, menuService, dispatch]);
 
   useEffect(() => {
-    if (clientId) {
-      dispatch(fetchMenus(clientId.toString()));
+    fetchMenu();
+  }, [fetchMenu]);
+
+  const handleAddGroup = useCallback(async () => {
+    if (locationId && newGroupName.trim()) {
+      try {
+        const updatedMenu: Menu = await menuService.addMenuGroup(
+          locationId,
+          newGroupName
+        );
+        dispatch(updateLocationMenu(updatedMenu));
+        setNewGroupName('');
+        setIsAddingGroup(false);
+      } catch (error) {
+        console.error('Failed to add menu group:', error);
+      }
     }
-  }, [dispatch, clientId]);
+  }, [locationId, newGroupName, menuService, dispatch]);
 
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination || !activeMenu) {
-      return;
+  const handleEditGroup = useCallback(async () => {
+    if (locationId && editingGroup) {
+      try {
+        const updatedMenu: Menu = await menuService.updateMenuGroup(
+          locationId,
+          editingGroup.id,
+          editingGroup.name
+        );
+        dispatch(updateLocationMenu(updatedMenu));
+        setEditingGroup(null);
+      } catch (error) {
+        console.error('Failed to update menu group:', error);
+      }
     }
+  }, [locationId, editingGroup, menuService, dispatch]);
 
-    const newGroups = Array.from(activeMenu.groups);
-    const [reorderedGroup] = newGroups.splice(result.source.index, 1);
-    newGroups.splice(result.destination.index, 0, reorderedGroup);
-
-    const updatedMenu: Menu = {
-      ...activeMenu,
-      groups: newGroups,
-    };
-
-    setActiveMenu(updatedMenu);
-    dispatch(updateMenu({ clientId: clientId.toString(), menuId: activeMenu.id, menuData: updatedMenu }));
-  };
-
-  const handleAddGroup = () => {
-    if (activeMenu && newGroupName.trim()) {
-      const updatedMenu: Menu = {
-        ...activeMenu,
-        groups: [
-          ...activeMenu.groups,
-          { id: Date.now().toString(), name: newGroupName.trim(), items: [] },
-        ],
-      };
-      dispatch(updateMenu({ clientId: clientId.toString(), menuId: activeMenu.id, menuData: updatedMenu }));
-      setIsAddGroupDialogOpen(false);
-      setNewGroupName('');
-    }
-  };
-
-  if (loading) {
-    return <CircularProgress />;
-  }
-
-  if (error) {
-    return <Typography color="error">{error}</Typography>;
-  }
+  const handleDeleteGroup = useCallback(
+    async (groupId: number) => {
+      if (locationId) {
+        try {
+          const updatedMenu: Menu = await menuService.deleteMenuGroup(
+            locationId,
+            groupId
+          );
+          dispatch(updateLocationMenu(updatedMenu));
+        } catch (error) {
+          console.error('Failed to delete menu group:', error);
+        }
+      }
+    },
+    [locationId, menuService, dispatch]
+  );
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Menu Builder
-      </Typography>
-      <Box display="flex" flexWrap="wrap" gap={2} mb={2}>
-        {menus.map((menu) => (
-          <Button
-            key={menu.id}
-            variant={activeMenu?.id === menu.id ? 'contained' : 'outlined'}
-            onClick={() => setActiveMenu(menu)}
-          >
-            {menu.name}
-          </Button>
-        ))}
-      </Box>
-      {activeMenu && (
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="menu">
-            {(provided) => (
-              <Box {...provided.droppableProps} ref={provided.innerRef}>
-                {activeMenu.groups.map((group, index) => (
-                  <Draggable key={group.id} draggableId={group.id} index={index}>
-                    {(provided) => (
-                      <Box
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                      >
-                        <MenuGroupComponent
-                          group={group}
-                          index={index}
-                          menuId={activeMenu.id}
-                        />
-                      </Box>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </Box>
-            )}
-          </Droppable>
-        </DragDropContext>
-      )}
-      <Button
-        startIcon={<AddCircleOutlineIcon />}
-        onClick={() => setIsAddGroupDialogOpen(true)}
-        variant="contained"
-        color="primary"
-        style={{ marginTop: '16px' }}
-      >
-        Add Group
+      <Typography variant="h4">Menu Builder</Typography>
+      <Button startIcon={<AddIcon />} onClick={() => setIsAddingGroup(true)}>
+        Add Menu Group
       </Button>
-      <Dialog open={isAddGroupDialogOpen} onClose={() => setIsAddGroupDialogOpen(false)}>
-        <DialogTitle>Add New Group</DialogTitle>
+      <List>
+        {menu?.groups.map((group) => (
+          <ListItem key={group.id}>
+            <ListItemText primary={group.name} />
+            <IconButton onClick={() => setEditingGroup(group)}>
+              <EditIcon />
+            </IconButton>
+            <IconButton onClick={() => handleDeleteGroup(group.id)}>
+              <DeleteIcon />
+            </IconButton>
+          </ListItem>
+        ))}
+      </List>
+
+      <Dialog open={isAddingGroup} onClose={() => setIsAddingGroup(false)}>
+        <DialogTitle>Add Menu Group</DialogTitle>
         <DialogContent>
           <TextField
             margin="dense"
@@ -140,10 +134,29 @@ const MenuBuilder: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setIsAddGroupDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleAddGroup} color="primary">
-            Add
-          </Button>
+          <Button onClick={() => setIsAddingGroup(false)}>Cancel</Button>
+          <Button onClick={handleAddGroup}>Add</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={!!editingGroup} onClose={() => setEditingGroup(null)}>
+        <DialogTitle>Edit Menu Group</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Group Name"
+            fullWidth
+            value={editingGroup?.name || ''}
+            onChange={(e) =>
+              setEditingGroup(
+                editingGroup ? { ...editingGroup, name: e.target.value } : null
+              )
+            }
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditingGroup(null)}>Cancel</Button>
+          <Button onClick={handleEditGroup}>Save</Button>
         </DialogActions>
       </Dialog>
     </Box>

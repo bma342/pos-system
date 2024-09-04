@@ -1,71 +1,133 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
-import { LocationService } from '../services/LocationService';
-import { updateLocation } from '../redux/slices/locationSlice';
-import { Location, LocationUpdateData } from '../types/locationTypes';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from '../redux/store';
+import {
+  fetchLocations,
+  updateLocation,
+} from '../redux/slices/locationSlice';
+import {
+  Box,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+} from '@mui/material';
+import { PaymentGateway } from '../types';
+import LocationBuilder from './LocationBuilder';
 
 const LocationManager: React.FC = () => {
-  const [locations, setLocations] = useState<Location[]>([]);
-  const dispatch = useDispatch();
-  const locationService = useMemo(() => new LocationService(), []);
-
-  const fetchLocations = useCallback(async () => {
-    try {
-      const fetchedLocations = await locationService.getLocations();
-      setLocations(fetchedLocations);
-    } catch (error) {
-      console.error('Failed to fetch locations:', error);
-    }
-  }, [locationService]);
+  const dispatch = useDispatch<AppDispatch>();
+  const locations = useSelector(
+    (state: RootState) => state.locations.locations
+  );
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
-    fetchLocations();
-  }, [fetchLocations]);
+    dispatch(fetchLocations());
+  }, [dispatch]);
 
-  const handleUpdateLocation = useCallback(
-    async (locationId: string, updateData: LocationUpdateData) => {
-      try {
-        const updatedLocation = await locationService.updateLocation(
-          locationId,
-          updateData
-        );
-        dispatch(updateLocation({ locationId, updateData: updatedLocation }));
-        setLocations((prevLocations) =>
-          prevLocations.map((loc) =>
-            loc.id === locationId ? { ...loc, ...updatedLocation } : loc
-          )
-        );
-      } catch (error) {
-        console.error('Failed to update location:', error);
-      }
-    },
-    [locationService, dispatch]
-  );
+  const handleEdit = (location) => {
+    setSelectedLocation(location);
+    setOpenDialog(true);
+  };
+
+  const handleClose = () => {
+    setOpenDialog(false);
+    setSelectedLocation(null);
+  };
+
+  const handleSave = () => {
+    dispatch(updateLocation(selectedLocation));
+    handleClose();
+  };
+
+  const handleExceptionChange = (field: string) => {
+    setSelectedLocation({
+      ...selectedLocation,
+      [field]: !selectedLocation[field],
+    });
+  };
+
+  const handlePaymentGatewayChange = (gateway: PaymentGateway) => {
+    const updatedGateways = selectedLocation.paymentGatewayExceptions.includes(
+      gateway
+    )
+      ? selectedLocation.paymentGatewayExceptions.filter((g) => g !== gateway)
+      : [...selectedLocation.paymentGatewayExceptions, gateway];
+    setSelectedLocation({
+      ...selectedLocation,
+      paymentGatewayExceptions: updatedGateways,
+    });
+  };
 
   return (
-    <div>
-      <h2>Location Manager</h2>
-      {locations.map((location) => (
-        <div key={location.id}>
-          <h3>{location.name}</h3>
-          <p>{location.address}</p>
-          <button
-            onClick={() =>
-              handleUpdateLocation(location.id, { status: 'active' })
-            }
-          >
-            Activate
-          </button>
-          <button
-            onClick={() =>
-              handleUpdateLocation(location.id, { status: 'inactive' })
-            }
-          >
-            Deactivate
-          </button>
-        </div>
-      ))}
-    </div>
+    <Box>
+      <Typography variant="h5">Location Manager</Typography>
+      <List>
+        {locations.map((location) => (
+          <ListItem key={location.id}>
+            <ListItemText
+              primary={location.name}
+              secondary={location.address}
+            />
+            <Button onClick={() => handleEdit(location)}>Edit</Button>
+          </ListItem>
+        ))}
+      </List>
+      <LocationBuilder />
+      <Dialog open={openDialog} onClose={handleClose}>
+        <DialogTitle>Edit Location</DialogTitle>
+        <DialogContent>
+          {selectedLocation && (
+            <>
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedLocation.twoFactorException}
+                      onChange={() =>
+                        handleExceptionChange('twoFactorException')
+                      }
+                    />
+                  }
+                  label="Two-Factor Authentication Exception"
+                />
+              </FormGroup>
+              <Typography variant="h6">Payment Gateway Exceptions</Typography>
+              <FormGroup>
+                {Object.values(PaymentGateway).map((gateway) => (
+                  <FormControlLabel
+                    key={gateway}
+                    control={
+                      <Checkbox
+                        checked={selectedLocation.paymentGatewayExceptions.includes(
+                          gateway
+                        )}
+                        onChange={() => handlePaymentGatewayChange(gateway)}
+                      />
+                    }
+                    label={gateway}
+                  />
+                ))}
+              </FormGroup>
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleSave}>Save</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 

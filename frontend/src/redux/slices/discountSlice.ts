@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { fetchDiscountsByLocation } from '../../api/discountApi';
+import { fetchDiscounts } from 'frontend/src/api/discountApi';
 
 interface DiscountState {
   discounts: { id: string; name: string; value: number }[];

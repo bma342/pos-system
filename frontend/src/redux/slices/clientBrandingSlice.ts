@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { fetchClientBranding } from 'frontend/src/api/clientApi';
 import { ClientBrandingService } from '../../services/clientBrandingService';
 import { ClientBranding } from '../../types/clientTypes';
 import { RootState } from '../store';

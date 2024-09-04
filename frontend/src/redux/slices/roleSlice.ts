@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../rootReducer';
+import { fetchRoles } from 'frontend/src/api/roleApi';
 
 interface Role {
   id: string;

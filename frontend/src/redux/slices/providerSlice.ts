@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { providerService } from '../../services/providerService';
 import { Provider, PaginatedResponse } from '../../types/providerTypes';
+import { fetchProviders } from 'frontend/src/api/providerApi';
 
 interface ProviderState {
   providers: Provider[];
