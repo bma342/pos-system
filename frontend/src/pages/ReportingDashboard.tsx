@@ -23,11 +23,11 @@ const ReportingDashboard: React.FC = () => {
   const [showComparison, setShowComparison] = useState(false);
 
   useEffect(() => {
-    if (dateRange.startDate && dateRange.endDate && selectedLocation) {
+    if (dateRange.startDate && dateRange.endDate && user?.clientId && selectedLocation) {
       const params: DashboardParams = {
         dateRange,
-        clientId: user?.clientId,
-        locationId: selectedLocation, // Change to locationId
+        clientId: user.clientId,
+        locationId: selectedLocation,
       };
       dispatch(fetchDashboardData(params));
     }
@@ -42,11 +42,11 @@ const ReportingDashboard: React.FC = () => {
   };
 
   const handleRefresh = () => {
-    if (dateRange.startDate && dateRange.endDate && selectedLocation) {
+    if (dateRange.startDate && dateRange.endDate && user?.clientId && selectedLocation) {
       const params: DashboardParams = {
         dateRange,
-        clientId: user?.clientId,
-        locationId: selectedLocation, // Change to locationId
+        clientId: user.clientId,
+        locationId: selectedLocation,
       };
       dispatch(fetchDashboardData(params));
     }
@@ -78,7 +78,7 @@ const ReportingDashboard: React.FC = () => {
         <Grid item xs={12} md={3}>
           <Paper elevation={3} sx={{ p: 2 }}>
             <Typography variant="h6">Total Revenue</Typography>
-            <Typography variant="h4">${data?.revenue?.toFixed(2) ?? 'N/A'}</Typography>
+            <Typography variant="h4">${data?.totalRevenue?.toFixed(2) ?? 'N/A'}</Typography>
           </Paper>
         </Grid>
         <Grid item xs={12} md={3}>
@@ -118,7 +118,6 @@ const ReportingDashboard: React.FC = () => {
           <LazyLocationComparisonChart data={data.locationComparison} />
         </Suspense>
       )}
-
     </Box>
   );
 };

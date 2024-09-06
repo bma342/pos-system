@@ -1,7 +1,6 @@
 import { MenuItem, MenuGroup } from '../types/menuTypes';
 import {
   getAllMenuItems,
-  getMenuItem,
   createMenuItem,
   updateMenuItem,
   deleteMenuItem,
@@ -13,19 +12,15 @@ export class MenuItemService {
     return getAllMenuItems(clientId, locationId);
   }
 
-  async getMenuItem(clientId: string, locationId: string, menuItemId: number): Promise<MenuItem> {
-    return getMenuItem(clientId, locationId, menuItemId);
-  }
-
   async createMenuItem(clientId: string, locationId: string, menuItem: Omit<MenuItem, 'id'>): Promise<MenuItem> {
     return createMenuItem(clientId, locationId, menuItem);
   }
 
-  async updateMenuItem(clientId: string, locationId: string, menuItemId: number, menuItem: MenuItem): Promise<MenuItem> {
+  async updateMenuItem(clientId: string, locationId: string, menuItemId: string, menuItem: MenuItem): Promise<MenuItem> {
     return updateMenuItem(clientId, locationId, menuItemId, menuItem);
   }
 
-  async deleteMenuItem(clientId: string, locationId: string, menuItemId: number): Promise<void> {
+  async deleteMenuItem(clientId: string, locationId: string, menuItemId: string): Promise<void> {
     return deleteMenuItem(clientId, locationId, menuItemId);
   }
 
@@ -33,3 +28,5 @@ export class MenuItemService {
     return getAllCategories(clientId, locationId);
   }
 }
+
+export default new MenuItemService();

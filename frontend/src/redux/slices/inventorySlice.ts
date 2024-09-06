@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { InventoryItem } from '../../types';
-import { fetchInventory } from 'frontend/src/api/inventoryApi';
+import { InventoryItem } from '../../types/inventoryTypes';
+import { inventoryService } from '../../services/inventoryService';
 
 interface InventoryState {
   items: InventoryItem[];
@@ -15,19 +15,17 @@ const initialState: InventoryState = {
   error: null,
 };
 
-export const fetchInventory = createAsyncThunk(
+export const fetchInventory = createAsyncThunk<InventoryItem[], string>(
   'inventory/fetchInventory',
-  async () => {
-    const response = await inventoryService.getInventory();
-    return response;
+  async (locationId) => {
+    return await inventoryService.getInventory(locationId);
   }
 );
 
-export const updateInventoryItem = createAsyncThunk(
+export const updateInventoryItem = createAsyncThunk<InventoryItem, { locationId: string; item: InventoryItem }>(
   'inventory/updateItem',
-  async (item: InventoryItem) => {
-    const response = await inventoryService.updateInventoryItem(item);
-    return response;
+  async ({ locationId, item }) => {
+    return await inventoryService.updateInventoryItem(locationId, item);
   }
 );
 

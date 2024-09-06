@@ -1,33 +1,24 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { RootState } from '../store';
-import { LocationPOSProfile } from '../../types/posTypes';
-import { fetchPOSProfiles } from 'frontend/src/api/posProfileApi';
+import { POSProfile } from '../../types/posTypes';
+import * as posProfileApi from '../../api/posProfileApi'; // Updated import
 
 interface POSProfileState {
-  locationProfiles: LocationPOSProfile[];
-  loading: boolean;
+  profiles: POSProfile[];
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
 
 const initialState: POSProfileState = {
-  locationProfiles: [],
-  loading: false,
-  error: null,
+  profiles: [],
+  status: 'idle',
+  error: null
 };
 
-export const fetchLocationPOSProfiles = createAsyncThunk<
-  LocationPOSProfile[],
-  string,
-  { rejectValue: string }
->(
-  'posProfile/fetchLocationProfiles',
-  async (locationId, { rejectWithValue }) => {
-    try {
-      const response = await api.get(`/locations/${locationId}/pos-profiles`);
-      return response.data;
-    } catch (error) {
-      return rejectWithValue('Failed to fetch location POS profiles');
-    }
+export const fetchLocationPOSProfiles = createAsyncThunk(
+  'posProfile/fetchLocationPOSProfiles',
+  async (locationId: string) => {
+    const response = await posProfileApi.fetchPOSProfiles(locationId);
+    return response;
   }
 );
 
@@ -38,22 +29,17 @@ const posProfileSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchLocationPOSProfiles.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+        state.status = 'loading';
       })
       .addCase(fetchLocationPOSProfiles.fulfilled, (state, action) => {
-        state.locationProfiles = action.payload;
-        state.loading = false;
+        state.status = 'succeeded';
+        state.profiles = action.payload;
       })
       .addCase(fetchLocationPOSProfiles.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || 'An error occurred';
+        state.status = 'failed';
+        state.error = action.error.message || 'Failed to fetch POS profiles';
       });
   },
 });
-
-export const selectLocationPOSProfiles = (state: RootState) => state.posProfile.locationProfiles;
-export const selectPOSProfileLoading = (state: RootState) => state.posProfile.loading;
-export const selectPOSProfileError = (state: RootState) => state.posProfile.error;
 
 export default posProfileSlice.reducer;

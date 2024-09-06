@@ -1,9 +1,10 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { fetchDiscounts } from 'frontend/src/api/discountApi';
+import { DiscountService } from '../../services/discountService';
+import { Discount } from '../../types/discountTypes';
 
 interface DiscountState {
-  discounts: { id: string; name: string; value: number }[];
+  discounts: Discount[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
@@ -16,44 +17,61 @@ const initialState: DiscountState = {
 
 export const fetchDiscounts = createAsyncThunk(
   'discounts/fetchDiscounts',
-  async (clientId: number) => {
-    const response = await fetchDiscountsByLocation(clientId);
-    return response;
+  async (clientId: string) => {
+    return await DiscountService.fetchDiscounts(clientId);
+  }
+);
+
+export const createDiscount = createAsyncThunk(
+  'discounts/createDiscount',
+  async ({ clientId, discount }: { clientId: string; discount: Omit<Discount, 'id'> }) => {
+    return await DiscountService.createDiscount(clientId, discount);
+  }
+);
+
+export const updateDiscount = createAsyncThunk(
+  'discounts/updateDiscount',
+  async ({ clientId, discountId, discount }: { clientId: string; discountId: string; discount: Partial<Discount> }) => {
+    return await DiscountService.updateDiscount(clientId, discountId, discount);
+  }
+);
+
+export const deleteDiscount = createAsyncThunk(
+  'discounts/deleteDiscount',
+  async ({ clientId, discountId }: { clientId: string; discountId: string }) => {
+    await DiscountService.deleteDiscount(clientId, discountId);
+    return discountId;
   }
 );
 
 const discountSlice = createSlice({
   name: 'discounts',
   initialState,
-  reducers: {
-    addDiscount: (
-      state,
-      action: PayloadAction<{ id: string; name: string; value: number }>
-    ) => {
-      state.discounts.push(action.payload);
-    },
-    updateDiscount: (
-      state,
-      action: PayloadAction<{ id: string; value: number }>
-    ) => {
-      const discount = state.discounts.find((d) => d.id === action.payload.id);
-      if (discount) {
-        discount.value = action.payload.value;
-      }
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchDiscounts.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(fetchDiscounts.fulfilled, (state, action) => {
+      .addCase(fetchDiscounts.fulfilled, (state, action: PayloadAction<Discount[]>) => {
         state.status = 'succeeded';
         state.discounts = action.payload;
       })
       .addCase(fetchDiscounts.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message || null;
+      })
+      .addCase(createDiscount.fulfilled, (state, action: PayloadAction<Discount>) => {
+        state.discounts.push(action.payload);
+      })
+      .addCase(updateDiscount.fulfilled, (state, action: PayloadAction<Discount>) => {
+        const index = state.discounts.findIndex(d => d.id === action.payload.id);
+        if (index !== -1) {
+          state.discounts[index] = action.payload;
+        }
+      })
+      .addCase(deleteDiscount.fulfilled, (state, action: PayloadAction<string>) => {
+        state.discounts = state.discounts.filter(d => d.id !== action.payload);
       });
   },
 });
@@ -61,7 +79,5 @@ const discountSlice = createSlice({
 export const selectDiscounts = (state: RootState) => state.discount.discounts;
 export const selectDiscountStatus = (state: RootState) => state.discount.status;
 export const selectDiscountsError = (state: RootState) => state.discount.error;
-
-export const { addDiscount, updateDiscount } = discountSlice.actions;
 
 export default discountSlice.reducer;

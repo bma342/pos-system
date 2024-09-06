@@ -1,15 +1,31 @@
 export interface ReviewCreateData {
   orderId: string;
+  locationId: string;
+  menuItemId: string;
   rating: number;
   comment: string;
-  // ... other fields needed for creating a review
+  tags: string[];
+  images?: string[];
 }
 
 export interface Review {
   id: string;
   orderId: string;
+  locationId: string;
+  menuItemId: string;
+  userId: string;
   rating: number;
   comment: string;
+  tags: string[];
+  images: string[];
   createdAt: string;
-  // ... other review fields
+  updatedAt: string;
+  helpfulCount: number;
+  responseFromBusiness?: string;
+}
+
+export interface ReviewStats {
+  averageRating: number;
+  totalReviews: number;
+  ratingDistribution: { [key: number]: number };
 }

@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { GuestMetrics } from '../../types/guestTypes';
-import { GuestService } from '../../services/guestService';
-import { fetchGuests } from 'frontend/src/api/guestApi';
+import { guestService } from '../../services/guestService';
+import { RootState } from '../store';
 
 interface GuestState {
   metrics: GuestMetrics | null;
@@ -17,13 +17,13 @@ const initialState: GuestState = {
 
 export const fetchGuestMetrics = createAsyncThunk<
   GuestMetrics,
-  string,
+  { locationId: string; guestId: string },
   { rejectValue: string }
 >(
   'guest/fetchMetrics',
-  async (locationId, { rejectWithValue }) => {
+  async ({ locationId, guestId }, { rejectWithValue }) => {
     try {
-      return await GuestService.fetchGuestMetrics(locationId);
+      return await guestService.fetchGuestMetrics(locationId, guestId);
     } catch (error) {
       return rejectWithValue('Failed to fetch guest metrics');
     }
@@ -49,5 +49,9 @@ const guestSlice = createSlice({
       });
   },
 });
+
+export const selectGuestMetrics = (state: RootState) => state.guest.metrics;
+export const selectGuestLoading = (state: RootState) => state.guest.loading;
+export const selectGuestError = (state: RootState) => state.guest.error;
 
 export default guestSlice.reducer;

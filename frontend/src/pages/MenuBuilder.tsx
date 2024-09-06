@@ -1,153 +1,156 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { RootState, AppDispatch, Menu, MenuGroup } from '../types';
-import { fetchMenus, updateMenu } from '../redux/slices/menuSlice';
-import MenuGroupComponent from './MenuGroupComponent';
-import {
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Typography,
-  Box,
-  CircularProgress,
-} from '@mui/material';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import { useClientContext } from '../context/ClientContext';
+import { RootState, AppDispatch } from '../redux/store';
+import { fetchMenu, updateMenu } from '../redux/slices/menuSlice';
+import { Menu, MenuGroup, MenuItem } from '../types/menuTypes';
+import { Box, Typography, Button, TextField, List, ListItem, IconButton } from '@mui/material';
+import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { useSelectedLocation } from '../hooks/useSelectedLocation';
+import { useSelectedClient } from '../hooks/useSelectedClient';
 
 const MenuBuilder: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const menus = useSelector((state: RootState) => state.menu.menus);
-  const loading = useSelector((state: RootState) => state.menu.loading);
-  const error = useSelector((state: RootState) => state.menu.error);
-  const [activeMenu, setActiveMenu] = useState<Menu | null>(null);
-  const [isAddGroupDialogOpen, setIsAddGroupDialogOpen] = useState(false);
+  const { selectedLocation } = useSelectedLocation();
+  const selectedClient = useSelectedClient();
+  const menu = useSelector((state: RootState) => state.menu.currentMenu);
+  const loading = useSelector((state: RootState) => state.menu.status === 'loading');
+
   const [newGroupName, setNewGroupName] = useState('');
-  const { clientId } = useClientContext();
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (clientId) {
-      dispatch(fetchMenus(clientId.toString()));
+    if (selectedLocation && selectedClient) {
+      dispatch(fetchMenu({ 
+        clientId: selectedClient.id.toString(), 
+        locationId: selectedLocation.id.toString() 
+      }));
     }
-  }, [dispatch, clientId]);
-
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination || !activeMenu) {
-      return;
-    }
-
-    const newGroups = Array.from(activeMenu.groups);
-    const [reorderedGroup] = newGroups.splice(result.source.index, 1);
-    newGroups.splice(result.destination.index, 0, reorderedGroup);
-
-    const updatedMenu: Menu = {
-      ...activeMenu,
-      groups: newGroups,
-    };
-
-    setActiveMenu(updatedMenu);
-    dispatch(updateMenu({ clientId: clientId.toString(), menuId: activeMenu.id, menuData: updatedMenu }));
-  };
+  }, [dispatch, selectedLocation, selectedClient]);
 
   const handleAddGroup = () => {
-    if (activeMenu && newGroupName.trim()) {
-      const updatedMenu: Menu = {
-        ...activeMenu,
-        groups: [
-          ...activeMenu.groups,
-          { id: Date.now().toString(), name: newGroupName.trim(), items: [] },
-        ],
-      };
-      dispatch(updateMenu({ clientId: clientId.toString(), menuId: activeMenu.id, menuData: updatedMenu }));
-      setIsAddGroupDialogOpen(false);
-      setNewGroupName('');
-    }
+    if (!menu || !selectedClient || !selectedLocation) return;
+
+    const newGroup: MenuGroup = {
+      id: Date.now().toString(),
+      name: newGroupName.trim(),
+      items: []
+    };
+
+    const updatedMenu: Menu = {
+      ...menu,
+      menuGroups: [...menu.menuGroups, newGroup]
+    };
+
+    dispatch(updateMenu({
+      clientId: selectedClient.id.toString(),
+      locationId: selectedLocation.id.toString(),
+      menuData: updatedMenu
+    }));
+
+    setNewGroupName('');
   };
 
-  if (loading) {
-    return <CircularProgress />;
-  }
+  const handleUpdateGroup = (groupId: string, newName: string) => {
+    if (!menu || !selectedClient || !selectedLocation) return;
 
-  if (error) {
-    return <Typography color="error">{error}</Typography>;
-  }
+    const updatedMenu: Menu = {
+      ...menu,
+      menuGroups: menu.menuGroups.map(group =>
+        group.id === groupId ? { ...group, name: newName } : group
+      )
+    };
+
+    dispatch(updateMenu({
+      clientId: selectedClient.id.toString(),
+      locationId: selectedLocation.id.toString(),
+      menuData: updatedMenu
+    }));
+
+    setEditingGroupId(null);
+  };
+
+  const handleDeleteGroup = (groupId: string) => {
+    if (!menu || !selectedClient || !selectedLocation) return;
+
+    const updatedMenu: Menu = {
+      ...menu,
+      menuGroups: menu.menuGroups.filter(group => group.id !== groupId)
+    };
+
+    dispatch(updateMenu({
+      clientId: selectedClient.id.toString(),
+      locationId: selectedLocation.id.toString(),
+      menuData: updatedMenu
+    }));
+  };
+
+  const onDragEnd = (result: any) => {
+    // Implement drag and drop logic here
+  };
+
+  if (loading) return <Typography>Loading menu...</Typography>;
+  if (!menu) return <Typography>No menu available</Typography>;
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Menu Builder
-      </Typography>
-      <Box display="flex" flexWrap="wrap" gap={2} mb={2}>
-        {menus.map((menu) => (
-          <Button
-            key={menu.id}
-            variant={activeMenu?.id === menu.id ? 'contained' : 'outlined'}
-            onClick={() => setActiveMenu(menu)}
-            aria-label={`Select menu ${menu.name}`}
-          >
-            {menu.name}
-          </Button>
-        ))}
+    <Box className="menu-builder" role="main" aria-label="Menu Builder">
+      <Typography variant="h4" gutterBottom>Menu Builder</Typography>
+      <Box className="add-group-form" mb={2}>
+        <TextField
+          label="New Group Name"
+          value={newGroupName}
+          onChange={(e) => setNewGroupName(e.target.value)}
+          aria-label="New group name input"
+        />
+        <Button
+          startIcon={<AddIcon />}
+          onClick={handleAddGroup}
+          disabled={!newGroupName.trim()}
+          aria-label="Add new group"
+        >
+          Add Group
+        </Button>
       </Box>
-      {activeMenu && (
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="menu">
-            {(provided) => (
-              <Box {...provided.droppableProps} ref={provided.innerRef}>
-                {activeMenu.groups.map((group, index) => (
-                  <Draggable key={group.id} draggableId={group.id} index={index}>
-                    {(provided) => (
-                      <Box
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                      >
-                        <MenuGroupComponent
-                          group={group}
-                          index={index}
-                          menuId={activeMenu.id}
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="menu-groups">
+          {(provided) => (
+            <List {...provided.droppableProps} ref={provided.innerRef}>
+              {menu.menuGroups.map((group, index) => (
+                <Draggable key={group.id} draggableId={group.id} index={index}>
+                  {(provided) => (
+                    <ListItem
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                    >
+                      {editingGroupId === group.id ? (
+                        <TextField
+                          value={group.name}
+                          onChange={(e) => handleUpdateGroup(group.id, e.target.value)}
+                          onBlur={() => setEditingGroupId(null)}
+                          autoFocus
+                          aria-label={`Edit ${group.name}`}
                         />
-                      </Box>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </Box>
-            )}
-          </Droppable>
-        </DragDropContext>
-      )}
-      <Button
-        startIcon={<AddCircleOutlineIcon />}
-        onClick={() => setIsAddGroupDialogOpen(true)}
-        variant="contained"
-        color="primary"
-        style={{ marginTop: '16px' }}
-        aria-label="Add new group"
-      >
-        Add Group
-      </Button>
-      <Dialog open={isAddGroupDialogOpen} onClose={() => setIsAddGroupDialogOpen(false)}>
-        <DialogTitle>Add New Group</DialogTitle>
-        <DialogContent>
-          <TextField
-            margin="dense"
-            label="Group Name"
-            fullWidth
-            value={newGroupName}
-            onChange={(e) => setNewGroupName(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsAddGroupDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleAddGroup} color="primary">
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
+                      ) : (
+                        <>
+                          <Typography>{group.name}</Typography>
+                          <IconButton onClick={() => setEditingGroupId(group.id)} aria-label={`Edit ${group.name}`}>
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton onClick={() => handleDeleteGroup(group.id)} aria-label={`Delete ${group.name}`}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </>
+                      )}
+                    </ListItem>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </List>
+          )}
+        </Droppable>
+      </DragDropContext>
     </Box>
   );
 };

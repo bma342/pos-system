@@ -1,23 +1,10 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { fetchUsers } from 'frontend/src/api/userApi';
-
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: 'global_admin' | 'client_admin' | 'restaurant_manager' | 'staff';
-  clientId?: string;
-  restaurantName?: string;
-  cuisineType?: string;
-  phoneNumber?: string;
-  address?: string;
-  timeZone?: string;
-}
+import { userService } from '../../services/userService';
+import { User, UserRole } from '../../types/userTypes';
 
 interface UserState {
+  users: User[];
   currentUser: User | null;
   selectedLocation: string | null;
   loading: boolean;
@@ -25,20 +12,31 @@ interface UserState {
 }
 
 const initialState: UserState = {
+  users: [],
   currentUser: null,
   selectedLocation: null,
   loading: false,
   error: null,
 };
 
-export const updateUserProfile = createAsyncThunk(
-  'user/updateProfile',
-  async (userData: Partial<User>, { rejectWithValue }) => {
+export const fetchUsers = createAsyncThunk<User[], { clientId?: string; locationId?: string }, { rejectValue: string }>(
+  'user/fetchUsers',
+  async ({ clientId, locationId }, { rejectWithValue }) => {
     try {
-      const response = await api.put('/user/profile', userData);
-      return response.data;
+      return await userService.fetchUsers(clientId, locationId);
     } catch (error) {
-      return rejectWithValue('Failed to update profile');
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+export const updateUserProfile = createAsyncThunk<User, Partial<User>, { rejectValue: string }>(
+  'user/updateProfile',
+  async (userData, { rejectWithValue }) => {
+    try {
+      return await userService.updateUserProfile(userData);
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
     }
   }
 );
@@ -56,13 +54,30 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(fetchUsers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUsers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.users = action.payload;
+      })
+      .addCase(fetchUsers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
       .addCase(updateUserProfile.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentUser = action.payload;
+        if (state.currentUser && state.currentUser.id === action.payload.id) {
+          state.currentUser = action.payload;
+        }
+        state.users = state.users.map(user => 
+          user.id === action.payload.id ? action.payload : user
+        );
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
@@ -73,7 +88,10 @@ const userSlice = createSlice({
 
 export const { setCurrentUser, setSelectedLocation } = userSlice.actions;
 
+export const selectUsers = (state: RootState) => state.user.users;
 export const selectCurrentUser = (state: RootState) => state.user.currentUser;
 export const selectSelectedLocation = (state: RootState) => state.user.selectedLocation;
+export const selectUserLoading = (state: RootState) => state.user.loading;
+export const selectUserError = (state: RootState) => state.user.error;
 
 export default userSlice.reducer;

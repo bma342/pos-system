@@ -1,22 +1,11 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../rootReducer';
-import { Wallet, WalletTransaction } from '../../types/walletTypes';
-import { fetchWallets } from 'frontend/src/api/walletApi';
-
-interface Reward {
-  id: string;
-  name: string;
-  // Add other relevant properties
-}
-
-interface Discount {
-  id: string;
-  name: string;
-  // Add other relevant properties
-}
+import { Wallet, WalletTransaction, Reward, Discount } from '../../types/walletTypes';
+import { walletService } from '../../services/walletService';
 
 interface WalletState {
   balance: number;
+  transactions: WalletTransaction[];
   rewards: Reward[];
   discounts: Discount[];
   loading: boolean;
@@ -25,57 +14,74 @@ interface WalletState {
 
 const initialState: WalletState = {
   balance: 0,
+  transactions: [],
   rewards: [],
   discounts: [],
   loading: false,
   error: null,
 };
 
-export const fetchWalletBalance = createAsyncThunk(
+export const fetchWalletBalance = createAsyncThunk<number, { clientId: string; locationId?: string }>(
   'wallet/fetchBalance',
-  async (_, { rejectWithValue }) => {
+  async ({ clientId, locationId }, { rejectWithValue }) => {
     try {
-      const balance = await walletService.getBalance();
-      return balance;
+      return await walletService.getBalance(clientId);
     } catch (error) {
       return rejectWithValue((error as Error).message);
     }
   }
 );
 
-export const addFunds = createAsyncThunk(
-  'wallet/addFunds',
-  async (amount: number, { rejectWithValue }) => {
+export const fetchWalletTransactions = createAsyncThunk<
+  WalletTransaction[],
+  { clientId: string; locationId?: string; page: number; limit: number }
+>(
+  'wallet/fetchTransactions',
+  async ({ clientId, locationId, page, limit }, { rejectWithValue }) => {
     try {
-      const updatedBalance = await walletService.addFunds(amount);
-      return updatedBalance;
+      return await walletService.getTransactions(clientId, locationId, page, limit);
     } catch (error) {
       return rejectWithValue((error as Error).message);
     }
   }
 );
 
-// Ensure this async thunk is exported
-export const loadWalletData = createAsyncThunk(
-  'wallet/loadData',
-  async (_, { rejectWithValue }) => {
+export const fetchWalletRewards = createAsyncThunk<Reward[], { clientId: string; locationId?: string }>(
+  'wallet/fetchRewards',
+  async ({ clientId, locationId }, { rejectWithValue }) => {
     try {
-      // Replace this with your actual API call
-      const response = await fetch('/api/wallet');
-      const data = await response.json();
-      return data;
+      return await walletService.getRewards(clientId, locationId);
     } catch (error) {
-      return rejectWithValue('Failed to load wallet data');
+      return rejectWithValue((error as Error).message);
     }
+  }
+);
+
+export const fetchWalletDiscounts = createAsyncThunk<Discount[], { clientId: string; locationId?: string }>(
+  'wallet/fetchDiscounts',
+  async ({ clientId, locationId }, { rejectWithValue }) => {
+    try {
+      return await walletService.getDiscounts(clientId, locationId);
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+export const loadWalletData = createAsyncThunk<void, { clientId: string; locationId?: string }>(
+  'wallet/loadWalletData',
+  async ({ clientId, locationId }, { dispatch }) => {
+    await dispatch(fetchWalletBalance({ clientId, locationId }));
+    await dispatch(fetchWalletTransactions({ clientId, locationId, page: 1, limit: 10 }));
+    await dispatch(fetchWalletRewards({ clientId, locationId }));
+    await dispatch(fetchWalletDiscounts({ clientId, locationId }));
   }
 );
 
 const walletSlice = createSlice({
   name: 'wallet',
   initialState,
-  reducers: {
-    // Add any synchronous actions here
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchWalletBalance.pending, (state) => {
@@ -90,27 +96,23 @@ const walletSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      .addCase(addFunds.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+      .addCase(fetchWalletTransactions.fulfilled, (state, action: PayloadAction<WalletTransaction[]>) => {
+        state.transactions = action.payload;
       })
-      .addCase(addFunds.fulfilled, (state, action: PayloadAction<number>) => {
-        state.loading = false;
-        state.balance = action.payload;
+      .addCase(fetchWalletRewards.fulfilled, (state, action: PayloadAction<Reward[]>) => {
+        state.rewards = action.payload;
       })
-      .addCase(addFunds.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
+      .addCase(fetchWalletDiscounts.fulfilled, (state, action: PayloadAction<Discount[]>) => {
+        state.discounts = action.payload;
       });
   },
 });
 
-// Export the reducer
-export default walletSlice.reducer;
-
-// Export selectors
 export const selectWalletBalance = (state: RootState) => state.wallet.balance;
+export const selectWalletTransactions = (state: RootState) => state.wallet.transactions;
 export const selectWalletRewards = (state: RootState) => state.wallet.rewards;
 export const selectWalletDiscounts = (state: RootState) => state.wallet.discounts;
 export const selectWalletLoading = (state: RootState) => state.wallet.loading;
 export const selectWalletError = (state: RootState) => state.wallet.error;
+
+export default walletSlice.reducer;

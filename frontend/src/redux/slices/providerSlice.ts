@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { Provider, PaginatedResponse } from '../../types/providerTypes';
-import { fetchProviders } from 'frontend/src/api/providerApi';
+import { providerService } from '../../services/providerService';
 
 interface ProviderState {
   providers: Provider[];
@@ -25,19 +25,61 @@ const initialState: ProviderState = {
 
 export const fetchProviders = createAsyncThunk<
   PaginatedResponse<Provider>,
-  { page: number; limit: number },
+  { clientId: string; page: number; limit: number },
   { rejectValue: string }
 >(
   'providers/fetchProviders',
-  async ({ page, limit }, { rejectWithValue }) => {
+  async ({ clientId, page, limit }, { rejectWithValue }) => {
     try {
-      const response = await providerService.getProviders({ page, limit });
-      return response;
+      return await providerService.getProviders(clientId, { page, limit });
     } catch (error) {
-      if (error instanceof Error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('An unknown error occurred');
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+export const createProvider = createAsyncThunk<
+  Provider,
+  { clientId: string; providerData: Omit<Provider, 'id'> },
+  { rejectValue: string }
+>(
+  'providers/createProvider',
+  async ({ clientId, providerData }, { rejectWithValue }) => {
+    try {
+      return await providerService.createProvider(clientId, providerData);
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+export const updateProvider = createAsyncThunk<
+  Provider,
+  { clientId: string; providerId: string; providerData: Partial<Provider> },
+  { rejectValue: string }
+>(
+  'providers/updateProvider',
+  async ({ clientId, providerId, providerData }, { rejectWithValue }) => {
+    try {
+      return await providerService.updateProvider(clientId, providerId, providerData);
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+export const deleteProvider = createAsyncThunk<
+  string,
+  { clientId: string; providerId: string },
+  { rejectValue: string }
+>(
+  'providers/deleteProvider',
+  async ({ clientId, providerId }, { rejectWithValue }) => {
+    try {
+      await providerService.deleteProvider(clientId, providerId);
+      return providerId;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
     }
   }
 );
@@ -57,11 +99,25 @@ const providerSlice = createSlice({
         state.totalProviders = action.payload.total;
         state.currentPage = action.payload.page;
         state.totalPages = action.payload.totalPages;
-        state.pageSize = action.payload.limit; // Changed from pageSize to limit
+        state.pageSize = action.payload.limit;
       })
       .addCase(fetchProviders.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'An unknown error occurred';
+      })
+      .addCase(createProvider.fulfilled, (state, action) => {
+        state.providers.push(action.payload);
+        state.totalProviders += 1;
+      })
+      .addCase(updateProvider.fulfilled, (state, action) => {
+        const index = state.providers.findIndex(provider => provider.id === action.payload.id);
+        if (index !== -1) {
+          state.providers[index] = action.payload;
+        }
+      })
+      .addCase(deleteProvider.fulfilled, (state, action) => {
+        state.providers = state.providers.filter(provider => provider.id !== action.payload);
+        state.totalProviders -= 1;
       });
   },
 });

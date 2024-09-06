@@ -1,30 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchGuestProfile } from '../api/guestApi';
+import { fetchGuestMetrics } from '../api/guestApi';
 import {
   getLoyaltyChallenges,
   getGuestChallengeProgress,
 } from '../api/loyaltyChallengeApi';
-import {
-  GuestProfile,
-  LoyaltyChallenge,
-  LoyaltyChallengeProgress,
-} from '../types';
-import LoyaltyChallengeProgressComponent from '../components/LoyaltyChallengeProgressComponent';
+import { GuestMetrics } from '../types/guestTypes';
+import { LoyaltyChallenge, LoyaltyChallengeProgress } from '../types/loyaltyTypes';
+import LoyaltyChallengeProgressComponent from '../components/LoyaltyChallengeProgress';
 
 const GuestProfilePage: React.FC = () => {
   const { guestId } = useParams<{ guestId: string }>();
-  const [guestProfile, setGuestProfile] = useState<GuestProfile | null>(null);
+  const [guestMetrics, setGuestMetrics] = useState<GuestMetrics | null>(null);
   const [challenges, setChallenges] = useState<LoyaltyChallenge[]>([]);
-  const [challengeProgress, setChallengeProgress] = useState<
-    LoyaltyChallengeProgress[]
-  >([]);
+  const [challengeProgress, setChallengeProgress] = useState<LoyaltyChallengeProgress[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!guestId) return;
       try {
-        const profile = await fetchGuestProfile(parseInt(guestId));
-        setGuestProfile(profile);
+        const metrics = await fetchGuestMetrics(guestId);
+        setGuestMetrics(metrics);
 
         const allChallenges = await getLoyaltyChallenges();
         const activeChallenges = allChallenges.filter(
@@ -32,7 +28,7 @@ const GuestProfilePage: React.FC = () => {
         );
         setChallenges(activeChallenges);
 
-        const progress = await getGuestChallengeProgress(parseInt(guestId));
+        const progress = await getGuestChallengeProgress(guestId);
         setChallengeProgress(progress);
       } catch (error) {
         console.error('Error fetching guest data:', error);
@@ -42,18 +38,17 @@ const GuestProfilePage: React.FC = () => {
     fetchData();
   }, [guestId]);
 
-  if (!guestProfile) {
+  if (!guestMetrics) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="guest-profile">
-      <h1>
-        {guestProfile.firstName} {guestProfile.lastName}&apos;s Profile
-      </h1>
-      <p>Email: {guestProfile.email}</p>
-      <p>Loyalty Points: {guestProfile.loyaltyPoints}</p>
-      <p>Loyalty Tier: {guestProfile.loyaltyTier}</p>
+      <h1>Guest Profile</h1>
+      <p>Total Orders: {guestMetrics.totalOrders}</p>
+      <p>Total Spent: ${guestMetrics.totalSpent.toFixed(2)}</p>
+      <p>Loyalty Points: {guestMetrics.loyaltyPoints}</p>
+      <p>Last Order Date: {new Date(guestMetrics.lastOrderDate).toLocaleDateString()}</p>
 
       <h2>Active Challenges</h2>
       {challenges.map((challenge) => {
@@ -64,7 +59,7 @@ const GuestProfilePage: React.FC = () => {
           <LoyaltyChallengeProgressComponent
             key={challenge.id}
             challenge={challenge}
-            progress={progress}
+            currentProgress={progress.currentValue}
           />
         ) : null;
       })}

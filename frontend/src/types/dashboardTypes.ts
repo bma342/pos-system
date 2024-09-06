@@ -7,20 +7,23 @@ export interface DateRange {
 
 export interface DashboardParams {
   dateRange: DateRange;
-  clientId?: string;
-  locationId?: string;
+  clientId: string;
+  locationId: string;
 }
 
 export interface DashboardData {
-  totalOrders?: number;
-  revenue?: number;
-  averageOrderValue?: number;
-  customerRetentionRate?: number;
-  revenueOverTime?: ChartData;
-  orderTrends?: ChartData;
-  menuPerformance?: ChartData;
-  customerInsights?: ChartData;
-  locationComparison?: LocationComparisonData;
+  totalOrders: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+  newCustomers: number;
+  popularItems: PopularItem[];
+  revenue: number;
+  customerRetentionRate: number;
+  revenueOverTime: ChartData;
+  orderTrends: ChartData;
+  menuPerformance: ChartData;
+  customerInsights: ChartData;
+  locationComparison: LocationComparisonData;
 }
 
 export interface ChartData {
@@ -43,18 +46,7 @@ export interface LocationComparisonData {
   }[];
 }
 
-export interface DashboardStats {
-    totalOrders: number;
-    totalRevenue: number;
-    averageOrderValue: number;
-    topSellingItems: TopSellingItem[];
-    newCustomers: number;
-    returningCustomers: number;
-  }
-  
-  export interface TopSellingItem {
-    itemId: string;
-    itemName: string;
-    quantity: number;
-    revenue: number;
-  }
+export interface PopularItem {
+  name: string;
+  orderCount: number;
+}

@@ -1,10 +1,11 @@
 export interface POSIntegration {
-  id: number;
+  id: string;
   tenantId: string;
   posType: POSType;
   apiKey: string;
   isActive: boolean;
   lastSyncDate: string;
+  locationId?: string; // Add this line
 }
 
 export enum POSType {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Accordion,
   AccordionSummary,
@@ -18,6 +18,10 @@ import {
   Switch,
   FormControlLabel,
   List,
+  Grid,
+  Box,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -26,7 +30,7 @@ import AddIcon from '@mui/icons-material/Add';
 import SyncIcon from '@mui/icons-material/Sync';
 import { useParams } from 'react-router-dom';
 import { menuService } from '../services/menuService';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { Menu, MenuGroup, MenuItem, Modifier } from '../types/menuTypes';
 
 interface SelectedItem {
@@ -45,16 +49,11 @@ interface SelectedItem {
 const MenuManagementAdmin: React.FC = () => {
   const [menus, setMenus] = useState<Menu[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalType, setModalType] = useState<
-    'menu' | 'group' | 'item' | 'modifier'
-  >('menu');
+  const [modalType, setModalType] = useState<'menu' | 'group' | 'item' | 'modifier'>('menu');
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [snackbar, setSnackbar] = useState<{
-    message: string;
-    severity: 'success' | 'error';
-  } | null>(null);
+  const [snackbar, setSnackbar] = useState<{ message: string; severity: 'success' | 'error' } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -62,6 +61,8 @@ const MenuManagementAdmin: React.FC = () => {
 
   const { clientId } = useParams<{ clientId: string }>();
   const { user } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const loadMenus = useCallback(async () => {
     if (!clientId) return;
@@ -98,42 +99,27 @@ const MenuManagementAdmin: React.FC = () => {
     if (!selectedItem || !clientId) return;
     setIsSaving(true);
     try {
-      let result: Menu | MenuGroup | MenuItem;
+      let result: Menu | MenuGroup | MenuItem | Modifier;
       switch (modalType) {
         case 'menu':
           result =
             selectedItem.id === '0'
-              ? await menuService.createMenu(clientId, selectedItem)
-              : await menuService.updateMenu(
-                  clientId,
-                  selectedItem.id,
-                  selectedItem
-                );
+              ? await menuService.createMenu(clientId, selectedItem as Partial<Menu>)
+              : await menuService.updateMenu(clientId, selectedItem.id, selectedItem as Partial<Menu>);
           setMenus(menus.map((m) => (m.id === result.id ? result as Menu : m)));
           break;
         case 'group':
           if (selectedItem.parentId) {
             result =
               selectedItem.id === '0'
-                ? await menuService.createMenuGroup(
-                    clientId,
-                    selectedItem.parentId,
-                    selectedItem
-                  )
-                : await menuService.updateMenuGroup(
-                    clientId,
-                    selectedItem.parentId,
-                    selectedItem.id,
-                    selectedItem
-                  );
+                ? await menuService.createMenuGroup(clientId, selectedItem.parentId, selectedItem as Partial<MenuGroup>)
+                : await menuService.updateMenuGroup(clientId, selectedItem.parentId, selectedItem.id, selectedItem as Partial<MenuGroup>);
             setMenus(
               menus.map((m) =>
                 m.id === selectedItem.parentId
                   ? {
                       ...m,
-                      menuGroups: m.menuGroups.map((g) =>
-                        g.id === result.id ? result : g
-                      ),
+                      menuGroups: m.menuGroups.map((g) => (g.id === result.id ? result as MenuGroup : g)),
                     }
                   : m
               )
@@ -142,21 +128,22 @@ const MenuManagementAdmin: React.FC = () => {
           break;
         case 'item':
           if (selectedItem.grandParentId && selectedItem.parentId) {
-            result =
-              selectedItem.id === '0'
-                ? await menuService.createMenuItem(
-                    clientId,
-                    selectedItem.grandParentId,
-                    selectedItem.parentId,
-                    selectedItem
-                  )
-                : await menuService.updateMenuItem(
-                    clientId,
-                    selectedItem.grandParentId,
-                    selectedItem.parentId,
-                    selectedItem.id,
-                    selectedItem
-                  );
+            const itemData: Omit<MenuItem, 'id'> = {
+              name: selectedItem.name,
+              description: selectedItem.description || '',
+              price: selectedItem.price || 0,
+              image: '', // Add a default image or make it optional in your MenuItem type
+              modifiers: [],
+              defaultModifiers: [],
+              reviewsEnabled: false,
+              showQuantityAvailable: false,
+              isAvailable: selectedItem.isAvailable || false,
+              imageUrl: 'sample-image-url.jpg', // Added property
+              groupName: 'Sample Group'         // Added property
+            };
+            result = selectedItem.id === '0'
+              ? await menuService.createMenuItem(clientId, selectedItem.grandParentId, itemData)
+              : await menuService.updateMenuItem(clientId, selectedItem.grandParentId, selectedItem.id, itemData as MenuItem);
             setMenus(
               menus.map((m) =>
                 m.id === selectedItem.grandParentId
@@ -166,9 +153,7 @@ const MenuManagementAdmin: React.FC = () => {
                         g.id === selectedItem.parentId
                           ? {
                               ...g,
-                              items: g.items.map((i) =>
-                                i.id === result.id ? result : i
-                              ),
+                              items: g.items.map((i) => (i.id === result.id ? result as MenuItem : i)),
                             }
                           : g
                       ),
@@ -179,28 +164,11 @@ const MenuManagementAdmin: React.FC = () => {
           }
           break;
         case 'modifier':
-          if (
-            selectedItem.menuId &&
-            selectedItem.groupId &&
-            selectedItem.itemId
-          ) {
+          if (selectedItem.menuId && selectedItem.groupId && selectedItem.itemId) {
             result =
               selectedItem.id === '0'
-                ? await menuService.createModifier(
-                    clientId,
-                    selectedItem.menuId,
-                    selectedItem.groupId,
-                    selectedItem.itemId,
-                    selectedItem
-                  )
-                : await menuService.updateModifier(
-                    clientId,
-                    selectedItem.menuId,
-                    selectedItem.groupId,
-                    selectedItem.itemId,
-                    selectedItem.id,
-                    selectedItem
-                  );
+                ? await menuService.createModifier(clientId, selectedItem.menuId, selectedItem.groupId, selectedItem.itemId, selectedItem as Partial<Modifier>)
+                : await menuService.updateModifier(clientId, selectedItem.menuId, selectedItem.groupId, selectedItem.itemId, selectedItem.id, selectedItem as Partial<Modifier>);
             setMenus(
               menus.map((m) =>
                 m.id === selectedItem.menuId
@@ -214,9 +182,9 @@ const MenuManagementAdmin: React.FC = () => {
                                 i.id === selectedItem.itemId
                                   ? {
                                       ...i,
-                                      modifiers: i.modifiers.map((mod) =>
-                                        mod.id === result.id ? result : mod
-                                      ),
+                                      modifiers: (i as MenuItem & { modifiers?: Modifier[] }).modifiers?.map((mod) =>
+                                        mod.id === result.id ? result as Modifier : mod
+                                      ) || [],
                                     }
                                   : i
                               ),
@@ -407,8 +375,8 @@ const MenuManagementAdmin: React.FC = () => {
   if (error) return <Typography color="error">{error}</Typography>;
 
   return (
-    <div>
-      <Typography variant="h4">Menu Management</Typography>
+    <Box className="menu-management-admin" sx={{ p: isMobile ? 1 : 2 }}>
+      <Typography variant="h4" gutterBottom>Menu Management</Typography>
       <TextField
         label="Search Menu Items"
         variant="outlined"
@@ -416,28 +384,34 @@ const MenuManagementAdmin: React.FC = () => {
         margin="normal"
         value={searchQuery}
         onChange={handleSearch}
+        aria-label="Search menu items"
       />
-      <Button onClick={handleSync} startIcon={<SyncIcon />}>
+      <Button onClick={handleSync} startIcon={<SyncIcon />} aria-label="Sync menus">
         Sync Menus
       </Button>
-      {syncStatus && <Typography>{syncStatus}</Typography>}
-      {(searchQuery ? filteredMenus : menus).map((menu) => (
-        <Accordion key={menu.id}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography>{menu.name}</Typography>
-          </AccordionSummary>
-          <AccordionDetails>{renderMenuStructure(menu)}</AccordionDetails>
-        </Accordion>
-      ))}
+      {syncStatus && <Typography role="status">{syncStatus}</Typography>}
+      <Grid container spacing={isMobile ? 1 : 2}>
+        {(searchQuery ? filteredMenus : menus).map((menu) => (
+          <Grid item xs={12} md={isMobile ? 12 : 6} key={menu.id}>
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-label={`Expand ${menu.name} menu`}>
+                <Typography>{menu.name}</Typography>
+              </AccordionSummary>
+              <AccordionDetails>{renderMenuStructure(menu)}</AccordionDetails>
+            </Accordion>
+          </Grid>
+        ))}
+      </Grid>
       <Button
         onClick={() => handleAdd('menu')}
         startIcon={<AddIcon />}
         variant="contained"
         color="primary"
+        aria-label="Add new menu"
       >
         Add Menu
       </Button>
-      <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)} aria-labelledby="modal-title">
         <Paper style={{ padding: '20px', maxWidth: '500px', margin: '20px auto' }}>
           {renderModalContent()}
         </Paper>
@@ -455,7 +429,7 @@ const MenuManagementAdmin: React.FC = () => {
           {snackbar?.message}
         </Alert>
       </Snackbar>
-    </div>
+    </Box>
   );
 };
 

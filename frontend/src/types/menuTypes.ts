@@ -11,13 +11,22 @@ export interface MenuGroup {
   items: MenuItem[];
 }
 
-export interface MenuItem extends BaseMenuItem {
-  localOverrides: LocalOverrides;
-  modifierGroups: {
-    id: string;
-    name: string;
-    modifiers: Modifier[];
-  }[];
+export interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  groupName: string;
+  modifiers: Modifier[];
+  defaultModifiers: Modifier[];
+  reviewsEnabled: boolean;
+  averageRating?: number;
+  reviewCount?: number;
+  showQuantityAvailable: boolean;
+  quantityAvailable?: number;
+  isAvailable: boolean;
+  image?: string;
 }
 
 export interface BaseMenuItem {
@@ -29,8 +38,11 @@ export interface BaseMenuItem {
   // Other common fields
 }
 
-export interface Modifier extends BaseModifier {
-  localOverrides: LocalOverrides;
+export interface Modifier {
+  id: string;
+  name: string;
+  price: number;
+  value?: string | number | boolean;
 }
 
 export interface BaseModifier {
@@ -59,13 +71,14 @@ export interface CartItem {
     price: number;
   };
   quantity: number;
-  selectedModifiers: Modifier[];
+  modifiers: Modifier[];
 }
 
 export interface MenuStatistics {
   totalItems: number;
   averagePrice: number;
   mostPopularItem: string;
+  mostPopularItems: MenuItem[]; // Add this line
   leastPopularItem: string;
   averageOrderValue: number;
   // Add any other relevant statistics for your multi-location restaurant system

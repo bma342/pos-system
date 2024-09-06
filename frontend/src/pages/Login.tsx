@@ -1,35 +1,35 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser } from '../redux/slices/authSlice';
+import { login } from '../redux/slices/authSlice';
 import { RootState, AppDispatch } from '../redux/store';
-import { Client } from '../types';
+import { useSelectedClient } from '../hooks/useSelectedClient';
 
 const Login: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const client = useSelector((state: RootState) => state.clientConfig.client);
+  const selectedClient = useSelectedClient();
   const error = useSelector((state: RootState) => state.auth.error);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (client) {
+    if (selectedClient) {
       const loginData = {
         email,
         password,
-        clientId: client.id,
-        subdomain: client.subdomain || '',
+        clientId: selectedClient.id.toString(), // Convert to string
+        subdomain: selectedClient.subdomain || '',
       };
-      dispatch(loginUser(loginData));
+      dispatch(login(loginData));
     } else {
-      console.error('Client is null');
+      console.error('Client is not selected');
     }
   };
 
   return (
     <div className="login-container">
       <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} aria-label="Login form">
         <div>
           <label htmlFor="email">Email:</label>
           <input
@@ -38,6 +38,7 @@ const Login: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            aria-required="true"
           />
         </div>
         <div>
@@ -48,11 +49,12 @@ const Login: React.FC = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            aria-required="true"
           />
         </div>
-        <button type="submit">Login</button>
+        <button type="submit" aria-label="Login">Login</button>
       </form>
-      {error && <p className="error-message">{error}</p>}
+      {error && <p className="error-message" role="alert">{error}</p>}
     </div>
   );
 };

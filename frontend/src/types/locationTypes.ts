@@ -34,11 +34,17 @@ export interface Location {
   id: string;
   name: string;
   address: string;
-  city: string;
+  city?: string;
+  state: string;
+  zipCode: string;
   latitude: number;
   longitude: number;
-  isDropoffSite: boolean;
-  // Add other properties as needed
+  isDropoffSite?: boolean;
+  imageUrl?: string;
+  taxRate: number;
+  cateringServiceChargeRate: number;
+  serviceChargeRate: number;
+  // ... other properties
 }
 
 export interface LocationCreateData {
@@ -80,5 +86,28 @@ export interface MenuItem {
   description: string;
   price: number;
   isAvailable: boolean;
+}
+
+export interface LocationSettings {
+  id: string;
+  locationId: string;
+  operatingHours: OperatingHours[];
+  deliveryRadius: number;
+  minimumOrderValue: number;
+  // Add other relevant settings
+}
+
+export interface LocationAnalytics {
+  locationId: string;
+  totalOrders: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+  // Add other relevant analytics fields
+}
+
+interface OperatingHours {
+  day: string;
+  openTime: string;
+  closeTime: string;
 }
 

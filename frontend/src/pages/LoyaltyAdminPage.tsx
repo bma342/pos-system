@@ -10,7 +10,7 @@ import { UserRole } from '../types/userTypes';
 
 const LoyaltyAdminPage: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
-  const isClientAdmin = user?.roles.includes(UserRole.CLIENT_ADMIN);
+  const isClientAdmin = user?.role === UserRole.CLIENT_ADMIN;
 
   return (
     <div>

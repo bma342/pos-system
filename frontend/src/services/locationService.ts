@@ -1,13 +1,10 @@
+import axios from 'axios';
 import { Location } from '../types/locationTypes';
-import { getLocations, getLocation } from '../api/locationApi';
 
-export class LocationService {
-  async getLocations(clientId: string): Promise<Location[]> {
-    return getLocations(clientId);
-  }
-
-  async getLocation(clientId: string, id: string): Promise<Location> {
-    return getLocation(clientId, id);
-  }
-}
+export const locationService = {
+  fetchLocations: async (clientId: string): Promise<Location[]> => {
+    const response = await axios.get(`/api/clients/${clientId}/locations`);
+    return response.data;
+  },
+};
 

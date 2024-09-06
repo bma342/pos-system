@@ -1,32 +1,31 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../rootReducer';
-import { Menu, MenuStatistics } from '../../types/menuTypes';
-import { fetchMenu } from 'frontend/src/api/menuApi';
+import { Menu, MenuStatistics, MenuItem } from '../../types/menuTypes';
+import { menuService } from '../../services/menuService';
 
 interface MenuState {
-  menu: Menu | null;
-  statistics: MenuStatistics | null;
+  menuItems: MenuItem[];
+  currentMenu: Menu | null;
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
 
 const initialState: MenuState = {
-  menu: null,
-  statistics: null,
+  menuItems: [],
+  currentMenu: null,
   status: 'idle',
   error: null,
 };
 
 export const fetchMenu = createAsyncThunk<
   Menu,
-  string,
+  { clientId: string; locationId: string },
   { rejectValue: string }
 >(
   'menu/fetchMenu',
-  async (locationId, { rejectWithValue }) => {
+  async ({ clientId, locationId }, { rejectWithValue }) => {
     try {
-      const menu = await menuService.getMenu(locationId);
-      return menu;
+      return await menuService.getMenu(clientId, locationId);
     } catch (error) {
       return rejectWithValue('Failed to fetch menu');
     }
@@ -35,14 +34,13 @@ export const fetchMenu = createAsyncThunk<
 
 export const updateMenu = createAsyncThunk<
   Menu,
-  { locationId: string; menuId: string; menuData: Partial<Menu> },
+  { clientId: string; locationId: string; menuData: Partial<Menu> },
   { rejectValue: string }
 >(
   'menu/updateMenu',
-  async ({ locationId, menuId, menuData }, { rejectWithValue }) => {
+  async ({ clientId, locationId, menuData }, { rejectWithValue }) => {
     try {
-      const updatedMenu = await menuService.updateMenu(locationId, menuId, menuData);
-      return updatedMenu;
+      return await menuService.updateMenu(clientId, locationId, menuData);
     } catch (error) {
       return rejectWithValue('Failed to update menu');
     }
@@ -60,7 +58,8 @@ const menuSlice = createSlice({
       })
       .addCase(fetchMenu.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.menu = action.payload;
+        state.currentMenu = action.payload;
+        state.menuItems = action.payload.menuGroups.flatMap(group => group.items);
       })
       .addCase(fetchMenu.rejected, (state, action) => {
         state.status = 'failed';
@@ -71,7 +70,8 @@ const menuSlice = createSlice({
       })
       .addCase(updateMenu.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.menu = action.payload;
+        state.currentMenu = action.payload;
+        state.menuItems = action.payload.menuGroups.flatMap(group => group.items);
       })
       .addCase(updateMenu.rejected, (state, action) => {
         state.status = 'failed';
@@ -80,8 +80,9 @@ const menuSlice = createSlice({
   },
 });
 
-export const selectMenu = (state: RootState) => state.menu.menu;
-export const selectMenuStatus = (state: RootState) => state.menu.status;
+export const selectMenu = (state: RootState) => state.menu.currentMenu;
+export const selectMenuItems = (state: RootState) => state.menu.menuItems;
+export const selectMenuLoading = (state: RootState) => state.menu.status === 'loading';
 export const selectMenuError = (state: RootState) => state.menu.error;
 
 export default menuSlice.reducer;

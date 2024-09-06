@@ -2,22 +2,36 @@ export interface LoyaltyReward {
     id: string;
     name: string;
     description: string;
+    rewardType: string;
     pointsRequired: number;
-    reward: string;
-  }
-  
-  export interface LoyaltyConfig {
-    id: string;
-    clientId: string;
+    isActive: boolean;
+    availableDays: string[]; // e.g., ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    startDate?: Date;
+    endDate?: Date;
+    locationId?: string;
+}
+
+export interface LoyaltyConfig {
+    tiers: LoyaltyTier[];
     pointsPerDollar: number;
-    expirationPeriod: number; // in days
-  }
-  
-  export interface LoyaltyTransaction {
+}
+
+export interface LoyaltyTier {
+    tierName: string;
+    pointThreshold: number;
+    benefits: string[];
+}
+
+export interface LoyaltyChallenge {
     id: string;
-    userId: string;
-    points: number;
-    type: 'EARN' | 'REDEEM';
+    name: string;
     description: string;
-    createdAt: Date;
-  }
+    targetValue: number;
+    unit: string;
+    status: 'active' | 'inactive';
+}
+
+export interface LoyaltyChallengeProgress {
+    challengeId: string;
+    currentValue: number;
+}

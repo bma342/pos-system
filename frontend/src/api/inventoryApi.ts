@@ -1,97 +1,28 @@
 import axios from 'axios';
-import { InventoryItem } from '../types';
+import { InventoryItem } from '../types/inventoryTypes';
 
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+const BASE_URL = '/api/inventory';
 
-export const fetchInventoryItems = async (): Promise<InventoryItem[]> => {
-  try {
-    const response = await axios.get<InventoryItem[]>(
-      `${API_BASE_URL}/inventory`
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching inventory items:', error);
-    throw error;
-  }
+export const getInventory = async (clientId: string, locationId: string): Promise<InventoryItem[]> => {
+  const response = await axios.get(`${BASE_URL}/${clientId}/${locationId}`);
+  return response.data;
 };
 
-export const getInventoryItemById = async (
-  id: number
-): Promise<InventoryItem> => {
-  try {
-    const response = await axios.get<InventoryItem>(
-      `${API_BASE_URL}/inventory/${id}`
-    );
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching inventory item with id ${id}:`, error);
-    throw error;
-  }
+export const getInventoryItem = async (clientId: string, locationId: string, itemId: string): Promise<InventoryItem> => {
+  const response = await axios.get(`${BASE_URL}/${clientId}/${locationId}/${itemId}`);
+  return response.data;
 };
 
-export const createInventoryItem = async (
-  itemData: Partial<InventoryItem>
-): Promise<InventoryItem> => {
-  try {
-    const response = await axios.post<InventoryItem>(
-      `${API_BASE_URL}/inventory`,
-      itemData
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Error creating inventory item:', error);
-    throw error;
-  }
+export const createInventoryItem = async (clientId: string, locationId: string, item: Omit<InventoryItem, 'id'>): Promise<InventoryItem> => {
+  const response = await axios.post(`${BASE_URL}/${clientId}/${locationId}`, item);
+  return response.data;
 };
 
-export const updateInventoryItem = async (
-  id: number,
-  itemData: Partial<InventoryItem>
-): Promise<InventoryItem> => {
-  try {
-    const response = await axios.put<InventoryItem>(
-      `${API_BASE_URL}/inventory/${id}`,
-      itemData
-    );
-    return response.data;
-  } catch (error) {
-    console.error(`Error updating inventory item with id ${id}:`, error);
-    throw error;
-  }
+export const updateInventoryItem = async (clientId: string, locationId: string, item: InventoryItem): Promise<InventoryItem> => {
+  const response = await axios.put(`${BASE_URL}/${clientId}/${locationId}/${item.id}`, item);
+  return response.data;
 };
 
-export const deleteInventoryItem = async (id: number): Promise<void> => {
-  try {
-    await axios.delete(`${API_BASE_URL}/inventory/${id}`);
-  } catch (error) {
-    console.error(`Error deleting inventory item with id ${id}:`, error);
-    throw error;
-  }
-};
-
-export const updateInventoryQuantity = async (
-  id: number,
-  quantity: number
-): Promise<InventoryItem> => {
-  try {
-    const response = await axios.patch<InventoryItem>(
-      `${API_BASE_URL}/inventory/${id}/quantity`,
-      { quantity }
-    );
-    return response.data;
-  } catch (error) {
-    console.error(
-      `Error updating quantity for inventory item with id ${id}:`,
-      error
-    );
-    throw error;
-  }
-};
-
-export const getInventory = async (clientId: string, locationId: string) => {
-  return fetchInventoryItems(clientId, locationId);
-};
-export const getInventoryItem = async (clientId: string, locationId: string, itemId: string) => {
-  return getInventoryItemById(clientId, locationId, itemId);
+export const deleteInventoryItem = async (clientId: string, locationId: string, itemId: string): Promise<void> => {
+  await axios.delete(`${BASE_URL}/${clientId}/${locationId}/${itemId}`);
 };

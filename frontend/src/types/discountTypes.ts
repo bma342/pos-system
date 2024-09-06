@@ -1,12 +1,18 @@
 export interface Discount {
     id: string;
-    clientId: string;
     name: string;
-    code: string;
-    type: 'PERCENTAGE' | 'FIXED_AMOUNT';
+    description: string;
+    discountType: 'percentage' | 'fixed';
     value: number;
-    startDate: Date;
-    endDate: Date;
+    code: string;
+    startDate: string;
+    endDate: string;
     isActive: boolean;
-    description?: string;
-  }
+    minimumOrderValue?: number;
+    maximumDiscountAmount?: number;
+    usageLimit?: number;
+    usageCount: number;
+    applicableItems?: string[]; // IDs of items or categories this discount applies to
+    clientId: string;
+    locationId?: string; // Optional, if the discount is location-specific
+}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { InventoryItem } from '../types';
+import { InventoryItem } from '../types/inventoryTypes';
 
 const Inventory: React.FC = () => {
   const items = useSelector((state: RootState) => state.inventory.items);

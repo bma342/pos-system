@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { LoyaltyReward, LoyaltyConfig } from '../../types';
-import { fetchLoyaltyProgram } from 'frontend/src/api/loyaltyApi';
+import { LoyaltyReward, LoyaltyConfig } from '../../types/loyaltyTypes';
+import { loyaltyService } from '../../services/loyaltyService';
 
 interface LoyaltyState {
   rewards: LoyaltyReward[];
@@ -19,49 +19,68 @@ const initialState: LoyaltyState = {
 
 export const fetchLoyaltyRewards = createAsyncThunk(
   'loyalty/fetchRewards',
-  async () => {
-    const response = await loyaltyService.getLoyaltyRewards();
-    return response;
+  async ({ clientId, locationId }: { clientId: string; locationId?: string }, { rejectWithValue }) => {
+    try {
+      return await loyaltyService.getLoyaltyRewards(clientId, locationId);
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
   }
 );
 
 export const createLoyaltyReward = createAsyncThunk(
   'loyalty/createReward',
-  async (reward: Partial<LoyaltyReward>) => {
-    const response = await loyaltyService.createLoyaltyReward(reward);
-    return response;
+  async ({ clientId, locationId, reward }: { clientId: string; locationId?: string; reward: LoyaltyReward }, { rejectWithValue }) => {
+    try {
+      return await loyaltyService.createLoyaltyReward(clientId, locationId, reward);
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
   }
 );
 
 export const updateLoyaltyReward = createAsyncThunk(
   'loyalty/updateReward',
-  async (reward: LoyaltyReward) => {
-    const response = await loyaltyService.updateLoyaltyReward(reward);
-    return response;
+  async (reward: LoyaltyReward, { rejectWithValue }) => {
+    try {
+      return await loyaltyService.updateLoyaltyReward(reward);
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
   }
 );
 
 export const deleteLoyaltyReward = createAsyncThunk(
   'loyalty/deleteReward',
-  async (rewardId: number) => {
-    await loyaltyService.deleteLoyaltyReward(rewardId);
-    return rewardId;
+  async (rewardId: string, { rejectWithValue }) => {
+    try {
+      await loyaltyService.deleteLoyaltyReward(rewardId);
+      return rewardId;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
   }
 );
 
 export const fetchLoyaltyConfig = createAsyncThunk(
   'loyalty/fetchConfig',
-  async () => {
-    const response = await loyaltyService.getLoyaltyConfig();
-    return response;
+  async (_, { rejectWithValue }) => {
+    try {
+      return await loyaltyService.getLoyaltyConfig();
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
   }
 );
 
 export const updateLoyaltyConfig = createAsyncThunk(
   'loyalty/updateConfig',
-  async (config: LoyaltyConfig) => {
-    const response = await loyaltyService.updateLoyaltyConfig(config);
-    return response;
+  async (config: LoyaltyConfig, { rejectWithValue }) => {
+    try {
+      return await loyaltyService.updateLoyaltyConfig(config);
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
   }
 );
 
@@ -80,7 +99,7 @@ const loyaltySlice = createSlice({
       })
       .addCase(fetchLoyaltyRewards.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.error.message || 'Failed to fetch loyalty rewards';
+        state.error = action.payload as string;
       })
       .addCase(createLoyaltyReward.fulfilled, (state, action: PayloadAction<LoyaltyReward>) => {
         state.rewards.push(action.payload);
@@ -91,7 +110,7 @@ const loyaltySlice = createSlice({
           state.rewards[index] = action.payload;
         }
       })
-      .addCase(deleteLoyaltyReward.fulfilled, (state, action: PayloadAction<number>) => {
+      .addCase(deleteLoyaltyReward.fulfilled, (state, action: PayloadAction<string>) => {
         state.rewards = state.rewards.filter((reward) => reward.id !== action.payload);
       })
       .addCase(fetchLoyaltyConfig.fulfilled, (state, action: PayloadAction<LoyaltyConfig>) => {
@@ -107,5 +126,8 @@ export const selectLoyaltyRewards = (state: RootState) => state.loyalty.rewards;
 export const selectLoyaltyConfig = (state: RootState) => state.loyalty.config;
 export const selectLoyaltyStatus = (state: RootState) => state.loyalty.status;
 export const selectLoyaltyError = (state: RootState) => state.loyalty.error;
+
+export const selectLoyaltyRewardsByLocation = (state: RootState, locationId: string) => 
+  state.loyalty.rewards.filter(reward => (reward as any).locationId === locationId);
 
 export default loyaltySlice.reducer;

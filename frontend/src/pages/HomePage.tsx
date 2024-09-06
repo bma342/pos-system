@@ -1,73 +1,43 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-  Typography,
-  Grid,
-  TextField,
-  Container,
-  Box,
-  Tabs,
-  Tab,
-} from '@mui/material';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import MarkerClusterGroup from 'react-leaflet-markercluster';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import 'react-leaflet-markercluster/dist/styles.min.css';
 import { RootState, AppDispatch } from '../redux/store';
 import { fetchLocations } from '../redux/slices/locationSlice';
 import { Location } from '../types/locationTypes';
-import LocationCard from '../components/LocationCard';
-import Button from '@mui/material/Button';
-
-// Fix for default marker icon
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-  iconUrl: require('leaflet/dist/images/marker-icon.png'),
-  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
-});
+import { Typography, TextField, Grid, Card, CardContent, CardMedia, Button } from '@mui/material';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import { selectCurrentUser } from '../redux/slices/authSlice';
 
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const locations = useSelector(
-    (state: RootState) => state.location.locations
-  );
+  const locations = useSelector((state: RootState) => state.location.locations);
+  const loading = useSelector((state: RootState) => state.location.status === 'loading');
+  const error = useSelector((state: RootState) => state.location.error);
+  const currentUser = useSelector(selectCurrentUser);
   const [searchTerm, setSearchTerm] = useState('');
-  const [tabValue, setTabValue] = useState(0);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    dispatch(fetchLocations());
-  }, [dispatch]);
+    if (currentUser?.clientId) {
+      dispatch(fetchLocations(currentUser.clientId));
+    }
+  }, [dispatch, currentUser]);
 
-  const filteredLocations = locations.filter(
-    (location: Location) =>
-      (location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        location.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        location.city.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (tabValue === 0 || (tabValue === 1 && location.isDropoffSite))
+  const filteredLocations = locations.filter((location) =>
+    location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    location.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (location.city && location.city.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const mapCenter =
-    locations.length > 0
-      ? [locations[0].latitude, locations[0].longitude]
-      : [0, 0];
+  const mapCenter = locations.length > 0 && locations[0].latitude && locations[0].longitude
+    ? [locations[0].latitude, locations[0].longitude]
+    : [0, 0];
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
-
-  const handleViewMenu = () => {
-    navigate('/menu');
-  };
+  if (loading) return <Typography>Loading...</Typography>;
+  if (error) return <Typography color="error">{error}</Typography>;
 
   return (
-    <Container maxWidth="lg">
-      <Typography variant="h2" component="h1" gutterBottom>
-        Welcome to Our Online Ordering Hub
-      </Typography>
+    <div>
+      <Typography variant="h4" gutterBottom>Our Locations</Typography>
       <TextField
         fullWidth
         variant="outlined"
@@ -76,29 +46,40 @@ const HomePage: React.FC = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
         style={{ marginBottom: '1rem' }}
       />
-      <Tabs
-        value={tabValue}
-        onChange={handleTabChange}
-        style={{ marginBottom: '1rem' }}
-      >
-        <Tab label="All Locations" />
-        <Tab label="Dropoff Sites" />
-      </Tabs>
-      <Box sx={{ height: '400px', marginBottom: '2rem' }}>
-        <MapContainer
-          center={mapCenter as L.LatLngExpression}
-          zoom={13}
-          style={{ height: '100%', width: '100%' }}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
-          <MarkerClusterGroup>
-            {filteredLocations.map((location) => (
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          {filteredLocations.map((location: Location) => (
+            <Card key={location.id} style={{ marginBottom: '1rem' }}>
+              <CardContent>
+                <Typography variant="h6">{location.name}</Typography>
+                <Typography variant="body2">{location.address}</Typography>
+                {location.city && (
+                  <Typography variant="body2">
+                    {location.city}, {location.state} {location.zipCode}
+                  </Typography>
+                )}
+                {location.isDropoffSite && (
+                  <Typography variant="body2" color="primary">
+                    Dropoff Site Available
+                  </Typography>
+                )}
+                <Button variant="contained" color="primary" style={{ marginTop: '0.5rem' }}>
+                  Order Now
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <MapContainer center={mapCenter as [number, number]} zoom={13} style={{ height: '400px', width: '100%' }}>
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            />
+            {filteredLocations.map((location: Location) => (
               <Marker
                 key={location.id}
-                position={[location.latitude, location.longitude]}
+                position={[location.latitude || 0, location.longitude || 0]}
               >
                 <Popup>
                   <Typography variant="h6">{location.name}</Typography>
@@ -111,18 +92,10 @@ const HomePage: React.FC = () => {
                 </Popup>
               </Marker>
             ))}
-          </MarkerClusterGroup>
-        </MapContainer>
-      </Box>
-      <Grid container spacing={4}>
-        {filteredLocations.map((location: Location) => (
-          <Grid item xs={12} sm={6} md={4} key={location.id}>
-            <LocationCard location={location} />
-          </Grid>
-        ))}
+          </MapContainer>
+        </Grid>
       </Grid>
-      <Button onClick={handleViewMenu}>View Menu</Button>
-    </Container>
+    </div>
   );
 };
 

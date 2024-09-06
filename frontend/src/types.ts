@@ -76,6 +76,7 @@ export interface MenuItem {
   reviewCount?: number;
   showQuantityAvailable: boolean;
   quantityAvailable?: number;
+  isAvailable: boolean;
 }
 
 export interface Modifier {
@@ -196,15 +197,11 @@ export interface LoyaltyConfig {
 }
 
 export interface CartItem {
-  menuItem: {
-    id: string;
-    name: string;
-    price: number;
-  };
+  clientId: string;
+  locationId: string;
+  menuItem: MenuItem;
   quantity: number;
-  selectedModifiers: {
-    [key: string]: string | number | boolean;
-  };
+  selectedModifiers: Modifier[];
 }
 
 export interface DashboardStat {

@@ -23,7 +23,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 const GlobalAdminPanel: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { clients, status, error } = useSelector(
-    (state: RootState) => state.client
+    (state: RootState) => state.clients // Ensure correct state slice
   );
   const [newClient, setNewClient] = useState<Partial<Client>>({
     name: '',
@@ -85,7 +85,7 @@ const GlobalAdminPanel: React.FC = () => {
       </Box>
 
       <List>
-        {clients.map((client) => (
+        {clients.map((client: Client) => (
           <ListItem key={client.id}>
             <TextField
               value={client.name}

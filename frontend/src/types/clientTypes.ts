@@ -11,8 +11,9 @@ export interface ClientPreferences {
 }
 
 export interface Client {
-  id: number;
+  id: string;
   name: string;
+  // Add other relevant client fields
   subdomain: string;
   email: string;
   phoneNumber: string;
@@ -71,20 +72,8 @@ export interface ClientCreateData {
 }
 
 export interface ClientMetrics {
-  totalClients: number;
-  newClients: number;
-  activeClients: number;
+  totalOrders: number;
+  totalRevenue: number;
   averageOrderValue: number;
-  repeatClientRate: number;
-  clientRetentionRate: number;
-  clientLifetimeValue: number;
-  averageOrdersPerClient: number;
-  topClients: {
-    clientId: string;
-    name: string;
-    totalOrders: number;
-    totalSpent: number;
-  }[];
-  clientSatisfactionScore: number;
-  lastUpdated: string; // ISO date string
+  // Add other relevant metrics
 }

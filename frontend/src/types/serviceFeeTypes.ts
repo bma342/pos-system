@@ -1,8 +1,7 @@
 export interface ServiceFee {
     id: string;
-    clientId: string;
     name: string;
     amount: number;
-    type: 'FIXED' | 'PERCENTAGE';
-    description?: string;
-  }
+    type: 'fixed' | 'percentage';
+    // Add any other relevant fields
+}

@@ -1,38 +1,32 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
-import { setSelectedLocations } from '../redux/slices/userSlice';
-import { FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText } from '@mui/material';
+import { setSelectedLocation } from '../redux/slices/locationSlice';
+import { Select, MenuItem } from '@mui/material';
 
 const LocationSelector: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const locations = useSelector((state: RootState) => state.locations.locations);
-  const selectedLocations = useSelector((state: RootState) => state.user.selectedLocations);
+  const locations = useSelector((state: RootState) => state.location.locations);
+  const selectedLocationId = useSelector((state: RootState) => state.location.selectedLocation);
 
   const handleLocationChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    const locationIds = event.target.value as string[];
-    dispatch(setSelectedLocations(locationIds));
+    dispatch(setSelectedLocation(event.target.value as string));
   };
 
   return (
-    <FormControl fullWidth>
-      <InputLabel id="location-select-label">Locations</InputLabel>
-      <Select
-        labelId="location-select-label"
-        id="location-select"
-        multiple
-        value={selectedLocations}
-        onChange={handleLocationChange}
-        renderValue={(selected) => (selected as string[]).join(', ')}
-      >
-        {locations.map((location) => (
-          <MenuItem key={location.id} value={location.id}>
-            <Checkbox checked={selectedLocations.indexOf(location.id) > -1} />
-            <ListItemText primary={location.name} />
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+    <Select
+      value={selectedLocationId || ''}
+      onChange={handleLocationChange}
+      displayEmpty
+      fullWidth
+    >
+      <MenuItem value="" disabled>Select a location</MenuItem>
+      {locations.map((location) => (
+        <MenuItem key={location.id} value={location.id}>
+          {location.name}
+        </MenuItem>
+      ))}
+    </Select>
   );
 };
 

@@ -1,12 +1,14 @@
+import axios from 'axios';
 import { Location } from '../types/locationTypes';
-import apiClient from './apiClient';
 
 export const getLocations = async (clientId: string): Promise<Location[]> => {
-  const response = await apiClient.get<Location[]>(`/clients/${clientId}/locations`);
-  return response.data;
+  try {
+    const response = await axios.get(`/api/clients/${clientId}/locations`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching locations:', error);
+    throw error;
+  }
 };
 
-export const getLocation = async (clientId: string, locationId: string): Promise<Location> => {
-  const response = await apiClient.get<Location>(`/clients/${clientId}/locations/${locationId}`);
-  return response.data;
-};
+// Add other location-related API calls here

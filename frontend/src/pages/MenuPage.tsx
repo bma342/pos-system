@@ -1,60 +1,121 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../redux/store';
-import { fetchMenu } from '../redux/slices/menuSlice';
-import { Menu, MenuGroup, MenuItem } from '../types/menuTypes';
-import { MenuService } from '../services/menuService';
-import MenuItemCard from '../components/MenuItemCard';
+import { RootState, AppDispatch } from '../redux/store';
+import { fetchMenu, selectMenu, selectMenuLoading } from '../redux/slices/menuSlice';
+import { menuService } from '../services/menuService';
+import { Menu, MenuItem, MenuStatistics, MenuGroup } from '../types/menuTypes';
 import LoadingSpinner from '../components/LoadingSpinner';
-import ErrorMessage from '../components/ErrorMessage';
+import { useSelectedLocation } from '../hooks/useSelectedLocation';
+import { useSelectedClient } from '../hooks/useSelectedClient';
+import { Typography, Grid, Box, useMediaQuery, useTheme } from '@mui/material';
+
+const LazyMenuItemCard = lazy(() => import('../components/MenuItemCard'));
 
 const MenuPage: React.FC = () => {
-  const { clientId } = useParams<{ clientId: string }>();
-  const dispatch = useDispatch();
-  const menu = useSelector((state: RootState) => state.menu.currentMenu);
-  const loading = useSelector((state: RootState) => state.menu.loading);
-  const error = useSelector((state: RootState) => state.menu.error);
-  const [menuStatistics, setMenuStatistics] = useState<MenuService.MenuStatistics | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
+  const { selectedLocation } = useSelectedLocation();
+  const selectedClient = useSelectedClient();
+  const menu = useSelector((state: RootState) => selectMenu(state));
+  const loading = useSelector((state: RootState) => selectMenuLoading(state));
+  const [menuStatistics, setMenuStatistics] = useState<MenuStatistics | null>(null);
+  const [activeGroup, setActiveGroup] = useState<string | null>(null);
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
-    if (clientId) {
-      dispatch(fetchMenu(clientId));
-      MenuService.getMenuStatistics(clientId)
+    if (selectedLocation && selectedClient) {
+      dispatch(fetchMenu({ 
+        clientId: selectedClient.id.toString(), 
+        locationId: selectedLocation.id.toString() 
+      }))
+        .unwrap()
+        .then(() => menuService.getMenuStatistics(selectedClient.id.toString(), selectedLocation.id.toString()))
         .then(stats => setMenuStatistics(stats))
-        .catch(err => console.error('Failed to fetch menu statistics:', err));
+        .catch((err: Error) => console.error('Failed to fetch menu or statistics:', err));
     }
-  }, [clientId, dispatch]);
+  }, [dispatch, selectedLocation, selectedClient]);
+
+  useEffect(() => {
+    if (menu && menu.menuGroups.length > 0) {
+      setActiveGroup(menu.menuGroups[0].id);
+    }
+  }, [menu]);
+
+  const handleItemSelect = (item: MenuItem) => {
+    // Implement item selection logic here
+    console.log('Selected item:', item);
+  };
+
+  const handleGroupChange = (groupId: string) => {
+    setActiveGroup(groupId);
+  };
 
   if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage message={error} />;
-  if (!menu) return <ErrorMessage message="Menu not found" />;
+  if (!menu) return <Typography variant="h6">No menu available</Typography>;
 
   return (
-    <div className="menu-page">
-      <h1>{menu.name}</h1>
+    <Box className="menu-page" sx={{ p: isMobile ? 1 : 2 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        {menu.name}
+      </Typography>
+      
       {menuStatistics && (
-        <div className="menu-statistics">
-          <p>Total Items: {menuStatistics.totalItems}</p>
-          <h3>Most Popular Items:</h3>
+        <Box className="menu-statistics" sx={{ mb: 4 }}>
+          <Typography variant="h5" component="h2" gutterBottom>Menu Statistics</Typography>
+          <Typography>Total Items: {menuStatistics.totalItems}</Typography>
+          <Typography>Average Price: ${menuStatistics.averagePrice.toFixed(2)}</Typography>
+          <Typography>Most Popular Items:</Typography>
           <ul>
-            {menuStatistics.mostPopularItems.map((item) => (
-              <li key={item.name}>{item.name} - Ordered {item.orderCount} times</li>
+            {menuStatistics.mostPopularItems?.map((item: MenuItem) => (
+              <li key={item.id}>{item.name}</li>
             ))}
           </ul>
-        </div>
+          <Typography>Average Order Value: ${menuStatistics.averageOrderValue.toFixed(2)}</Typography>
+        </Box>
       )}
-      {menu.menuGroups.map((group: MenuGroup) => (
-        <div key={group.id} className="menu-group">
-          <h2>{group.name}</h2>
-          <div className="menu-items">
-            {group.items.map((item: MenuItem) => (
-              <MenuItemCard key={item.id} item={item} />
+
+      <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row' }}>
+        <Box sx={{ width: isMobile ? '100%' : '200px', mr: isMobile ? 0 : 2, mb: isMobile ? 2 : 0 }}>
+          {menu.menuGroups.map((group: MenuGroup) => (
+            <Box
+              key={group.id}
+              onClick={() => handleGroupChange(group.id)}
+              sx={{
+                p: 1,
+                cursor: 'pointer',
+                backgroundColor: activeGroup === group.id ? 'primary.main' : 'background.paper',
+                color: activeGroup === group.id ? 'primary.contrastText' : 'text.primary',
+                '&:hover': {
+                  backgroundColor: 'primary.light',
+                },
+              }}
+            >
+              <Typography>{group.name}</Typography>
+            </Box>
+          ))}
+        </Box>
+
+        <Box sx={{ flexGrow: 1 }}>
+          {menu.menuGroups
+            .filter((group: MenuGroup) => activeGroup === group.id)
+            .map((group: MenuGroup) => (
+              <Box key={group.id} className="menu-group">
+                <Typography variant="h5" component="h2" gutterBottom>{group.name}</Typography>
+                <Grid container spacing={2}>
+                  {group.items.map(item => (
+                    <Grid item xs={12} sm={6} md={4} key={item.id}>
+                      <Suspense fallback={<div>Loading...</div>}>
+                        <LazyMenuItemCard item={item} onSelect={handleItemSelect} />
+                      </Suspense>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
             ))}
-          </div>
-        </div>
-      ))}
-    </div>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

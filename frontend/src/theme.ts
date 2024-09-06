@@ -1,29 +1,20 @@
 import { createTheme } from '@mui/material/styles';
-import { DefaultTheme } from 'styled-components';
 
-const muiTheme = createTheme({
+const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
+      main: 'var(--primary-color, #1976d2)',
     },
     secondary: {
-      main: '#dc004e',
+      main: 'var(--secondary-color, #dc004e)',
     },
+    // Add more color variables as needed
   },
+  typography: {
+    fontFamily: 'var(--font-family, "Roboto", "Helvetica", "Arial", sans-serif)',
+    // Add more typography variables as needed
+  },
+  // Add more theme customizations as needed
 });
 
-const styledTheme: DefaultTheme = {
-  colors: {
-    primary: muiTheme.palette.primary.main,
-    secondary: muiTheme.palette.secondary.main,
-    background: muiTheme.palette.background.default,
-    text: muiTheme.palette.text.primary,
-  },
-  fontSizes: {
-    small: '0.8rem',
-    medium: '1rem',
-    large: '1.2rem',
-  },
-};
-
-export { muiTheme as default, styledTheme };
+export default theme;

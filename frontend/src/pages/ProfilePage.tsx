@@ -2,133 +2,94 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
 import { updateUserProfile, selectCurrentUser } from '../redux/slices/userSlice';
+import { User } from '../types/userTypes';
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Grid,
+  Paper,
+  Snackbar,
+} from '@mui/material';
+import { Alert } from '@mui/material';
 
 const ProfilePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const userProfile = useSelector(selectCurrentUser);
-  const [firstName, setFirstName] = useState(userProfile?.firstName || '');
-  const [lastName, setLastName] = useState(userProfile?.lastName || '');
-  const [email, setEmail] = useState(userProfile?.email || '');
-  const [restaurantName, setRestaurantName] = useState(userProfile?.restaurantName || '');
-  const [cuisineType, setCuisineType] = useState(userProfile?.cuisineType || '');
-  const [phoneNumber, setPhoneNumber] = useState(userProfile?.phoneNumber || '');
-  const [address, setAddress] = useState(userProfile?.address || '');
-  const [timeZone, setTimeZone] = useState(userProfile?.timeZone || '');
+  const [formData, setFormData] = useState<Partial<User>>({});
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (userProfile) {
-      setFirstName(userProfile.firstName);
-      setLastName(userProfile.lastName);
-      setEmail(userProfile.email);
-      setRestaurantName(userProfile.restaurantName || '');
-      setCuisineType(userProfile.cuisineType || '');
-      setPhoneNumber(userProfile.phoneNumber || '');
-      setAddress(userProfile.address || '');
-      setTimeZone(userProfile.timeZone || '');
+      setFormData({
+        firstName: userProfile.firstName || '',
+        lastName: userProfile.lastName || '',
+        email: userProfile.email || '',
+        restaurantName: userProfile.restaurantName || '',
+        cuisineType: userProfile.cuisineType || '',
+        phoneNumber: userProfile.phoneNumber || '',
+        address: userProfile.address || '',
+        timeZone: userProfile.timeZone || '',
+      });
     }
   }, [userProfile]);
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
+  };
+
   const handleUpdateProfile = async () => {
     try {
-      await dispatch(updateUserProfile({
-        firstName,
-        lastName,
-        email,
-        restaurantName,
-        cuisineType,
-        phoneNumber,
-        address,
-        timeZone
-      })).unwrap();
+      await dispatch(updateUserProfile(formData)).unwrap();
       setError(null);
+      setSuccess('Profile updated successfully');
     } catch (err) {
       setError('Failed to update profile. Please try again.');
+      setSuccess(null);
     }
   };
 
   if (!userProfile) {
-    return <div>Loading...</div>;
+    return <Typography>Loading...</Typography>;
   }
 
   return (
-    <div className="profile-page">
-      <h2>Restaurant Profile</h2>
-      {error && <div className="error">{error}</div>}
-      <div>
-        <label htmlFor="firstName">First Name:</label>
-        <input
-          type="text"
-          id="firstName"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="lastName">Last Name:</label>
-        <input
-          type="text"
-          id="lastName"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="email">Email:</label>
-        <input
-          type="email"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="restaurantName">Restaurant Name:</label>
-        <input
-          type="text"
-          id="restaurantName"
-          value={restaurantName}
-          onChange={(e) => setRestaurantName(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="cuisineType">Cuisine Type:</label>
-        <input
-          type="text"
-          id="cuisineType"
-          value={cuisineType}
-          onChange={(e) => setCuisineType(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="phoneNumber">Phone Number:</label>
-        <input
-          type="tel"
-          id="phoneNumber"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="address">Address:</label>
-        <input
-          type="text"
-          id="address"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="timeZone">Time Zone:</label>
-        <input
-          type="text"
-          id="timeZone"
-          value={timeZone}
-          onChange={(e) => setTimeZone(e.target.value)}
-        />
-      </div>
-      <button onClick={handleUpdateProfile}>Update Profile</button>
-    </div>
+    <Box sx={{ maxWidth: 600, margin: 'auto', pt: 4 }}>
+      <Paper elevation={3} sx={{ p: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Restaurant Profile
+        </Typography>
+        <Grid container spacing={3}>
+          {Object.entries(formData).map(([key, value]) => (
+            <Grid item xs={12} sm={6} key={key}>
+              <TextField
+                fullWidth
+                label={key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
+                name={key}
+                value={value}
+                onChange={handleInputChange}
+              />
+            </Grid>
+          ))}
+        </Grid>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleUpdateProfile}
+          sx={{ mt: 3 }}
+        >
+          Update Profile
+        </Button>
+      </Paper>
+      <Snackbar open={!!error || !!success} autoHideDuration={6000} onClose={() => { setError(null); setSuccess(null); }}>
+        <Alert onClose={() => { setError(null); setSuccess(null); }} severity={error ? "error" : "success"} sx={{ width: '100%' }}>
+          {error || success}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 };
 

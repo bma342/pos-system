@@ -5,7 +5,7 @@ export enum UserRole {
   GUEST = 'GUEST',
   CLIENT_ADMIN = 'CLIENT_ADMIN',
   GLOBAL_ADMIN = 'GLOBAL_ADMIN',
-  // Add other roles as needed
+  LOCATION_ADMIN = 'LOCATION_ADMIN'  // Add this line
 }
 
 export interface User {
@@ -13,6 +13,14 @@ export interface User {
   email: string;
   role: UserRole;
   clientId: string;
+  locationId?: string;
+  firstName?: string;
+  lastName?: string;
+  restaurantName?: string;
+  cuisineType?: string;
+  phoneNumber?: string;
+  address?: string;
+  timeZone?: string;
 }
 
 export interface AuthResponse {

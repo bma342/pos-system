@@ -3,27 +3,33 @@ import { POSProfile, POSIntegration } from '../types/posTypes';
 
 const BASE_URL = '/api/pos-profiles';
 
-export const fetchPOSProfiles = async (clientId: string): Promise<POSProfile[]> => {
-  const response = await axios.get(`${BASE_URL}`, { params: { clientId } });
+export const fetchPOSProfiles = async (locationId: string): Promise<POSProfile[]> => {
+  const response = await axios.get(`${BASE_URL}/location/${locationId}`);
   return response.data;
 };
 
 export const createPOSProfile = async (profile: Omit<POSProfile, 'id'>): Promise<POSProfile> => {
-  const response = await axios.post(`${BASE_URL}`, profile);
+  const response = await axios.post(BASE_URL, profile);
   return response.data;
 };
 
-export const updatePOSProfile = async (profileId: string, profile: Partial<POSProfile>): Promise<POSProfile> => {
-  const response = await axios.put(`${BASE_URL}/${profileId}`, profile);
+export const updatePOSProfile = async (id: string, profile: Partial<POSProfile>): Promise<POSProfile> => {
+  const response = await axios.put(`${BASE_URL}/${id}`, profile);
   return response.data;
 };
 
-export const deletePOSProfile = async (profileId: string): Promise<void> => {
-  await axios.delete(`${BASE_URL}/${profileId}`);
+export const deletePOSProfile = async (id: string): Promise<void> => {
+  await axios.delete(`${BASE_URL}/${id}`);
 };
 
-export const fetchPOSIntegrations = async (clientId: string): Promise<POSIntegration[]> => {
-  const response = await axios.get(`${BASE_URL}/integrations`, { params: { clientId } });
+// New functions for POS Integrations
+export const fetchPOSIntegrations = async (): Promise<POSIntegration[]> => {
+  const response = await axios.get(`${BASE_URL}/integrations`);
+  return response.data;
+};
+
+export const fetchPOSIntegration = async (id: string): Promise<POSIntegration> => {
+  const response = await axios.get(`${BASE_URL}/integrations/${id}`);
   return response.data;
 };
 
@@ -32,25 +38,11 @@ export const createPOSIntegration = async (integration: Omit<POSIntegration, 'id
   return response.data;
 };
 
-export const updatePOSIntegration = async (integrationId: string, integration: Partial<POSIntegration>): Promise<POSIntegration> => {
-  const response = await axios.put(`${BASE_URL}/integrations/${integrationId}`, integration);
+export const updatePOSIntegration = async (id: string, integration: Partial<POSIntegration>): Promise<POSIntegration> => {
+  const response = await axios.put(`${BASE_URL}/integrations/${id}`, integration);
   return response.data;
 };
 
-export const deletePOSIntegration = async (integrationId: string): Promise<void> => {
-  await axios.delete(`${BASE_URL}/integrations/${integrationId}`);
-};
-
-export const syncPOSProfile = async (profileId: string): Promise<void> => {
-  await axios.post(`${BASE_URL}/${profileId}/sync`);
-};
-
-export const fetchPOSProfile = async (clientId: string, locationId: string, profileId: string): Promise<POSProfile> => {
-  const response = await axios.get(`${BASE_URL}/clients/${clientId}/locations/${locationId}/pos-profiles/${profileId}`);
-  return response.data;
-};
-
-export const fetchPOSIntegration = async (clientId: string, integrationId: string): Promise<POSIntegration> => {
-  const response = await axios.get(`${BASE_URL}/clients/${clientId}/pos-integrations/${integrationId}`);
-  return response.data;
+export const deletePOSIntegration = async (id: string): Promise<void> => {
+  await axios.delete(`${BASE_URL}/integrations/${id}`);
 };

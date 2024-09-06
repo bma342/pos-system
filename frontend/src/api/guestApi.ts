@@ -1,5 +1,5 @@
 import apiClient from './apiClient';
-import { Reward, CartItem } from '../types';
+import { Reward, CartItem, GuestMetrics } from '../types';
 
 export const fetchGuestRewards = async (guestId: number): Promise<Reward[]> => {
   try {
@@ -32,7 +32,11 @@ export const getEstimatedPrepTime = async (cartItems: CartItem[]): Promise<strin
   }
 };
 
-export const fetchGuestMetrics = async (clientId: string, guestId: number): Promise<GuestMetrics> => {
-  const response = await apiClient.get(`/clients/${clientId}/guests/${guestId}/metrics`);
-  return response.data;
+export const fetchGuestMetrics = async (guestId: string): Promise<GuestMetrics> => {
+  try {
+    const response = await apiClient.get(`/api/guests/${guestId}/metrics`);
+    return response.data;
+  } catch (error) {
+    throw new Error('Failed to fetch guest metrics');
+  }
 };

@@ -1,12 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../rootReducer';
-import { fetchRoles } from 'frontend/src/api/roleApi';
-
-interface Role {
-  id: string;
-  name: string;
-  permissions: string[];
-}
+import { roleService } from '../../services/roleService';
+import { Role } from '../../types/roleTypes';
 
 interface RoleState {
   roles: Role[];
@@ -19,6 +14,17 @@ const initialState: RoleState = {
   status: 'idle',
   error: null,
 };
+
+export const fetchRoles = createAsyncThunk<Role[], void, { rejectValue: string }>(
+  'roles/fetchRoles',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await roleService.fetchRoles();
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
 
 const roleSlice = createSlice({
   name: 'roles',
@@ -36,6 +42,20 @@ const roleSlice = createSlice({
         role.permissions = action.payload.permissions;
       }
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchRoles.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchRoles.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.roles = action.payload;
+      })
+      .addCase(fetchRoles.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload || 'Failed to fetch roles';
+      });
   },
 });
 

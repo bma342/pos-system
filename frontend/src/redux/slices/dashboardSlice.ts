@@ -2,18 +2,11 @@ import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { DashboardData, DashboardParams } from '../../types/dashboardTypes';
 import { fetchDashboardDataAPI } from '../../services/dashboardService';
 
-export const fetchDashboardData = createAsyncThunk<DashboardData, DashboardParams, { rejectValue: string }>(
+export const fetchDashboardData = createAsyncThunk<DashboardData, DashboardParams>(
   'dashboard/fetchDashboardData',
-  async (params: DashboardParams, { rejectWithValue }) => {
-    try {
-      const response = await fetchDashboardDataAPI(params);
-      return response;
-    } catch (error) {
-      if (error instanceof Error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('An unknown error occurred');
-    }
+  async (params: DashboardParams) => {
+    const response = await fetchDashboardDataAPI(params.clientId, params.locationId, params.dateRange);
+    return response;
   }
 );
 
@@ -45,7 +38,7 @@ const dashboardSlice = createSlice({
       })
       .addCase(fetchDashboardData.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? 'An error occurred';
+        state.error = action.error.message ?? 'An error occurred';
       });
   },
 });

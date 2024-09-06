@@ -13,7 +13,8 @@ import {
 } from '@mui/material';
 import { RootState, AppDispatch } from '../redux/store';
 import { fetchLocations } from '../redux/slices/locationSlice';
-import { Location } from '../types';
+import { Location } from '../types/locationTypes'; // Ensure correct import
+import { getClientIdFromSubdomain } from '../utils/clientIdUtil';
 
 const GuestLandingPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -21,14 +22,15 @@ const GuestLandingPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    dispatch(fetchLocations());
+    const clientId = getClientIdFromSubdomain();
+    dispatch(fetchLocations(clientId)); // Pass the derived clientId as a string
   }, [dispatch]);
 
   const filteredLocations = locations.filter(
     (location) =>
       location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       location.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      location.city.toLowerCase().includes(searchTerm.toLowerCase())
+      (location.city && location.city.toLowerCase().includes(searchTerm.toLowerCase())) // Check if city is defined
   );
 
   return (

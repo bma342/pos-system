@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent, CardMedia, Typography, Button, Box } from '@mui/material';
+import { Card, CardContent, CardMedia, Typography, Button } from '@mui/material';
 import { MenuItem } from '../types/menuTypes';
 
 interface MenuItemCardProps {
@@ -8,54 +8,42 @@ interface MenuItemCardProps {
 }
 
 const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onSelect }) => {
-  const handleKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      onSelect(item);
-    }
-  };
-
   return (
     <Card 
       sx={{ 
-        maxWidth: 345, 
-        m: 2, 
-        display: 'flex', 
-        flexDirection: 'column',
-        height: '100%',
+        backgroundColor: 'var(--card-background)',
+        boxShadow: 'var(--card-shadow)',
         '&:hover': {
-          boxShadow: 6,
+          boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
         },
       }}
     >
       <CardMedia
         component="img"
         height="140"
-        image={item.image || '/placeholder-image.jpg'}
+        image={item.imageUrl}
         alt={item.name}
       />
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Typography gutterBottom variant="h5" component="div">
+      <CardContent>
+        <Typography gutterBottom variant="h6" component="div">
           {item.name}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           {item.description}
         </Typography>
-        <Typography variant="h6" color="primary" sx={{ mt: 2 }}>
+        <Typography variant="h6" color="var(--primary-color)">
           ${item.price.toFixed(2)}
         </Typography>
-      </CardContent>
-      <Box sx={{ p: 2 }}>
-        <Button
-          variant="contained"
+        <Button 
+          onClick={onSelect}
+          variant="contained" 
           color="primary"
-          onClick={() => onSelect(item)}
-          onKeyPress={handleKeyPress}
-          fullWidth
-          aria-label={`Add ${item.name} to cart`}
+          sx={{ marginTop: 2 }}
+          aria-label={`Select ${item.name}`}
         >
-          Add to Cart
+          Select
         </Button>
-      </Box>
+      </CardContent>
     </Card>
   );
 };

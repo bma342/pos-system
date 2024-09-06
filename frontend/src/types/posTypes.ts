@@ -56,5 +56,7 @@ export interface POSIntegration {
 export interface POSProfile {
   id: string;
   name: string;
-  // Add other properties as needed
+  posType: string;
+  active: boolean;
+  // Add other relevant properties
 }

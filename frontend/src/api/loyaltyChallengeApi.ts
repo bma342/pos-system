@@ -28,11 +28,7 @@ export const deleteLoyaltyChallenge = async (id: number): Promise<void> => {
   await apiClient.delete(`/api/loyalty-challenges/${id}`);
 };
 
-export const getGuestChallengeProgress = async (
-  guestId: number
-): Promise<LoyaltyChallengeProgress[]> => {
-  const response = await apiClient.get(
-    `/api/loyalty-challenges/progress/${guestId}`
-  );
+export const getGuestChallengeProgress = async (guestId: string): Promise<LoyaltyChallengeProgress[]> => {
+  const response = await apiClient.get(`/api/guests/${guestId}/challenge-progress`);
   return response.data;
 };

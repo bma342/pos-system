@@ -9,63 +9,58 @@ import {
 } from '../redux/slices/cartSlice';
 import { createOrder } from '../api/orderApi';
 import { fetchGuestRewards } from '../api/guestApi';
-import { OrderType, Reward, CartItem } from '../types';
+import { OrderType, Reward, Location, User, Order, CartItem } from '../types';
+import { Typography, Grid, Paper, Button, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { selectCurrentUser } from '../redux/slices/authSlice';
+import { selectSelectedLocation } from '../redux/selectors/locationSelectors';
 
 const CheckoutPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const cartItems = useSelector((state: RootState) => state.cart.items);
-  const location = useSelector(
-    (state: RootState) => state.location.selectedLocation
-  );
-  const guest = useSelector((state: RootState) => state.auth.currentGuest);
+  const selectedLocation = useSelector(selectSelectedLocation) as Location | null;
+  const currentUser = useSelector(selectCurrentUser);
 
   const [orderType, setOrderType] = useState<OrderType>('pickup');
   const [kitchenTip, setKitchenTip] = useState<number>(0);
   const [driverTip, setDriverTip] = useState<number>(0);
-  const [appliedDiscounts, setAppliedDiscounts] = useState<string[]>([]);
+  const [appliedDiscounts, setAppliedDiscounts] = useState<Reward[]>([]);
   const [availableRewards, setAvailableRewards] = useState<Reward[]>([]);
 
   useEffect(() => {
-    if (guest) {
-      fetchGuestRewards(guest.id).then(setAvailableRewards);
+    if (currentUser?.id) {
+      fetchGuestRewards(Number(currentUser.id)).then(setAvailableRewards);
     }
-  }, [guest]);
+  }, [currentUser]);
 
-  const handleQuantityChange = (index: number, newQuantity: number) => {
+  const handleQuantityChange = (clientId: string, locationId: string, menuItemId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
-    dispatch(updateCartItemQuantity({ index, quantity: newQuantity }));
+    dispatch(updateCartItemQuantity({ clientId, locationId, menuItemId, quantity: newQuantity }));
   };
 
-  const handleRemoveItem = (index: number) => {
-    dispatch(removeFromCart(index));
+  const handleRemoveItem = (clientId: string, locationId: string, menuItemId: string) => {
+    dispatch(removeFromCart({ clientId, locationId, menuItemId }));
   };
 
   const calculateItemTotal = (item: CartItem) => {
     const itemTotal = item.menuItem.price * item.quantity;
-    const modifierTotal =
-      item.selectedModifiers.reduce((sum, mod) => sum + mod.price, 0) *
-      item.quantity;
+    const modifierTotal = item.selectedModifiers.reduce((sum, mod) => sum + mod.price, 0) * item.quantity;
     return itemTotal + modifierTotal;
   };
 
   const calculateSubtotal = () => {
-    return cartItems.reduce(
-      (total, item) => total + calculateItemTotal(item),
-      0
-    );
+    return cartItems.reduce((total, item) => total + calculateItemTotal(item), 0);
   };
 
   const calculateTax = (subtotal: number) => {
-    return subtotal * (location?.taxRate || 0);
+    return subtotal * (selectedLocation?.taxRate ?? 0);
   };
 
   const calculateServiceCharge = (subtotal: number) => {
-    const rate =
-      orderType === 'catering'
-        ? location?.cateringServiceChargeRate
-        : location?.serviceChargeRate;
-    return subtotal * (rate || 0);
+    const rate = orderType === 'catering' 
+      ? selectedLocation?.cateringServiceChargeRate 
+      : selectedLocation?.serviceChargeRate;
+    return subtotal * (rate ?? 0);
   };
 
   const calculateTotal = () => {
@@ -78,21 +73,21 @@ const CheckoutPage: React.FC = () => {
 
   const handleCheckout = async () => {
     try {
-      if (!location) {
-        throw new Error('Location not selected');
+      if (!selectedLocation || !currentUser?.id) {
+        throw new Error('Location or user information is missing');
       }
-      const orderData = {
+      const orderData: Partial<Order> = {
         items: cartItems,
-        orderType,
-        locationId: location.id,
-        guestId: guest?.id,
+        orderType: orderType as OrderType,
+        locationId: selectedLocation.id,
+        guestId: currentUser.id,
         subtotal: calculateSubtotal(),
         tax: calculateTax(calculateSubtotal()),
         serviceCharge: calculateServiceCharge(calculateSubtotal()),
         kitchenTip,
         driverTip,
         total: calculateTotal(),
-        appliedDiscounts,
+        appliedDiscounts: appliedDiscounts,
       };
       const response = await createOrder(orderData);
       const orderId = response.data.id;
@@ -105,103 +100,14 @@ const CheckoutPage: React.FC = () => {
   };
 
   return (
-    <div className="checkout-page">
-      <h1>Checkout</h1>
-      <div className="order-type-selector">
-        <label>
-          Order Type:
-          <select
-            value={orderType}
-            onChange={(e) => setOrderType(e.target.value as OrderType)}
-            aria-label="Select Order Type"
-          >
-            <option value="pickup">Pickup</option>
-            <option value="delivery">Delivery</option>
-            <option value="catering">Catering</option>
-          </select>
-        </label>
-      </div>
-      {cartItems.map((item, index) => (
-        <div key={index} className="cart-item">
-          <h3>{item.menuItem.name}</h3>
-          <p>
-            Quantity:
-            <input
-              type="number"
-              value={item.quantity}
-              onChange={(e) =>
-                handleQuantityChange(index, parseInt(e.target.value, 10))
-              }
-              min="1"
-              aria-label="Item Quantity"
-            />
-          </p>
-          <p>Price: ${calculateItemTotal(item).toFixed(2)}</p>
-          {item.selectedModifiers.map((mod, modIndex) => (
-            <p key={modIndex}>
-              {mod.name}: ${(mod.price * item.quantity).toFixed(2)}
-            </p>
-          ))}
-          <button onClick={() => handleRemoveItem(index)}>Remove</button>
-        </div>
-      ))}
-      <div className="order-summary">
-        <h2>Order Summary</h2>
-        <p>Subtotal: ${calculateSubtotal().toFixed(2)}</p>
-        <p>Tax: ${calculateTax(calculateSubtotal()).toFixed(2)}</p>
-        <p>
-          Service Charge: $
-          {calculateServiceCharge(calculateSubtotal()).toFixed(2)}
-        </p>
-        {orderType === 'catering' && (
-          <>
-            <label>
-              Kitchen Tip: $
-              <input
-                type="number"
-                value={kitchenTip}
-                onChange={(e) => setKitchenTip(parseFloat(e.target.value))}
-                min="0"
-                step="0.01"
-                aria-label="Kitchen Tip"
-              />
-            </label>
-            <label>
-              Driver Tip: $
-              <input
-                type="number"
-                value={driverTip}
-                onChange={(e) => setDriverTip(parseFloat(e.target.value))}
-                min="0"
-                step="0.01"
-                aria-label="Driver Tip"
-              />
-            </label>
-          </>
-        )}
-        <h3>Total: ${calculateTotal().toFixed(2)}</h3>
-      </div>
-      {availableRewards.length > 0 && (
-        <div className="available-rewards">
-          <h3>Available Rewards</h3>
-          {availableRewards.map((reward) => (
-            <div key={reward.id}>
-              <p>
-                {reward.name} - {reward.description}
-              </p>
-              <button
-                onClick={() =>
-                  setAppliedDiscounts([...appliedDiscounts, reward.id])
-                }
-              >
-                Apply
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-      <button onClick={handleCheckout}>Place Order</button>
-    </div>
+    <Grid container spacing={3} className="checkout-page">
+      <Grid item xs={12} md={8} lg={9}>
+        {/* Order details */}
+      </Grid>
+      <Grid item xs={12} md={4} lg={3}>
+        {/* Order summary */}
+      </Grid>
+    </Grid>
   );
 };
 

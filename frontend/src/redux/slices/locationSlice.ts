@@ -1,56 +1,52 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { RootState } from '../store';
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { Location } from '../../types/locationTypes';
-import { fetchLocations } from 'frontend/src/api/locationApi';
+import { locationService } from '../../services/locationService';
 
 interface LocationState {
   locations: Location[];
-  loading: boolean;
+  selectedLocation: string | null;
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
 
 const initialState: LocationState = {
   locations: [],
-  loading: false,
+  selectedLocation: null,
+  status: 'idle',
   error: null,
 };
 
-export const fetchLocations = createAsyncThunk<Location[], void, { rejectValue: string }>(
+export const fetchLocations = createAsyncThunk(
   'location/fetchLocations',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await api.get('/locations');
-      return response.data;
-    } catch (error) {
-      return rejectWithValue('Failed to fetch locations');
-    }
+  async (clientId: string) => {
+    const response = await locationService.fetchLocations(clientId);
+    return response;
   }
 );
 
 const locationSlice = createSlice({
   name: 'location',
   initialState,
-  reducers: {},
+  reducers: {
+    setSelectedLocation: (state, action: PayloadAction<string>) => {
+      state.selectedLocation = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchLocations.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+        state.status = 'loading';
       })
-      .addCase(fetchLocations.fulfilled, (state, action) => {
+      .addCase(fetchLocations.fulfilled, (state, action: PayloadAction<Location[]>) => {
+        state.status = 'succeeded';
         state.locations = action.payload;
-        state.loading = false;
       })
       .addCase(fetchLocations.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || 'An error occurred';
+        state.status = 'failed';
+        state.error = action.error.message || 'Failed to fetch locations';
       });
   },
 });
 
-// Updated selector functions
-export const selectLocations = (state: RootState) => state.location.locations;
-export const selectLocationLoading = (state: RootState) => state.location.loading;
-export const selectLocationError = (state: RootState) => state.location.error;
-
+export const { setSelectedLocation } = locationSlice.actions;
 export default locationSlice.reducer;

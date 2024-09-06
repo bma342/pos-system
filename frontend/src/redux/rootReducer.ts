@@ -24,16 +24,16 @@ import cateringOrderReducer from './slices/cateringOrderSlice';
 import inventoryReducer from './slices/inventorySlice';
 import realtimeMetricsReducer from './slices/realtimeMetricsSlice';
 import posSettingsReducer from './slices/posSettingsSlice';
-import cartReducer from './slices/cartSlice'; // Add this line
+import cartReducer from './slices/cartSlice';
 import menuItemsReducer from './slices/menuItemsSlice';
 
 const rootReducer = combineReducers({
+  location: locationReducer,
   auth: authReducer,
   abTest: abTestReducer,
   clientBranding: clientBrandingReducer,
   clientConfig: clientConfigReducer,
-  client: clientReducer,
-  location: locationReducer,
+  clients: clientReducer, // Ensure correct state slice
   menu: menuReducer,
   order: orderReducer,
   loyalty: loyaltyReducer,
@@ -53,7 +53,7 @@ const rootReducer = combineReducers({
   inventory: inventoryReducer,
   realtimeMetrics: realtimeMetricsReducer,
   posSettings: posSettingsReducer,
-  cart: cartReducer, // Add this line
+  cart: cartReducer,
   menuItems: menuItemsReducer,
 });
 

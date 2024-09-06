@@ -1,123 +1,93 @@
-import React, { useEffect, useState } from 'react';
-import { useClientContext } from '../context/ClientContext';
-import { CateringOrderService } from '../services/CateringOrderService';
-import { MenuService } from '../services/MenuService';
-import {
-  Typography,
-  Grid,
-  Paper,
-  CircularProgress,
-  Button,
+import React, { useEffect, useState, lazy, Suspense } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../redux/store';
+import { fetchDashboardData } from '../redux/slices/dashboardSlice';
+import { selectCurrentUser, selectSelectedLocation } from '../redux/slices/userSlice';
+import { 
+  Typography, 
+  Grid, 
+  Paper, 
+  CircularProgress, 
+  Box,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
-import { OrderStatistics } from '../types/cateringOrderTypes';
-import { MenuStatistics } from '../types/menuTypes';
-import { fetchCateringOrders } from 'frontend/src/api/cateringOrderApi';
-import { fetchMenuSummary } from 'frontend/src/api/menuApi';
+import { DashboardData, DateRange } from '../types/dashboardTypes';
+
+const LazyChart = lazy(() => import('../components/LazyChart'));
 
 const Dashboard: React.FC = () => {
-  const { user } = useClientContext();
-  const [orderStats, setOrderStats] = useState<OrderStatistics | null>(null);
-  const [menuStats, setMenuStats] = useState<MenuStatistics | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { data, loading, error } = useSelector((state: RootState) => state.dashboard);
+  const user = useSelector(selectCurrentUser);
+  const selectedLocation = useSelector(selectSelectedLocation);
+  const [dateRange, setDateRange] = useState<DateRange>({
+    startDate: new Date(new Date().setDate(new Date().getDate() - 30)), // Last 30 days
+    endDate: new Date()
+  });
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!user?.clientId) return;
-
-      try {
-        const endDate = new Date().toISOString();
-        const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(); // Last 30 days
-        const [orderStatsData, menuStatsData] = await Promise.all([
-          CateringOrderService.getOrderStatistics(user.clientId, startDate, endDate),
-          MenuService.getMenuStatistics(user.clientId, startDate, endDate),
-        ]);
-        setOrderStats(orderStatsData);
-        setMenuStats(menuStatsData);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to load dashboard data. Please try again.');
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [user?.clientId]);
+    if (user?.clientId && selectedLocation) {
+      dispatch(fetchDashboardData({ 
+        clientId: user.clientId, 
+        locationId: selectedLocation,
+        dateRange: dateRange
+      }));
+    }
+  }, [dispatch, user, selectedLocation, dateRange]);
 
   if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
-
-  const popularItemsData = menuStats?.mostPopularItems.map((item) => ({
-    name: item.name,
-    orders: item.orderCount,
-  })) || [];
+  if (!data) return <Typography>No data available</Typography>;
 
   return (
-    <div>
-      <Typography variant="h4" gutterBottom>
-        Dashboard
-      </Typography>
+    <Box 
+      className="dashboard" 
+      sx={{ 
+        padding: isMobile ? 2 : 4,
+        backgroundColor: 'var(--background-color)',
+        color: 'var(--text-color)'
+      }}
+    >
+      <Typography variant="h4" component="h1" gutterBottom>Dashboard</Typography>
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6} md={3}>
-          <Paper style={{ padding: '20px' }}>
+          <Paper elevation={3} sx={{ p: 2, backgroundColor: 'var(--card-background)' }}>
             <Typography variant="h6">Total Orders</Typography>
-            <Typography variant="h4">{orderStats?.totalOrders}</Typography>
+            <Typography variant="h4">{data.totalOrders}</Typography>
           </Paper>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Paper style={{ padding: '20px' }}>
+          <Paper elevation={3} sx={{ p: 2, backgroundColor: 'var(--card-background)' }}>
             <Typography variant="h6">Total Revenue</Typography>
-            <Typography variant="h4">
-              ${orderStats?.totalRevenue.toFixed(2)}
-            </Typography>
+            <Typography variant="h4">${data.totalRevenue.toFixed(2)}</Typography>
           </Paper>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Paper style={{ padding: '20px' }}>
+          <Paper elevation={3} sx={{ p: 2, backgroundColor: 'var(--card-background)' }}>
             <Typography variant="h6">Average Order Value</Typography>
-            <Typography variant="h4">
-              ${orderStats?.averageOrderValue.toFixed(2)}
-            </Typography>
+            <Typography variant="h4">${data.averageOrderValue.toFixed(2)}</Typography>
           </Paper>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Paper style={{ padding: '20px' }}>
-            <Typography variant="h6">Total Menu Items</Typography>
-            <Typography variant="h4">{menuStats?.totalItems}</Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12}>
-          <Paper style={{ padding: '20px' }}>
-            <Typography variant="h6" gutterBottom>
-              Most Popular Items
-            </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={popularItemsData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="orders" fill="#8884d8" />
-              </BarChart>
-            </ResponsiveContainer>
+          <Paper elevation={3} sx={{ p: 2, backgroundColor: 'var(--card-background)' }}>
+            <Typography variant="h6">New Customers</Typography>
+            <Typography variant="h4">{data.newCustomers}</Typography>
           </Paper>
         </Grid>
       </Grid>
-      <Button variant="contained" color="primary" style={{ marginTop: '20px' }}>
-        View Detailed Reports
-      </Button>
-    </div>
+
+      <Box mt={4}>
+        <Typography variant="h5" gutterBottom>Popular Items</Typography>
+        <Suspense fallback={<CircularProgress />}>
+          <LazyChart data={data.popularItems} />
+        </Suspense>
+      </Box>
+
+      {/* Add more sections for other dashboard data */}
+    </Box>
   );
 };
 

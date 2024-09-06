@@ -14,51 +14,51 @@ import {
   Snackbar,
   Alert,
   CircularProgress,
+  Box,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { InventoryItem } from '../types/inventoryTypes';
-import { InventoryService } from '../services/inventoryService';
-import { useAuth } from '../contexts/AuthContext';
-import { fetchInventory, updateInventory } from 'frontend/src/api/inventoryApi';
+import { useSelectedLocation } from '../hooks/useSelectedLocation';
+import { useSelectedClient } from '../hooks/useSelectedClient';
+import * as inventoryApi from '../api/inventoryApi';
 
 const InventoryManagement: React.FC = () => {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const inventoryService = useMemo(() => new InventoryService(), []);
-
-  useEffect(() => {
-    const fetchInventory = async () => {
-      try {
-        const data = await inventoryService.getInventory();
-        setInventory(data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching inventory:', error);
-        setError('Failed to fetch inventory. Please try again.');
-        setLoading(false);
-      }
-    };
-
-    fetchInventory();
-  }, [inventoryService]);
-
-  const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Partial<InventoryItem> | null>(null);
   const [snackbar, setSnackbar] = useState<{
     message: string;
     severity: 'success' | 'error';
   } | null>(null);
 
+  const { selectedLocation } = useSelectedLocation();
+  const selectedClient = useSelectedClient();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  useEffect(() => {
+    const fetchInventory = async () => {
+      if (selectedClient && selectedLocation) {
+        try {
+          const data = await inventoryApi.getInventory(selectedClient.id.toString(), selectedLocation.id);
+          setInventory(data);
+          setLoading(false);
+        } catch (error) {
+          console.error('Error fetching inventory:', error);
+          setError('Failed to fetch inventory. Please try again.');
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchInventory();
+  }, [selectedLocation, selectedClient]);
+
   const handleAddItem = () => {
-    setSelectedItem({
-      id: 0,
-      name: '',
-      quantity: 0,
-      unit: '',
-      reorderPoint: 0,
-      tenantId: user.tenantId,
-    });
+    setSelectedItem({ name: '', quantity: 0, unit: '', reorderPoint: 0 });
     setIsModalOpen(true);
   };
 
@@ -68,21 +68,22 @@ const InventoryManagement: React.FC = () => {
   };
 
   const handleSaveItem = async () => {
-    if (!selectedItem) return;
+    if (!selectedItem || !selectedClient || !selectedLocation) return;
 
     try {
-      let updatedItem;
-      if (selectedItem.id === 0) {
-        updatedItem = await inventoryService.createInventoryItem(
-          user.tenantId,
-          selectedItem
+      let updatedItem: InventoryItem;
+      if (!selectedItem.id) {
+        updatedItem = await inventoryApi.createInventoryItem(
+          selectedClient.id.toString(),
+          selectedLocation.id,
+          selectedItem as Omit<InventoryItem, 'id'>
         );
         setInventory([...inventory, updatedItem]);
       } else {
-        updatedItem = await inventoryService.updateInventoryItem(
-          user.tenantId,
-          selectedItem.id,
-          selectedItem
+        updatedItem = await inventoryApi.updateInventoryItem(
+          selectedClient.id.toString(),
+          selectedLocation.id,
+          selectedItem as InventoryItem
         );
         setInventory(
           inventory.map((item) =>
@@ -103,23 +104,20 @@ const InventoryManagement: React.FC = () => {
     }
   };
 
-  const handleDeleteItem = async (itemId: number) => {
-    if (
-      window.confirm('Are you sure you want to delete this inventory item?')
-    ) {
-      try {
-        await inventoryService.deleteInventoryItem(user.tenantId, itemId);
-        setInventory(inventory.filter((item) => item.id !== itemId));
-        setSnackbar({
-          message: 'Inventory item deleted successfully',
-          severity: 'success',
-        });
-      } catch (err) {
-        setSnackbar({
-          message: 'Failed to delete inventory item. Please try again.',
-          severity: 'error',
-        });
-      }
+  const handleDeleteItem = async (itemId: string) => {
+    if (!selectedClient || !selectedLocation) return;
+    try {
+      await inventoryApi.deleteInventoryItem(selectedClient.id.toString(), selectedLocation.id, itemId);
+      setInventory(inventory.filter((item) => item.id !== itemId));
+      setSnackbar({
+        message: 'Inventory item deleted successfully',
+        severity: 'success',
+      });
+    } catch (err) {
+      setSnackbar({
+        message: 'Failed to delete inventory item. Please try again.',
+        severity: 'error',
+      });
     }
   };
 
@@ -127,7 +125,7 @@ const InventoryManagement: React.FC = () => {
   if (error) return <Typography color="error">{error}</Typography>;
 
   return (
-    <div>
+    <Box className="inventory-management" sx={{ p: isMobile ? 1 : 2 }}>
       <Typography variant="h4" gutterBottom>
         Inventory Management
       </Typography>
@@ -191,7 +189,7 @@ const InventoryManagement: React.FC = () => {
               }}
             >
               <Typography variant="h6" gutterBottom>
-                {selectedItem.id === 0 ? 'Add New Item' : 'Edit Item'}
+                {selectedItem.id ? 'Edit Item' : 'Add New Item'}
               </Typography>
               <TextField
                 label="Name"
@@ -263,7 +261,7 @@ const InventoryManagement: React.FC = () => {
           {snackbar?.message}
         </Alert>
       </Snackbar>
-    </div>
+    </Box>
   );
 };
 
