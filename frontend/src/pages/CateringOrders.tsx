@@ -201,14 +201,14 @@ const CateringOrders: React.FC = () => {
           </FormControl>
           <DateTimePicker
             label="Order Date"
-            value={newOrder.orderDate}
+            value={newOrder.orderDate ? new Date(newOrder.orderDate) : null}
             onChange={(date) =>
               setNewOrder({ ...newOrder, orderDate: date?.toISOString() || '' })
             }
           />
           <DateTimePicker
             label="Delivery Date"
-            value={newOrder.deliveryDate}
+            value={newOrder.deliveryDate ? new Date(newOrder.deliveryDate) : null}
             onChange={(date) =>
               setNewOrder({
                 ...newOrder,

@@ -27,7 +27,7 @@ import {
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 import { cateringOrderApi } from '../api/cateringOrderApi';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import {
   CateringOrder,
   OrderStatus,
@@ -40,7 +40,7 @@ const CateringOrdersAdmin: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<CateringOrder | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [deletingOrderId, setDeletingOrderId] = useState<number | null>(null);
+  const [deletingOrderId, setDeletingOrderId] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [orderStatistics, setOrderStatistics] = useState<OrderStatistics | null>(null);
@@ -52,13 +52,14 @@ const CateringOrdersAdmin: React.FC = () => {
     data: orders,
     isLoading,
     isError,
-  } = useQuery(['cateringOrders', selectedStatus, clientId], () =>
-    cateringOrderApi.fetchOrders(clientId, selectedStatus)
+  } = useQuery(
+    ['cateringOrders', selectedStatus, clientId],
+    () => cateringOrderApi.fetchOrders(clientId!, selectedStatus as OrderStatus)
   );
 
   const updateOrderStatusMutation = useMutation(
-    ({ orderId, newStatus }: { orderId: number; newStatus: OrderStatus }) =>
-      cateringOrderApi.updateOrderStatus(clientId, orderId, newStatus),
+    ({ orderId, newStatus }: { orderId: string; newStatus: OrderStatus }) =>
+      cateringOrderApi.updateOrderStatus(clientId!, orderId, newStatus),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['cateringOrders', selectedStatus, clientId]);
@@ -73,7 +74,7 @@ const CateringOrdersAdmin: React.FC = () => {
   );
 
   const deleteOrderMutation = useMutation(
-    (orderId: number) => cateringOrderApi.deleteOrder(clientId, orderId),
+    (orderId: string) => cateringOrderApi.deleteOrder(clientId!, orderId),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['cateringOrders', selectedStatus, clientId]);
@@ -88,7 +89,7 @@ const CateringOrdersAdmin: React.FC = () => {
   );
 
   const handleStatusChange = useCallback(
-    (orderId: number, newStatus: OrderStatus) => {
+    (orderId: string, newStatus: OrderStatus) => {
       updateOrderStatusMutation.mutate({ orderId, newStatus });
     },
     [updateOrderStatusMutation]
@@ -106,7 +107,7 @@ const CateringOrdersAdmin: React.FC = () => {
     setIsEditModalOpen(true);
   }, []);
 
-  const handleDeleteClick = useCallback((orderId: number) => {
+  const handleDeleteClick = useCallback((orderId: string) => {
     setDeletingOrderId(orderId);
     setIsDeleteModalOpen(true);
   }, []);
@@ -204,7 +205,7 @@ const CateringOrdersAdmin: React.FC = () => {
                   <IconButton onClick={() => handleEditClick(order)}>
                     <EditIcon />
                   </IconButton>
-                  <IconButton onClick={() => handleDeleteClick(order.id)}>
+                  <IconButton onClick={() => handleDeleteClick(order.id.toString())}>
                     <DeleteIcon />
                   </IconButton>
                 </TableCell>

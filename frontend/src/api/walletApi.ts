@@ -31,7 +31,12 @@ export const addDiscountToWallet = async (
 };
 
 // Fetch all wallet data (balance, discounts, rewards)
-export const fetchWalletData = async (): Promise<Wallet> => {
-  const response = await apiClient.get<Wallet>('/api/wallet');
-  return response.data;
+export const fetchWalletData = async (guestId: string): Promise<Wallet> => {
+  // Implement the API call to fetch wallet data
+  // This is a placeholder implementation
+  const response = await fetch(`/api/wallet/${guestId}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch wallet data');
+  }
+  return await response.json();
 };

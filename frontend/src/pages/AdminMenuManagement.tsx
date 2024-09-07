@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { createMenu, updateMenu, deleteMenu, fetchMenus } from '../api/menuApi';
+import { createMenu, updateMenu, deleteMenu, getMenus } from '../api/menuApi';
 import { useParams } from 'react-router-dom';
 import { Menu } from '../types';
 
@@ -12,7 +12,7 @@ const AdminMenuManagement: React.FC = () => {
 
   const loadMenus = useCallback(async () => {
     if (clientId) {
-      const loadedMenus = await fetchMenus(Number(clientId));
+      const loadedMenus = await getMenus(clientId);
       setMenus(loadedMenus);
     }
   }, [clientId]);
@@ -23,7 +23,7 @@ const AdminMenuManagement: React.FC = () => {
 
   const handleCreateMenu = async () => {
     if (clientId && menuData.name) {
-      await createMenu(Number(clientId), menuData);
+      await createMenu(clientId, menuData);
       loadMenus();
       setMenuData({});
     }
@@ -31,7 +31,7 @@ const AdminMenuManagement: React.FC = () => {
 
   const handleUpdateMenu = async () => {
     if (clientId && menuId && updatedMenu) {
-      await updateMenu(Number(clientId), menuId, updatedMenu);
+      await updateMenu(clientId, menuId.toString(), updatedMenu);
       loadMenus();
       setUpdatedMenu({});
     }

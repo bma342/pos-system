@@ -3,8 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import {
   fetchLoyaltyRewards,
-  addReward,
-  updateReward,
+  addLoyaltyReward,
+  updateLoyaltyReward,
   selectLoyaltyRewards,
 } from '../redux/slices/loyaltySlice';
 import { AppDispatch, LoyaltyReward } from '../types';
@@ -18,18 +18,18 @@ const AdminLoyaltyRewards: React.FC = () => {
 
   useEffect(() => {
     if (clientId) {
-      dispatch(fetchLoyaltyRewards(Number(clientId))); // Pass clientId as number
+      dispatch(fetchLoyaltyRewards({ clientId }));
     }
   }, [dispatch, clientId]);
 
   const handleAddReward = () => {
-    if (rewardName && pointsRequired) {
+    if (rewardName && pointsRequired && clientId) {
       dispatch(
-        addReward({
-          id: Date.now(),
+        addLoyaltyReward({
           name: rewardName,
           pointsRequired: parseInt(pointsRequired as string, 10),
-          isActive: true, // Default to active when added
+          isActive: true,
+          clientId,
         })
       );
       setRewardName('');
@@ -60,10 +60,11 @@ const AdminLoyaltyRewards: React.FC = () => {
             <button
               onClick={() =>
                 dispatch(
-                  updateReward({
+                  updateLoyaltyReward({
                     id: reward.id,
                     pointsRequired: 200,
                     isActive: true,
+                    clientId,
                   })
                 )
               }

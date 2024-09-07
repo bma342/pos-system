@@ -77,3 +77,20 @@ export interface ClientMetrics {
   averageOrderValue: number;
   // Add other relevant metrics
 }
+
+export interface BrandingProfile {
+  id: number;
+  clientId: number;
+  name: string;
+  logoUrl: string;
+  primaryColor: string;
+  secondaryColor: string;
+  fontColor: string;
+  secondaryFontColor: string;
+}
+
+export interface BrandingState {
+  profiles: BrandingProfile[];
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  error: string | null;
+}

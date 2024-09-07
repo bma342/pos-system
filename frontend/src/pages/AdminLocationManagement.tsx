@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  fetchLocations,
+  getLocations,
   createLocation,
   updateLocation,
   deleteLocation,
@@ -19,7 +19,7 @@ const AdminLocationManagement: React.FC = () => {
   const loadLocations = async () => {
     try {
       setLoading(true);
-      const data = await fetchLocations();
+      const data = await getLocations();
       setLocations(data);
       setLoading(false);
     } catch (err) {

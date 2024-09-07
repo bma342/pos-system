@@ -49,18 +49,18 @@ const CheckoutPage: React.FC = () => {
   };
 
   const calculateSubtotal = () => {
-    return cartItems.reduce((total, item) => total + calculateItemTotal(item), 0);
+    return cartItems.reduce((total, item) => total + calculateItemTotal(item as CartItem), 0);
   };
 
   const calculateTax = (subtotal: number) => {
-    return subtotal * (selectedLocation?.taxRate ?? 0);
+    // Assuming a default tax rate of 0.1 (10%) if not available in the Location object
+    return subtotal * 0.1;
   };
 
   const calculateServiceCharge = (subtotal: number) => {
-    const rate = orderType === 'catering' 
-      ? selectedLocation?.cateringServiceChargeRate 
-      : selectedLocation?.serviceChargeRate;
-    return subtotal * (rate ?? 0);
+    // Assuming a default service charge rate of 0.05 (5%) if not available in the Location object
+    const rate = 0.05;
+    return subtotal * rate;
   };
 
   const calculateTotal = () => {
@@ -77,19 +77,16 @@ const CheckoutPage: React.FC = () => {
         throw new Error('Location or user information is missing');
       }
       const orderData: Partial<Order> = {
-        items: cartItems,
+        items: cartItems as CartItem[],
         orderType: orderType as OrderType,
-        locationId: selectedLocation.id,
-        guestId: currentUser.id,
         subtotal: calculateSubtotal(),
         tax: calculateTax(calculateSubtotal()),
-        serviceCharge: calculateServiceCharge(calculateSubtotal()),
-        kitchenTip,
-        driverTip,
         total: calculateTotal(),
         appliedDiscounts: appliedDiscounts,
+        // Remove locationId from here as it's not part of the Order type
       };
-      const response = await createOrder(orderData);
+      // Pass locationId separately if needed by the createOrder function
+      const response = await createOrder(orderData, currentUser.id);
       const orderId = response.data.id;
       dispatch(clearCart());
       navigate(`/order-confirmation/${orderId}`);

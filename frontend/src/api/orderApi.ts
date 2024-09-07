@@ -1,11 +1,12 @@
 import api from './axios';
 import { Order, OrderItem } from '../types';
 
-export const createOrder = async (orderData: Partial<Order>) => {
+export const createOrder = async (orderData: Partial<Order>, guestId: string) => {
   try {
-    return await api.post<Order>('/orders', orderData);
+    const response = await api.post('/orders', { ...orderData, guestId });
+    return response.data;
   } catch (error) {
-    throw new Error('Failed to create order');
+    throw new Error('Failed to create order: ' + (error as Error).message);
   }
 };
 

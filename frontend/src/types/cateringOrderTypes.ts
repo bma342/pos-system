@@ -1,11 +1,18 @@
 import { Order, OrderItem } from './orderTypes';
 
-export interface CateringOrder extends Omit<Order, 'id'> {
-  id: number; // Override the id type to number
-  eventDate: Date;
+export interface CateringOrder {
+  id: string;
+  clientId: string;
+  customerId: string;
+  customerName: string;
+  total: number;
+  status: OrderStatus;
+  eventDate: string;
   eventType: string;
   deliveryAddress: string;
   specialInstructions?: string;
+  orderDate: string;
+  totalAmount: number;
 }
 
 export interface CateringOrderItem extends OrderItem {
@@ -15,7 +22,7 @@ export interface CateringOrderItem extends OrderItem {
 // Remove the duplicate CateringOrder interface
 // export interface CateringOrder { ... }
 
-export type OrderStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
+export type OrderStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'CANCELLED';
 
 export interface OrderStatistics {
   totalOrders: number;

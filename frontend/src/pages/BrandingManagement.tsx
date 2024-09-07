@@ -7,7 +7,7 @@ import {
   updateBrandingProfile,
   deleteBrandingProfile,
 } from '../redux/slices/brandingSlice';
-import { BrandingProfile, Client } from '../types';
+import { BrandingProfile, Client } from '../types/clientTypes'; // Update import path if necessary
 import {
   TextField,
   Button,
@@ -20,12 +20,11 @@ import {
   MenuItem,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { selectBrandingProfiles } from '../redux/slices/brandingSlice';
 
 const BrandingManagement: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { profiles, status, error } = useSelector(
-    (state: RootState) => state.branding
-  );
+  const { profiles, status, error } = useSelector(selectBrandingProfiles);
   const clients = useSelector((state: RootState) => state.clients.clients);
   const [newProfile, setNewProfile] = useState<Partial<BrandingProfile>>({
     name: '',
@@ -132,7 +131,7 @@ const BrandingManagement: React.FC = () => {
       </Box>
 
       <List>
-        {profiles.map((profile) => (
+        {profiles.map((profile: BrandingProfile) => (
           <ListItem key={profile.id}>
             <TextField
               value={profile.name}

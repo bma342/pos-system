@@ -124,7 +124,7 @@ const AppRoutes: React.FC = () => {
       <Route element={<PrivateRoute allowedRoles={[UserRole.GLOBAL_ADMIN]} />}>
         <Route
           path="/global-admin"
-          element={<AdminPanel isGlobalAdmin={true} />}
+          element={<AdminPanel />}
         />
       </Route>
     </Routes>

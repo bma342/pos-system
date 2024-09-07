@@ -26,6 +26,7 @@ import realtimeMetricsReducer from './slices/realtimeMetricsSlice';
 import posSettingsReducer from './slices/posSettingsSlice';
 import cartReducer from './slices/cartSlice';
 import menuItemsReducer from './slices/menuItemsSlice';
+import brandingReducer from './slices/brandingSlice';
 
 const rootReducer = combineReducers({
   location: locationReducer,
@@ -33,7 +34,7 @@ const rootReducer = combineReducers({
   abTest: abTestReducer,
   clientBranding: clientBrandingReducer,
   clientConfig: clientConfigReducer,
-  clients: clientReducer, // Ensure correct state slice
+  clients: clientReducer,
   menu: menuReducer,
   order: orderReducer,
   loyalty: loyaltyReducer,
@@ -55,6 +56,7 @@ const rootReducer = combineReducers({
   posSettings: posSettingsReducer,
   cart: cartReducer,
   menuItems: menuItemsReducer,
+  branding: brandingReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

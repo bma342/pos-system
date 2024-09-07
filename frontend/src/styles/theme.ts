@@ -3,29 +3,13 @@ import { createTheme } from '@mui/material/styles';
 export const theme = createTheme({
   palette: {
     primary: {
-      main: 'var(--primary-color, #007bff)',
+      main: 'var(--primary-color, #1976d2)',
     },
     secondary: {
-      main: 'var(--secondary-color, #6c757d)',
+      main: 'var(--secondary-color, #dc004e)',
     },
   },
   typography: {
     fontFamily: 'var(--font-family, "Roboto", "Helvetica", "Arial", sans-serif)',
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 'var(--button-border-radius, 4px)',
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          backgroundColor: 'var(--card-background-color, #ffffff)',
-        },
-      },
-    },
   },
 });

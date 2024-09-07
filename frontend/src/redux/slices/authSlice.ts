@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { AuthService } from '../../services/authService';
 import { User } from '../../types/userTypes';
+import { UserRole } from '../../types/userTypes';
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -59,6 +60,11 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.isAuthenticated = true;
     },
+    setUserRole: (state, action: PayloadAction<User['role']>) => {
+      if (state.user) {
+        state.user.role = action.payload;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -90,11 +96,12 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, setCredentials } = authSlice.actions;
+export const { logout, setCredentials, setUserRole } = authSlice.actions;
 
 export const selectCurrentUser = (state: RootState) => state.auth.user;
 export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;
 export const selectAuthStatus = (state: RootState) => state.auth.status;
 export const selectAuthError = (state: RootState) => state.auth.error;
+export const selectUserRole = (state: RootState): UserRole | undefined => state.auth.user?.role;
 
 export default authSlice.reducer;

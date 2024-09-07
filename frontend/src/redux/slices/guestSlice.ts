@@ -1,15 +1,22 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { RootState } from '../rootReducer';
 import { GuestMetrics } from '../../types/guestTypes';
 import { guestService } from '../../services/guestService';
-import { RootState } from '../store';
+
+interface GuestProfile {
+  id: string;
+  // Add other guest profile properties
+}
 
 interface GuestState {
+  profile: GuestProfile | null;
   metrics: GuestMetrics | null;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: GuestState = {
+  profile: null,
   metrics: null,
   loading: false,
   error: null,
@@ -33,7 +40,11 @@ export const fetchGuestMetrics = createAsyncThunk<
 const guestSlice = createSlice({
   name: 'guest',
   initialState,
-  reducers: {},
+  reducers: {
+    setGuestProfile: (state, action: PayloadAction<GuestProfile>) => {
+      state.profile = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchGuestMetrics.pending, (state) => {
@@ -50,6 +61,9 @@ const guestSlice = createSlice({
   },
 });
 
+export const { setGuestProfile } = guestSlice.actions;
+
+export const selectGuestProfile = (state: RootState) => state.guest.profile;
 export const selectGuestMetrics = (state: RootState) => state.guest.metrics;
 export const selectGuestLoading = (state: RootState) => state.guest.loading;
 export const selectGuestError = (state: RootState) => state.guest.error;

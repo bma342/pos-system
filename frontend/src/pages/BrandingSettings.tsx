@@ -1,20 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  selectBrandingProfiles,
-  addBrandingProfile,
-  updateBrandingProfile,
   fetchBrandingProfiles,
+  createBrandingProfile,
+  updateBrandingProfile,
+  selectBrandingProfiles,
 } from '../redux/slices/brandingSlice';
-import { RootState, AppDispatch, BrandingProfile } from '../types';
+import { AppDispatch } from '../redux/store';
+import { BrandingProfile } from '../types/clientTypes';
 import { useParams } from 'react-router-dom';
 import { fetchClientId } from '../api/clientApi';
 
 const BrandingSettings: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const brandingProfiles = useSelector((state: RootState) =>
-    selectBrandingProfiles(state)
-  );
+  const { profiles } = useSelector(selectBrandingProfiles);
   const { clientId } = useParams<{ clientId: string }>();
   const [currentProfile, setCurrentProfile] = useState<BrandingProfile>({
     id: 0,
@@ -30,19 +29,19 @@ const BrandingSettings: React.FC = () => {
 
   useEffect(() => {
     if (clientId) {
-      dispatch(fetchBrandingProfiles(Number(clientId)));
+      dispatch(fetchBrandingProfiles());
     }
   }, [dispatch, clientId]);
 
   useEffect(() => {
-    if (brandingProfiles.length > 0) {
+    if (profiles.length > 0) {
       setCurrentProfile((prev) => ({
         ...prev,
-        ...brandingProfiles[0],
-        id: brandingProfiles[0].id || 0,
+        ...profiles[0],
+        id: profiles[0].id || 0,
       }));
     }
-  }, [brandingProfiles]);
+  }, [profiles]);
 
   useEffect(() => {
     const fetchClient = async () => {
@@ -83,7 +82,7 @@ const BrandingSettings: React.FC = () => {
     }
 
     if (currentProfile.id === 0) {
-      dispatch(addBrandingProfile(currentProfile));
+      dispatch(createBrandingProfile(currentProfile));
     } else {
       dispatch(updateBrandingProfile(currentProfile));
     }
