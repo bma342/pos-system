@@ -1,18 +1,23 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { createMenu, updateMenu, deleteMenu, getMenus } from '../api/menuApi';
+import { createMenu, updateMenu, deleteMenu, getMenu } from '../api/menuApi';
 import { useParams } from 'react-router-dom';
-import { Menu } from '../types';
+import { Menu } from '../types/menuTypes';
 
 const AdminMenuManagement: React.FC = () => {
   const { clientId } = useParams<{ clientId: string }>();
-  const [menuId, setMenuId] = useState<number>(0);
+  const [menuId, setMenuId] = useState<string>('');
   const [menuData, setMenuData] = useState<Partial<Menu>>({});
   const [updatedMenu, setUpdatedMenu] = useState<Partial<Menu>>({});
   const [menus, setMenus] = useState<Menu[]>([]);
 
   const loadMenus = useCallback(async () => {
     if (clientId) {
-      const loadedMenus = await getMenus(clientId);
+      // Assuming we're fetching menus for all locations
+      const loadedMenus = await Promise.all(
+        (await getMenu(clientId, '')).menuGroups.map(async (group) => {
+          return await getMenu(clientId, group.id);
+        })
+      );
       setMenus(loadedMenus);
     }
   }, [clientId]);
@@ -23,7 +28,7 @@ const AdminMenuManagement: React.FC = () => {
 
   const handleCreateMenu = async () => {
     if (clientId && menuData.name) {
-      await createMenu(clientId, menuData);
+      await createMenu(clientId, menuData as Partial<Menu>);
       loadMenus();
       setMenuData({});
     }
@@ -31,7 +36,7 @@ const AdminMenuManagement: React.FC = () => {
 
   const handleUpdateMenu = async () => {
     if (clientId && menuId && updatedMenu) {
-      await updateMenu(clientId, menuId.toString(), updatedMenu);
+      await updateMenu(clientId, menuId, updatedMenu as Partial<Menu>);
       loadMenus();
       setUpdatedMenu({});
     }
@@ -39,9 +44,9 @@ const AdminMenuManagement: React.FC = () => {
 
   const handleDeleteMenu = async () => {
     if (clientId && menuId) {
-      await deleteMenu(Number(clientId), menuId);
+      await deleteMenu(clientId, menuId.toString());
       loadMenus();
-      setMenuId(0);
+      setMenuId('');
     }
   };
 
@@ -62,9 +67,9 @@ const AdminMenuManagement: React.FC = () => {
         <h3>Update Menu</h3>
         <select
           value={menuId}
-          onChange={(e) => setMenuId(Number(e.target.value))}
+          onChange={(e) => setMenuId(e.target.value)}
         >
-          <option value={0}>Select a menu</option>
+          <option value="">Select a menu</option>
           {menus.map((menu) => (
             <option key={menu.id} value={menu.id}>
               {menu.name}
@@ -85,9 +90,9 @@ const AdminMenuManagement: React.FC = () => {
         <h3>Delete Menu</h3>
         <select
           value={menuId}
-          onChange={(e) => setMenuId(Number(e.target.value))}
+          onChange={(e) => setMenuId(e.target.value)}
         >
-          <option value={0}>Select a menu</option>
+          <option value="">Select a menu</option>
           {menus.map((menu) => (
             <option key={menu.id} value={menu.id}>
               {menu.name}

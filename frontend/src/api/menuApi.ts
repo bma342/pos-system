@@ -1,6 +1,7 @@
+import { Menu } from '../types/menuTypes';
 import apiClient from './apiClient';
 import axios from 'axios';
-import { Menu, MenuGroup, MenuItem, Modifier, MenuStatistics } from '../types/menuTypes';
+import { MenuGroup, MenuItem, Modifier, MenuStatistics } from '../types/menuTypes';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '';
 
@@ -96,6 +97,10 @@ export const menuApi = {
       throw error;
     }
   },
+
+  deleteMenu: async (clientId: string, menuId: string): Promise<void> => {
+    await apiClient.delete(`/clients/${clientId}/menus/${menuId}`);
+  },
 };
 
 // Export individual functions
@@ -117,7 +122,8 @@ export const {
   updateModifier, 
   deleteItem, 
   syncMenus,
-  fetchMenuItems // Add this line
+  fetchMenuItems,
+  deleteMenu // Add this line
 } = menuApi;
 
 export default menuApi;
