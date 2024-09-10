@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../store';
 import { ServiceFee } from '../../types/serviceFeeTypes';
-import { serviceFeeService } from '../../services/serviceFeeService';
+import { serviceFeeApi } from '../../api/serviceFeeApi';
 
 interface ServiceFeeState {
   serviceFees: ServiceFee[];
@@ -16,10 +15,10 @@ const initialState: ServiceFeeState = {
 };
 
 export const fetchServiceFees = createAsyncThunk<ServiceFee[], string, { rejectValue: string }>(
-  'serviceFees/fetchServiceFees',
+  'serviceFee/fetchServiceFees',
   async (clientId, { rejectWithValue }) => {
     try {
-      return await serviceFeeService.fetchServiceFees(clientId);
+      return await serviceFeeApi.getServiceFees(clientId);
     } catch (error) {
       return rejectWithValue((error as Error).message);
     }
@@ -27,10 +26,33 @@ export const fetchServiceFees = createAsyncThunk<ServiceFee[], string, { rejectV
 );
 
 export const createServiceFee = createAsyncThunk<ServiceFee, { clientId: string; serviceFee: Omit<ServiceFee, 'id'> }, { rejectValue: string }>(
-  'serviceFees/createServiceFee',
+  'serviceFee/createServiceFee',
   async ({ clientId, serviceFee }, { rejectWithValue }) => {
     try {
-      return await serviceFeeService.createServiceFee(clientId, serviceFee);
+      return await serviceFeeApi.createServiceFee(clientId, serviceFee);
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+export const updateServiceFee = createAsyncThunk<ServiceFee, { clientId: string; serviceFee: ServiceFee }, { rejectValue: string }>(
+  'serviceFee/updateServiceFee',
+  async ({ clientId, serviceFee }, { rejectWithValue }) => {
+    try {
+      return await serviceFeeApi.updateServiceFee(clientId, serviceFee);
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+export const deleteServiceFee = createAsyncThunk<string, { clientId: string; serviceFeeId: string }, { rejectValue: string }>(
+  'serviceFee/deleteServiceFee',
+  async ({ clientId, serviceFeeId }, { rejectWithValue }) => {
+    try {
+      await serviceFeeApi.deleteServiceFee(clientId, serviceFeeId);
+      return serviceFeeId;
     } catch (error) {
       return rejectWithValue((error as Error).message);
     }
@@ -56,12 +78,17 @@ const serviceFeeSlice = createSlice({
       })
       .addCase(createServiceFee.fulfilled, (state, action) => {
         state.serviceFees.push(action.payload);
+      })
+      .addCase(updateServiceFee.fulfilled, (state, action) => {
+        const index = state.serviceFees.findIndex(fee => fee.id === action.payload.id);
+        if (index !== -1) {
+          state.serviceFees[index] = action.payload;
+        }
+      })
+      .addCase(deleteServiceFee.fulfilled, (state, action) => {
+        state.serviceFees = state.serviceFees.filter(fee => fee.id !== action.payload);
       });
   },
 });
-
-export const selectServiceFees = (state: RootState) => state.serviceFee.serviceFees;
-export const selectServiceFeeLoading = (state: RootState) => state.serviceFee.loading;
-export const selectServiceFeeError = (state: RootState) => state.serviceFee.error;
 
 export default serviceFeeSlice.reducer;

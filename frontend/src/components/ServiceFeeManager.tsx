@@ -1,61 +1,86 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
-  addServiceFee,
+  fetchServiceFees,
   updateServiceFee,
+  deleteServiceFee,
 } from '../redux/slices/serviceFeeSlice';
-import { AppDispatch } from '../redux/store';
-import { ServiceFee } from '../types';
+import { AppDispatch, RootState } from '../redux/store';
+import { ServiceFee } from '../types/serviceFeeTypes';
+import { useAuth } from '../hooks/useAuth';
+import { Box, Typography, List, ListItem, Button, TextField, Select, MenuItem, Grid } from '@mui/material';
 
 const ServiceFeeManager: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const [feeName, setFeeName] = useState('');
-  const [feeAmount, setFeeAmount] = useState<number | string>('');
+  const { user } = useAuth();
+  const serviceFees = useSelector((state: RootState) => state.serviceFee.serviceFees);
 
-  const handleAddFee = () => {
-    if (feeName && feeAmount) {
-      const newFee: Omit<ServiceFee, 'id'> = {
-        name: feeName,
-        amount: Number(feeAmount),
-        value: Number(feeAmount),
-      };
-      dispatch(addServiceFee(newFee));
-      setFeeName('');
-      setFeeAmount('');
+  useEffect(() => {
+    if (user?.clientId) {
+      dispatch(fetchServiceFees(user.clientId));
+    }
+  }, [dispatch, user]);
+
+  const handleUpdate = (fee: ServiceFee) => {
+    if (user?.clientId) {
+      dispatch(updateServiceFee({ clientId: user.clientId, serviceFee: fee }));
     }
   };
 
-  const handleUpdateFee = (id: number) => {
-    if (feeAmount) {
-      dispatch(
-        updateServiceFee({
-          id,
-          amount: Number(feeAmount),
-          value: Number(feeAmount),
-        })
-      );
-      setFeeAmount('');
+  const handleDelete = (feeId: string) => {
+    if (user?.clientId) {
+      dispatch(deleteServiceFee({ clientId: user.clientId, serviceFeeId: feeId }));
     }
   };
 
   return (
-    <div>
-      <h2>Manage Service Fees</h2>
-      <input
-        type="text"
-        placeholder="Fee Name"
-        value={feeName}
-        onChange={(e) => setFeeName(e.target.value)}
-      />
-      <input
-        type="number"
-        placeholder="Fee Amount"
-        value={feeAmount}
-        onChange={(e) => setFeeAmount(e.target.value)}
-      />
-      <button onClick={handleAddFee}>Add Service Fee</button>
-      <button onClick={() => handleUpdateFee(1)}>Update Fee</button>
-    </div>
+    <Box sx={{ maxWidth: 'var(--max-width-lg)', margin: '0 auto', padding: 'var(--spacing-md)' }}>
+      <Typography variant="h4" component="h1" gutterBottom>Service Fee Manager</Typography>
+      <List aria-label="List of service fees">
+        {serviceFees.map((fee) => (
+          <ListItem key={fee.id} sx={{ mb: 2, border: '1px solid var(--color-border)', borderRadius: 'var(--border-radius)' }}>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} sm={3}>
+                <TextField
+                  value={fee.name}
+                  onChange={(e) => handleUpdate({ ...fee, name: e.target.value })}
+                  label="Name"
+                  fullWidth
+                  aria-label={`Edit name for ${fee.name}`}
+                />
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <TextField
+                  value={fee.amount}
+                  onChange={(e) => handleUpdate({ ...fee, amount: parseFloat(e.target.value) })}
+                  label="Amount"
+                  type="number"
+                  fullWidth
+                  aria-label={`Edit amount for ${fee.name}`}
+                />
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Select
+                  value={fee.type}
+                  onChange={(e) => handleUpdate({ ...fee, type: e.target.value as 'fixed' | 'percentage' })}
+                  label="Type"
+                  fullWidth
+                  aria-label={`Select type for ${fee.name}`}
+                >
+                  <MenuItem value="fixed">Fixed</MenuItem>
+                  <MenuItem value="percentage">Percentage</MenuItem>
+                </Select>
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Button onClick={() => handleDelete(fee.id)} variant="outlined" color="secondary" fullWidth aria-label={`Delete ${fee.name}`}>
+                  Delete
+                </Button>
+              </Grid>
+            </Grid>
+          </ListItem>
+        ))}
+      </List>
+    </Box>
   );
 };
 

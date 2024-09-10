@@ -27,8 +27,14 @@ import posSettingsReducer from './slices/posSettingsSlice';
 import cartReducer from './slices/cartSlice';
 import menuItemsReducer from './slices/menuItemsSlice';
 import brandingReducer from './slices/brandingSlice';
+import settingsReducer from './slices/settingsSlice';
+import analyticsReducer from './slices/analyticsSlice';
+import metricsReducer from './slices/metricsSlice';
+import posDiscountReducer from './slices/posDiscountSlice';
+import posAlertsReducer from './slices/posAlertsSlice';
 
 const rootReducer = combineReducers({
+  settings: settingsReducer,
   location: locationReducer,
   auth: authReducer,
   abTest: abTestReducer,
@@ -57,6 +63,10 @@ const rootReducer = combineReducers({
   cart: cartReducer,
   menuItems: menuItemsReducer,
   branding: brandingReducer,
+  analytics: analyticsReducer,
+  metrics: metricsReducer,
+  posDiscount: posDiscountReducer,
+  posAlerts: posAlertsReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

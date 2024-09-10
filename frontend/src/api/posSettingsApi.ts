@@ -1,21 +1,14 @@
 import axios from 'axios';
+import { POSSettings } from '../redux/slices/posSettingsSlice';
 
-export const fetchPOSSettings = async () => {
-  try {
-    const response = await axios.get('/api/pos-settings');
+export const posSettingsApi = {
+  fetchPOSSettings: async (locationId: string): Promise<POSSettings> => {
+    const response = await axios.get(`/api/pos-settings/${locationId}`);
     return response.data;
-  } catch (error) {
-    throw new Error('Failed to fetch POS settings');
-  }
-};
+  },
 
-export const updatePOSSettings = async (settings: {
-  modifierSendMethod: string;
-}) => {
-  try {
-    const response = await axios.put('/api/pos-settings', settings);
+  updatePOSSettings: async (locationId: string, settings: Partial<POSSettings>): Promise<POSSettings> => {
+    const response = await axios.put(`/api/pos-settings/${locationId}`, settings);
     return response.data;
-  } catch (error) {
-    throw new Error('Failed to update POS settings');
-  }
+  },
 };

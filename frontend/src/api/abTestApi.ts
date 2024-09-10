@@ -58,13 +58,8 @@ export const abTestApi = {
     }
   },
 
-  deleteABTest: async (id: number): Promise<void> => {
-    try {
-      await apiClient.delete(`/ab-tests/${id}`);
-    } catch (error) {
-      console.error(`Error deleting AB test with id ${id}:`, error);
-      throw error;
-    }
+  deleteABTest: async (id: string): Promise<void> => {
+    await apiClient.delete(`/ab-tests/${id}`);
   },
 
   getABTestResults: async (id: number): Promise<any> => {

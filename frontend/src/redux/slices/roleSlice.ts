@@ -1,68 +1,58 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../rootReducer';
-import { roleService } from '../../services/roleService';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { Role } from '../../types/roleTypes';
+import { roleApi } from '../../api/roleApi';
 
 interface RoleState {
   roles: Role[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  loading: boolean;
   error: string | null;
 }
 
 const initialState: RoleState = {
   roles: [],
-  status: 'idle',
+  loading: false,
   error: null,
 };
 
-export const fetchRoles = createAsyncThunk<Role[], void, { rejectValue: string }>(
-  'roles/fetchRoles',
-  async (_, { rejectWithValue }) => {
-    try {
-      return await roleService.fetchRoles();
-    } catch (error) {
-      return rejectWithValue((error as Error).message);
-    }
-  }
-);
+export const fetchRoles = createAsyncThunk('role/fetchRoles', async () => {
+  return await roleApi.getRoles();
+});
+
+export const createRole = createAsyncThunk('role/createRole', async (role: Omit<Role, 'id'>) => {
+  return await roleApi.createRole(role);
+});
+
+export const updateRole = createAsyncThunk('role/updateRole', async (role: Role) => {
+  return await roleApi.updateRole(role);
+});
+
+export const deleteRole = createAsyncThunk('role/deleteRole', async (roleId: string) => {
+  await roleApi.deleteRole(roleId);
+  return roleId;
+});
 
 const roleSlice = createSlice({
-  name: 'roles',
+  name: 'role',
   initialState,
-  reducers: {
-    addRole: (state, action: PayloadAction<Role>) => {
-      state.roles.push(action.payload);
-    },
-    updateRole: (
-      state,
-      action: PayloadAction<{ id: string; permissions: string[] }>
-    ) => {
-      const role = state.roles.find((r) => r.id === action.payload.id);
-      if (role) {
-        role.permissions = action.payload.permissions;
-      }
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchRoles.pending, (state) => {
-        state.status = 'loading';
-      })
       .addCase(fetchRoles.fulfilled, (state, action) => {
-        state.status = 'succeeded';
         state.roles = action.payload;
       })
-      .addCase(fetchRoles.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload || 'Failed to fetch roles';
+      .addCase(createRole.fulfilled, (state, action) => {
+        state.roles.push(action.payload);
+      })
+      .addCase(updateRole.fulfilled, (state, action) => {
+        const index = state.roles.findIndex(role => role.id === action.payload.id);
+        if (index !== -1) {
+          state.roles[index] = action.payload;
+        }
+      })
+      .addCase(deleteRole.fulfilled, (state, action) => {
+        state.roles = state.roles.filter(role => role.id !== action.payload);
       });
   },
 });
-
-export const selectRoles = (state: RootState) => state.role.roles;
-export const selectRoleStatus = (state: RootState) => state.role.status;
-export const selectRoleError = (state: RootState) => state.role.error;
-
-export const { addRole, updateRole } = roleSlice.actions;
 
 export default roleSlice.reducer;

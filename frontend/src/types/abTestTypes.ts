@@ -1,12 +1,12 @@
 export interface ABTest {
-    id: number;
+    id: string;
     name: string;
     description: string;
     variantA: string;
     variantB: string;
     isActive: boolean;
-    clientId: number;
-    locationId: number;
+    clientId: string;
+    locationId: string;
     startDate: string;
     endDate: string;
     createdAt: string;

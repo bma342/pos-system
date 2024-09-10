@@ -1,0 +1,20 @@
+/* Mobile devices */
+@media screen and (max-width: 600px) {
+  .guest-menu-page {
+    padding: 1rem;
+  }
+}
+
+/* Tablets */
+@media screen and (min-width: 601px) and (max-width: 960px) {
+  .guest-menu-page {
+    padding: 2rem;
+  }
+}
+
+/* Desktops */
+@media screen and (min-width: 961px) {
+  .guest-menu-page {
+    padding: 3rem;
+  }
+}

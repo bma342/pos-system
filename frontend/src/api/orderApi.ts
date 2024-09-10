@@ -1,39 +1,14 @@
-import api from './axios';
-import { Order, OrderItem } from '../types';
+import axios from 'axios';
+import { Order } from '../types/orderTypes';
 
-export const createOrder = async (orderData: Partial<Order>, guestId: string) => {
-  try {
-    const response = await api.post('/orders', { ...orderData, guestId });
+export const orderApi = {
+  getOrders: async (clientId: string): Promise<Order[]> => {
+    const response = await axios.get(`/api/orders/${clientId}`);
     return response.data;
-  } catch (error) {
-    throw new Error('Failed to create order: ' + (error as Error).message);
-  }
-};
+  },
 
-export const getActiveOrders = async () => {
-  try {
-    return await api.get<Order[]>('/orders/active');
-  } catch (error) {
-    throw new Error('Failed to fetch active orders');
-  }
+  createOrder: async (clientId: string, orderData: Omit<Order, 'id'>): Promise<Order> => {
+    const response = await axios.post(`/api/orders/${clientId}`, orderData);
+    return response.data;
+  },
 };
-
-export const cancelOrder = async (orderId: string) => {
-  try {
-    return await api.post<Order>(`/orders/${orderId}/cancel`);
-  } catch (error) {
-    throw new Error(`Failed to cancel order ${orderId}`);
-  }
-};
-
-export const markItemOutOfStock = async (orderId: string, itemId: string) => {
-  try {
-    return await api.post<OrderItem>(
-      `/orders/${orderId}/items/${itemId}/out-of-stock`
-    );
-  } catch (error) {
-    throw new Error(`Failed to mark item ${itemId} out of stock for order ${orderId}`);
-  }
-};
-
-// Add other order-related API calls as needed

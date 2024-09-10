@@ -1,21 +1,15 @@
 import React from 'react';
-import ClientBrandingManager from '../components/ClientBrandingManager';
-import POSSettingsForm from '../components/POSSettingsForm';
-// ... other imports ...
+import RoleBasedAccess from '../components/RoleBasedAccess';
+import ReportingDashboard from '../components/ReportingDashboard';
 
 const AdminDashboard: React.FC = () => {
   return (
-    <div className="admin-dashboard">
+    <div>
       <h1>Admin Dashboard</h1>
-      <section>
-        <h2>Client Branding</h2>
-        <ClientBrandingManager />
-      </section>
-      <section>
-        <h2>POS Settings</h2>
-        <POSSettingsForm />
-      </section>
-      {/* ... other admin components ... */}
+      <RoleBasedAccess allowedRoles={['admin', 'manager']}>
+        <ReportingDashboard />
+      </RoleBasedAccess>
+      {/* Other admin components */}
     </div>
   );
 };

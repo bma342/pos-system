@@ -1,4 +1,4 @@
-export type POSType = 'Toast' | 'Square' | 'Clover' | 'Revel' | 'Other';
+export type POSType = 'SQUARE' | 'CLOVER' | 'TOAST' | 'LIGHTSPEED' | 'REVEL';
 
 export interface CorePOSProfile {
   // Define your CorePOSProfile properties here
@@ -56,7 +56,8 @@ export interface POSIntegration {
 export interface POSProfile {
   id: string;
   name: string;
-  posType: string;
-  active: boolean;
-  // Add other relevant properties
+  type: POSType;
+  apiKey: string;
+  clientId: string;
+  active: boolean; // Add this line
 }

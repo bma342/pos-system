@@ -30,8 +30,42 @@ export const fetchUsers = createAsyncThunk<User[], { clientId?: string; location
   }
 );
 
+export const updateUser = createAsyncThunk<User, User, { rejectValue: string }>(
+  'user/updateUser',
+  async (userData, { rejectWithValue }) => {
+    try {
+      return await userService.updateUser(userData.id, userData);
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+export const createUser = createAsyncThunk<User, Omit<User, 'id'>, { rejectValue: string }>(
+  'user/createUser',
+  async (userData, { rejectWithValue }) => {
+    try {
+      return await userService.createUser(userData);
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
+export const deleteUser = createAsyncThunk<string, string, { rejectValue: string }>(
+  'user/deleteUser',
+  async (userId, { rejectWithValue }) => {
+    try {
+      await userService.deleteUser(userId);
+      return userId;
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
 export const updateUserProfile = createAsyncThunk<User, Partial<User>, { rejectValue: string }>(
-  'user/updateProfile',
+  'user/updateUserProfile',
   async (userData, { rejectWithValue }) => {
     try {
       return await userService.updateUserProfile(userData);
@@ -66,22 +100,26 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      .addCase(updateUserProfile.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+      .addCase(updateUser.fulfilled, (state, action) => {
+        const index = state.users.findIndex(user => user.id === action.payload.id);
+        if (index !== -1) {
+          state.users[index] = action.payload;
+        }
+      })
+      .addCase(createUser.fulfilled, (state, action) => {
+        state.users.push(action.payload);
+      })
+      .addCase(deleteUser.fulfilled, (state, action) => {
+        state.users = state.users.filter(user => user.id !== action.payload);
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
-        state.loading = false;
         if (state.currentUser && state.currentUser.id === action.payload.id) {
           state.currentUser = action.payload;
         }
-        state.users = state.users.map(user => 
-          user.id === action.payload.id ? action.payload : user
-        );
-      })
-      .addCase(updateUserProfile.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
+        const index = state.users.findIndex(user => user.id === action.payload.id);
+        if (index !== -1) {
+          state.users[index] = action.payload;
+        }
       });
   },
 });

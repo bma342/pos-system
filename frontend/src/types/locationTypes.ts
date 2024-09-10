@@ -34,17 +34,14 @@ export interface Location {
   id: string;
   name: string;
   address: string;
-  city?: string;
+  city: string;
   state: string;
   zipCode: string;
   latitude: number;
   longitude: number;
-  isDropoffSite?: boolean;
+  isDropoffSite: boolean;
+  clientId: string;
   imageUrl?: string;
-  taxRate: number;
-  cateringServiceChargeRate: number;
-  serviceChargeRate: number;
-  // ... other properties
 }
 
 export interface LocationCreateData {

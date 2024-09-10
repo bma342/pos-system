@@ -1,6 +1,9 @@
-import api from '../services/api';
+import axios from 'axios';
+import { RevenueData } from '../types/revenueTypes';
 
-export const fetchRevenueData = async (dateRange: { startDate: string; endDate: string }) => {
-  const response = await api.get('/revenue', { params: dateRange });
+export const fetchRevenueData = async (clientId: string, startDate: string, endDate: string): Promise<RevenueData[]> => {
+  const response = await axios.get(`/api/revenue/${clientId}`, {
+    params: { startDate, endDate }
+  });
   return response.data;
 };

@@ -1,20 +1,16 @@
 export interface Order {
   id: string;
-  clientId: string;
-  customerId: string;
-  items: OrderItem[];
+  customerName: string;
   total: number;
-  status: OrderStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  status: string;
+  // Add other relevant properties
 }
 
 export interface OrderItem {
   id: string;
-  menuItemId: string;
+  name: string;
   quantity: number;
   price: number;
-  selectedModifiers: SelectedModifier[];
 }
 
 export interface SelectedModifier {

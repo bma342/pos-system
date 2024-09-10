@@ -1,8 +1,8 @@
 import React from 'react';
-import { useClientContext } from '../context/ClientContext';
+import { useClient } from '../context/ClientContext';
 
 const BusinessAdminDashboard: React.FC = () => {
-  const { client } = useClientContext();
+  const { client } = useClient();
 
   if (!client) {
     return <div>Loading...</div>;

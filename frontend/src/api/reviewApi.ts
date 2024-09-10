@@ -1,30 +1,33 @@
 import axios from 'axios';
-import { Review, ReviewCreateData } from '../types/reviewTypes';
+import { Review, ReviewCreateData, ReviewStats } from '../types/reviewTypes';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+export const reviewApi = {
+  fetchPendingReviews: async (clientId: string): Promise<Review[]> => {
+    const response = await axios.get(`/api/reviews/pending/${clientId}`);
+    return response.data;
+  },
 
-export const createReview = async (
-  reviewData: ReviewCreateData
-): Promise<Review> => {
-  const response = await axios.post<Review>('/api/reviews', reviewData);
-  return response.data;
-};
+  approveReview: async (reviewId: string): Promise<Review> => {
+    const response = await axios.put(`/api/reviews/approve/${reviewId}`);
+    return response.data;
+  },
 
-export const getReviewsForMenuItem = async (menuItemId: number) => {
-  const response = await axios.get(`${API_URL}/reviews/menuItem/${menuItemId}`);
-  return response.data;
-};
+  deleteReview: async (reviewId: string): Promise<void> => {
+    await axios.delete(`/api/reviews/${reviewId}`);
+  },
 
-export const getPendingReviews = async () => {
-  const response = await axios.get(`${API_URL}/reviews/pending`);
-  return response.data;
-};
+  getReviewsForMenuItem: async (menuItemId: string): Promise<Review[]> => {
+    const response = await axios.get(`/api/reviews/menuItem/${menuItemId}`);
+    return response.data;
+  },
 
-export const approveReview = async (reviewId: number) => {
-  const response = await axios.put(`${API_URL}/reviews/approve/${reviewId}`);
-  return response.data;
-};
+  createReview: async (reviewData: ReviewCreateData): Promise<Review> => {
+    const response = await axios.post('/api/reviews', reviewData);
+    return response.data;
+  },
 
-export const deleteReview = async (reviewId: number) => {
-  await axios.delete(`${API_URL}/reviews/${reviewId}`);
+  getReviewStats: async (menuItemId: string): Promise<ReviewStats> => {
+    const response = await axios.get(`/api/reviews/stats/${menuItemId}`);
+    return response.data;
+  },
 };

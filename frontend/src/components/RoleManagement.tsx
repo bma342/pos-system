@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/store';
+import { fetchRoles, createRole, updateRole, deleteRole } from '../redux/slices/roleSlice';
+import { Role } from '../types/roleTypes';
 import {
   Box,
   Typography,
@@ -6,71 +10,75 @@ import {
   ListItem,
   ListItemText,
   Button,
+  TextField,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
-  Checkbox,
-  FormControlLabel,
 } from '@mui/material';
 
-interface Role {
-  id: string;
-  name: string;
-  permissions: string[];
-}
-
 const RoleManagement: React.FC = () => {
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const roles = useSelector((state: RootState) => state.role.roles);
+  const [open, setOpen] = useState(false);
+  const [currentRole, setCurrentRole] = useState<Role | null>(null);
+  const [roleName, setRoleName] = useState('');
 
   useEffect(() => {
-    // Fetch roles from API
-    // setRoles(fetchedRoles);
-  }, []);
+    dispatch(fetchRoles());
+  }, [dispatch]);
 
-  const handleEditRole = (role: Role) => {
-    setSelectedRole(role);
-    setIsDialogOpen(true);
+  const handleOpen = (role?: Role) => {
+    if (role) {
+      setCurrentRole(role);
+      setRoleName(role.name);
+    } else {
+      setCurrentRole(null);
+      setRoleName('');
+    }
+    setOpen(true);
   };
 
-  const handleCloseDialog = () => {
-    setSelectedRole(null);
-    setIsDialogOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    setCurrentRole(null);
+    setRoleName('');
   };
 
-  const handleUpdateRole = () => {
-    // Implement role update logic here
-    handleCloseDialog();
+  const handleSubmit = () => {
+    if (currentRole) {
+      dispatch(updateRole({ ...currentRole, name: roleName }));
+    } else {
+      dispatch(createRole({ name: roleName }));
+    }
+    handleClose();
   };
 
-  const handleAddRole = () => {
-    setSelectedRole({ id: '', name: '', permissions: [] });
-    setIsDialogOpen(true);
+  const handleDelete = (roleId: string) => {
+    if (window.confirm('Are you sure you want to delete this role?')) {
+      dispatch(deleteRole(roleId));
+    }
   };
 
   return (
     <Box>
-      <Typography variant="h5">Role Management</Typography>
+      <Typography variant="h4" gutterBottom>
+        Role Management
+      </Typography>
+      <Button variant="contained" color="primary" onClick={() => handleOpen()}>
+        Add New Role
+      </Button>
       <List>
-        {roles.map((role) => (
+        {roles.map((role: Role) => (
           <ListItem key={role.id}>
-            <ListItemText
-              primary={role.name}
-              secondary={`Permissions: ${role.permissions.join(', ')}`}
-            />
-            <Button onClick={() => handleEditRole(role)}>Edit</Button>
+            <ListItemText primary={role.name} />
+            <Button onClick={() => handleOpen(role)}>Edit</Button>
+            <Button onClick={() => handleDelete(role.id)}>Delete</Button>
           </ListItem>
         ))}
       </List>
-      <Button variant="contained" color="primary" onClick={handleAddRole}>
-        Add New Role
-      </Button>
-      <Dialog open={isDialogOpen} onClose={handleCloseDialog}>
-        <DialogTitle>
-          {selectedRole?.id ? 'Edit Role' : 'Add New Role'}
-        </DialogTitle>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>{currentRole ? 'Edit Role' : 'Add New Role'}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -78,37 +86,13 @@ const RoleManagement: React.FC = () => {
             label="Role Name"
             type="text"
             fullWidth
-            value={selectedRole?.name || ''}
-            onChange={(e) =>
-              setSelectedRole({ ...selectedRole!, name: e.target.value })
-            }
+            value={roleName}
+            onChange={(e) => setRoleName(e.target.value)}
           />
-          <Typography variant="subtitle1">Permissions:</Typography>
-          {/* Add checkboxes for permissions */}
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={selectedRole?.permissions.includes('read') || false}
-                onChange={(e) => {
-                  const newPermissions = e.target.checked
-                    ? [...selectedRole!.permissions, 'read']
-                    : selectedRole!.permissions.filter((p) => p !== 'read');
-                  setSelectedRole({
-                    ...selectedRole!,
-                    permissions: newPermissions,
-                  });
-                }}
-              />
-            }
-            label="Read"
-          />
-          {/* Add more permission checkboxes as needed */}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleUpdateRole} color="primary">
-            {selectedRole?.id ? 'Update' : 'Add'}
-          </Button>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleSubmit}>{currentRole ? 'Update' : 'Create'}</Button>
         </DialogActions>
       </Dialog>
     </Box>

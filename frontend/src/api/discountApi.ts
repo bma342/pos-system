@@ -1,37 +1,37 @@
-import { apiCall } from '../services/api';
-import { Discount } from '../types';
+import axios from 'axios';
+import { Discount, DiscountCreateData } from '../types/discountTypes';
 
-export const getDiscounts = () =>
-  apiCall<Discount[]>({ url: '/discounts', method: 'GET' });
+export const discountApi = {
+  getDiscounts: async (clientId: string): Promise<Discount[]> => {
+    const response = await axios.get(`/api/discounts/${clientId}`);
+    return response.data;
+  },
 
-export const createDiscount = (discount: Omit<Discount, 'id' | 'usageCount'>) =>
-  apiCall<Discount>({ url: '/discounts', method: 'POST', data: discount });
+  createDiscount: async (clientId: string, discount: DiscountCreateData): Promise<Discount> => {
+    const response = await axios.post(`/api/discounts/${clientId}`, discount);
+    return response.data;
+  },
 
-export const updateDiscount = (id: number, discount: Partial<Discount>) =>
-  apiCall<Discount>({ url: `/discounts/${id}`, method: 'PUT', data: discount });
+  fetchDiscountsByLocation: async (locationId: string): Promise<Discount[]> => {
+    const response = await axios.get(`/api/discounts/location/${locationId}`);
+    return response.data;
+  },
 
-export const deleteDiscount = (id: number) =>
-  apiCall<void>({ url: `/discounts/${id}`, method: 'DELETE' });
+  updateDiscount: async (clientId: string, discountId: string, discount: Partial<Discount>): Promise<Discount> => {
+    const response = await axios.put(`/api/discounts/${clientId}/${discountId}`, discount);
+    return response.data;
+  },
 
-export const applyDiscount = (code: string, cartTotal: number) =>
-  apiCall<{ discountedTotal: number; appliedDiscount: Discount }>({
-    url: '/discounts/apply',
-    method: 'POST',
-    data: { code, cartTotal },
-  });
+  deleteDiscount: async (clientId: string, discountId: string): Promise<void> => {
+    await axios.delete(`/api/discounts/${clientId}/${discountId}`);
+  },
 
-export const syncDiscountsFromPOS = (locationId: number) =>
-  apiCall<void>({
-    url: '/discounts/sync-from-pos',
-    method: 'POST',
-    data: { locationId },
-  });
+  scheduleDiscountDrop: async (clientId: string, discountId: string, dropDate: string): Promise<Discount> => {
+    const response = await axios.post(`/api/discounts/${clientId}/${discountId}/schedule`, { dropDate });
+    return response.data;
+  },
 
-export const syncDiscountsForAllLocations = () =>
-  apiCall<void>({ url: '/discounts/sync-all-locations', method: 'POST' });
-
-export const fetchDiscountsByLocation = (clientId: number) =>
-  apiCall<Discount[]>({
-    url: `/discounts/by-location/${clientId}`,
-    method: 'GET',
-  });
+  syncPOSDiscounts: async (clientId: string): Promise<void> => {
+    await axios.post(`/api/discounts/${clientId}/sync-pos`);
+  },
+};

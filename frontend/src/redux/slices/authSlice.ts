@@ -1,47 +1,50 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { User, AuthResponse, UserRole } from '../../types/userTypes';
+import { authApi } from '../../api/authApi';
 import { RootState } from '../store';
-import { AuthService } from '../../services/authService';
-import { User } from '../../types/userTypes';
-import { UserRole } from '../../types/userTypes';
 
 interface AuthState {
-  isAuthenticated: boolean;
   user: User | null;
-  token: string | null;
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  isAuthenticated: boolean;
+  loading: boolean;
   error: string | null;
-  currentUser: User | null;
 }
 
 const initialState: AuthState = {
-  isAuthenticated: false,
   user: null,
-  token: null,
-  status: 'idle',
+  isAuthenticated: false,
+  loading: false,
   error: null,
-  currentUser: null,
 };
 
-export const register = createAsyncThunk(
-  'auth/register',
-  async (userData: { username: string; email: string; password: string }, { rejectWithValue }) => {
+export const login = createAsyncThunk<AuthResponse, { email: string; password: string }>(
+  'auth/login',
+  async ({ email, password }, { rejectWithValue }) => {
     try {
-      const user = await AuthService.register(userData);
-      return user;
+      const response = await authApi.login(email, password);
+      return response;
     } catch (error) {
-      return rejectWithValue('Registration failed. Please try again.');
+      return rejectWithValue((error as Error).message);
     }
   }
 );
 
-export const login = createAsyncThunk(
-  'auth/login',
-  async (credentials: { email: string; password: string }, { rejectWithValue }) => {
+export const logout = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) => {
+  try {
+    await authApi.logout();
+  } catch (error) {
+    return rejectWithValue((error as Error).message);
+  }
+});
+
+export const register = createAsyncThunk<AuthResponse, { email: string; password: string; firstName: string; lastName: string }>(
+  'auth/register',
+  async ({ email, password, firstName, lastName }, { rejectWithValue }) => {
     try {
-      const { user, token } = await AuthService.login(credentials);
-      return { user, token };
+      const response = await authApi.register(email, password, firstName, lastName);
+      return response;
     } catch (error) {
-      return rejectWithValue('Login failed. Please try again.');
+      return rejectWithValue((error as Error).message);
     }
   }
 );
@@ -50,58 +53,54 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    logout: (state) => {
-      state.user = null;
-      state.token = null;
-      state.isAuthenticated = false;
-    },
-    setCredentials: (state, action: PayloadAction<{ user: User; token: string }>) => {
-      state.user = action.payload.user;
-      state.token = action.payload.token;
-      state.isAuthenticated = true;
-    },
-    setUserRole: (state, action: PayloadAction<User['role']>) => {
-      if (state.user) {
-        state.user.role = action.payload;
-      }
+    setUser: (state, action: PayloadAction<User | null>) => {
+      state.user = action.payload;
+      state.isAuthenticated = !!action.payload;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(register.pending, (state) => {
-        state.status = 'loading';
-      })
-      .addCase(register.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.user = action.payload;
-        state.isAuthenticated = true;
-      })
-      .addCase(register.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload as string;
-      })
       .addCase(login.pending, (state) => {
-        state.status = 'loading';
+        state.loading = true;
+        state.error = null;
       })
       .addCase(login.fulfilled, (state, action) => {
-        state.status = 'succeeded';
         state.user = action.payload.user;
-        state.token = action.payload.token;
         state.isAuthenticated = true;
+        state.loading = false;
       })
       .addCase(login.rejected, (state, action) => {
-        state.status = 'failed';
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(logout.fulfilled, (state) => {
+        state.user = null;
+        state.isAuthenticated = false;
+      })
+      .addCase(register.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(register.fulfilled, (state, action) => {
+        state.user = action.payload.user;
+        state.isAuthenticated = true;
+        state.loading = false;
+      })
+      .addCase(register.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload as string;
       });
   },
 });
 
-export const { logout, setCredentials, setUserRole } = authSlice.actions;
+export const { setUser } = authSlice.actions;
 
 export const selectCurrentUser = (state: RootState) => state.auth.user;
-export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;
-export const selectAuthStatus = (state: RootState) => state.auth.status;
-export const selectAuthError = (state: RootState) => state.auth.error;
-export const selectUserRole = (state: RootState): UserRole | undefined => state.auth.user?.role;
+export const selectUserRole = (state: RootState) => state.auth.user?.role;
+export const selectAuthStatus = (state: RootState) => ({
+  isAuthenticated: state.auth.isAuthenticated,
+  loading: state.auth.loading,
+  error: state.auth.error,
+});
 
 export default authSlice.reducer;

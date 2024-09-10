@@ -1,58 +1,51 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Button, Typography, CircularProgress, Paper, Box } from '@mui/material';
-import { POSIntegrationService } from '../services/POSIntegrationService';
-import { useAuth } from '../contexts/AuthContext';
-import { User } from '../types/userTypes';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '../redux/store';
+import { Button, Typography, CircularProgress } from '@mui/material';
+import { useAuth } from '../hooks/useAuth';
+import { AppDispatch, RootState } from '../redux/store';
 import { syncDiscounts, fetchLastSyncTime } from '../redux/slices/posDiscountSlice';
-import { syncPOSDiscounts } from 'frontend/src/api/discountApi';
+import { discountApi } from '../api/discountApi';
 
 const POSDiscountSync: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { isSyncing, lastSyncTime, error } = useSelector((state: RootState) => state.posDiscount);
   const { user } = useAuth();
-
-  const posIntegrationService = React.useMemo(
-    () => new POSIntegrationService(),
-    []
-  );
-
-  const fetchLastSync = useCallback(() => {
-    if (user && (user as User).clientId) {
-      dispatch(fetchLastSyncTime((user as User).clientId));
-    }
-  }, [user, dispatch]);
+  const { isSyncing, lastSyncTime, error } = useSelector((state: RootState) => state.posDiscount);
 
   useEffect(() => {
-    fetchLastSync();
-  }, [fetchLastSync]);
+    if (user?.clientId) {
+      dispatch(fetchLastSyncTime(user.clientId));
+    }
+  }, [dispatch, user]);
 
   const handleSync = async () => {
-    if (user && (user as User).clientId) {
-      dispatch(syncDiscounts((user as User).clientId));
+    if (user?.clientId) {
+      try {
+        await dispatch(syncDiscounts(user.clientId)).unwrap();
+        await discountApi.syncPOSDiscounts(user.clientId);
+      } catch (error) {
+        console.error('Error syncing discounts:', error);
+      }
     }
   };
 
   return (
-    <Paper elevation={3}>
-      <Box p={2}>
-        <Typography variant="h6" gutterBottom>POS Discount Sync</Typography>
-        <Typography variant="body1" gutterBottom>
-          Last sync: {lastSyncTime ? new Date(lastSyncTime).toLocaleString() : 'Never'}
+    <div>
+      <Typography variant="h6">POS Discount Sync</Typography>
+      <Button
+        onClick={handleSync}
+        disabled={isSyncing}
+        variant="contained"
+        color="primary"
+      >
+        {isSyncing ? <CircularProgress size={24} /> : 'Sync Discounts'}
+      </Button>
+      {lastSyncTime && (
+        <Typography variant="body2">
+          Last synced: {new Date(lastSyncTime).toLocaleString()}
         </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSync}
-          disabled={isSyncing}
-          startIcon={isSyncing ? <CircularProgress size={20} color="inherit" /> : null}
-        >
-          {isSyncing ? 'Syncing...' : 'Sync Discounts'}
-        </Button>
-        {error && <Typography color="error" mt={2}>{error}</Typography>}
-      </Box>
-    </Paper>
+      )}
+      {error && <Typography color="error">{error}</Typography>}
+    </div>
   );
 };
 

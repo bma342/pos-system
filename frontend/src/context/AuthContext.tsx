@@ -1,40 +1,41 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { login, logout } from 'frontend/src/api/authApi';
+import { authApi } from '../api/authApi';
+import { User, UserRole } from '../types/userTypes';
 
-interface User {
-  id: string;
-  email: string;
-  // Add other user properties as needed
-}
-
-interface AuthContextType {
-  isAuthenticated: boolean;
+export interface AuthContextType {
   user: User | null;
+  isAuthenticated: boolean;
+  isGlobalAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
+      // Implement token validation and user data fetching
+      // For now, we'll just set isAuthenticated to true
       setIsAuthenticated(true);
-      // Optionally fetch user data here
     }
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await api.post('/auth/login', { email, password });
-      const { token, user } = response.data;
-      localStorage.setItem('token', token);
+      const response = await authApi.login(email, password);
+      const userData: User = {
+        ...response.user,
+        role: response.user.role as UserRole,
+        clientId: response.user.clientId || '',
+      };
+      setUser(userData);
       setIsAuthenticated(true);
-      setUser(user);
+      localStorage.setItem('token', response.token);
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -42,21 +43,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    setIsAuthenticated(false);
     setUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem('token');
   };
 
+  const isGlobalAdmin = user?.role === UserRole.GLOBAL_ADMIN;
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, isGlobalAdmin, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

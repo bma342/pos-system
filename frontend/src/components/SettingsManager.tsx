@@ -1,60 +1,35 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { TextField, Button, Typography, Box } from '@mui/material';
-import { SettingsService } from '../../services/SettingsService';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { TextField, Button, Typography, Box, CircularProgress } from '@mui/material';
+import { useAuth } from '../hooks/useAuth';
 import { Settings } from '../types/settingsTypes';
-import { fetchSettings, updateSettings } from '../api/settingsApi';
+import { fetchSettings, updateSettings } from '../redux/slices/settingsSlice';
+import { RootState, AppDispatch } from '../redux/store';
 
 const SettingsManager: React.FC = () => {
-  const [settings, setSettings] = useState<Settings | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
+  const { data: settings, loading, error } = useSelector((state: RootState) => state.settings);
   const { user } = useAuth();
 
-  const settingsService = useMemo(() => new SettingsService(), []);
-
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        setIsLoading(true);
-        const fetchedSettings = await settingsService.getSettings(
-          user.clientId
-        );
-        setSettings(fetchedSettings);
-        setError(null);
-      } catch (err) {
-        setError('Failed to fetch settings');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSettings();
-  }, [settingsService, user.clientId]);
+    if (user?.clientId) {
+      dispatch(fetchSettings(user.clientId));
+    }
+  }, [dispatch, user]);
 
   const handleSettingChange = (
     key: keyof Settings,
     value: string | number | boolean
   ) => {
-    if (settings) {
-      setSettings({ ...settings, [key]: value });
+    if (settings && user?.clientId) {
+      dispatch(updateSettings({ 
+        clientId: user.clientId, 
+        settings: { ...settings, [key]: value } 
+      }));
     }
   };
 
-  const handleSaveSettings = async () => {
-    if (settings) {
-      try {
-        await settingsService.updateSettings(user.clientId, settings);
-        setError(null);
-      } catch (err) {
-        setError('Failed to save settings');
-        console.error(err);
-      }
-    }
-  };
-
-  if (isLoading) return <Typography>Loading settings...</Typography>;
+  if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
   if (!settings) return <Typography>No settings found</Typography>;
 
@@ -75,7 +50,15 @@ const SettingsManager: React.FC = () => {
           margin="normal"
         />
       ))}
-      <Button variant="contained" color="primary" onClick={handleSaveSettings}>
+      <Button 
+        variant="contained" 
+        color="primary" 
+        onClick={() => {
+          if (user?.clientId && settings) {
+            dispatch(updateSettings({ clientId: user.clientId, settings }));
+          }
+        }}
+      >
         Save Settings
       </Button>
     </Box>

@@ -1,73 +1,52 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../store';
-import { POSIntegration } from '../../types/posIntegrationTypes';
-import { posIntegrationService } from '../../services/posIntegrationService';
+import { POSProfile, POSType } from '../../types/posTypes';
+import { posIntegrationApi } from '../../api/posIntegrationApi';
 
 interface POSIntegrationState {
-  integrations: POSIntegration[];
+  profiles: POSProfile[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
 
 const initialState: POSIntegrationState = {
-  integrations: [],
+  profiles: [],
   status: 'idle',
   error: null,
 };
 
-export const fetchPOSIntegrations = createAsyncThunk<POSIntegration[], { clientId: string; locationId?: string }, { rejectValue: string }>(
-  'posIntegration/fetchPOSIntegrations',
-  async ({ clientId, locationId }, { rejectWithValue }) => {
-    try {
-      return await posIntegrationService.fetchPOSIntegrations(clientId, locationId);
-    } catch (error) {
-      return rejectWithValue((error as Error).message);
-    }
+export const fetchProfiles = createAsyncThunk(
+  'posIntegration/fetchProfiles',
+  async (clientId: string) => {
+    return await posIntegrationApi.getProfiles(clientId);
   }
 );
 
-export const createPOSIntegration = createAsyncThunk<POSIntegration, { clientId: string, integration: Omit<POSIntegration, 'id'> }, { rejectValue: string }>(
-  'posIntegration/createPOSIntegration',
-  async ({ clientId, integration }, { rejectWithValue }) => {
-    try {
-      return await posIntegrationService.createPOSIntegration(clientId, integration);
-    } catch (error) {
-      return rejectWithValue((error as Error).message);
-    }
+export const createProfile = createAsyncThunk(
+  'posIntegration/createProfile',
+  async (profile: Omit<POSProfile, 'id'>) => {
+    return await posIntegrationApi.createProfile(profile);
   }
 );
 
-export const updatePOSIntegration = createAsyncThunk<POSIntegration, { clientId: string, integrationId: string, integration: Partial<POSIntegration> }, { rejectValue: string }>(
-  'posIntegration/updatePOSIntegration',
-  async ({ clientId, integrationId, integration }, { rejectWithValue }) => {
-    try {
-      return await posIntegrationService.updatePOSIntegration(clientId, integrationId, integration);
-    } catch (error) {
-      return rejectWithValue((error as Error).message);
-    }
+export const updateProfile = createAsyncThunk(
+  'posIntegration/updateProfile',
+  async (profile: POSProfile) => {
+    return await posIntegrationApi.updateProfile(profile);
   }
 );
 
-export const deletePOSIntegration = createAsyncThunk<string, { clientId: string, integrationId: string }, { rejectValue: string }>(
-  'posIntegration/deletePOSIntegration',
-  async ({ clientId, integrationId }, { rejectWithValue }) => {
-    try {
-      await posIntegrationService.deletePOSIntegration(clientId, integrationId);
-      return integrationId;
-    } catch (error) {
-      return rejectWithValue((error as Error).message);
-    }
+export const deleteProfile = createAsyncThunk(
+  'posIntegration/deleteProfile',
+  async (profileId: string) => {
+    await posIntegrationApi.deleteProfile(profileId);
+    return profileId;
   }
 );
 
-export const syncPOSData = createAsyncThunk<void, { clientId: string, locationId: string, integrationType: string }, { rejectValue: string }>(
-  'posIntegration/syncPOSData',
-  async ({ clientId, locationId, integrationType }, { rejectWithValue }) => {
-    try {
-      await posIntegrationService.syncPOSData(clientId, locationId, integrationType);
-    } catch (error) {
-      return rejectWithValue((error as Error).message);
-    }
+export const syncProfile = createAsyncThunk(
+  'posIntegration/syncProfile',
+  async (profileId: string) => {
+    return await posIntegrationApi.syncProfile(profileId);
   }
 );
 
@@ -77,47 +56,36 @@ const posIntegrationSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchPOSIntegrations.pending, (state) => {
+      .addCase(fetchProfiles.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(fetchPOSIntegrations.fulfilled, (state, action) => {
+      .addCase(fetchProfiles.fulfilled, (state, action: PayloadAction<POSProfile[]>) => {
         state.status = 'succeeded';
-        state.integrations = action.payload;
+        state.profiles = action.payload;
       })
-      .addCase(fetchPOSIntegrations.rejected, (state, action) => {
+      .addCase(fetchProfiles.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.payload || 'Failed to fetch POS integrations';
+        state.error = action.error.message || 'Failed to fetch profiles';
       })
-      .addCase(createPOSIntegration.fulfilled, (state, action) => {
-        state.integrations.push(action.payload);
+      .addCase(createProfile.fulfilled, (state, action: PayloadAction<POSProfile>) => {
+        state.profiles.push(action.payload);
       })
-      .addCase(updatePOSIntegration.fulfilled, (state, action) => {
-        const index = state.integrations.findIndex(integration => integration.id === action.payload.id);
+      .addCase(updateProfile.fulfilled, (state, action: PayloadAction<POSProfile>) => {
+        const index = state.profiles.findIndex(profile => profile.id === action.payload.id);
         if (index !== -1) {
-          state.integrations[index] = action.payload;
+          state.profiles[index] = action.payload;
         }
       })
-      .addCase(deletePOSIntegration.fulfilled, (state, action: PayloadAction<string>) => {
-        state.integrations = state.integrations.filter(integration => integration.id !== action.payload);
+      .addCase(deleteProfile.fulfilled, (state, action: PayloadAction<string>) => {
+        state.profiles = state.profiles.filter(profile => profile.id !== action.payload);
       })
-      .addCase(syncPOSData.pending, (state) => {
-        state.status = 'loading';
-      })
-      .addCase(syncPOSData.fulfilled, (state) => {
-        state.status = 'succeeded';
-      })
-      .addCase(syncPOSData.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload || 'Failed to sync POS data';
+      .addCase(syncProfile.fulfilled, (state, action: PayloadAction<POSProfile>) => {
+        const index = state.profiles.findIndex(profile => profile.id === action.payload.id);
+        if (index !== -1) {
+          state.profiles[index] = action.payload;
+        }
       });
   },
 });
-
-export const selectPOSIntegrations = (state: RootState) => state.posIntegration.integrations;
-export const selectPOSIntegrationStatus = (state: RootState) => state.posIntegration.status;
-export const selectPOSIntegrationError = (state: RootState) => state.posIntegration.error;
-
-export const selectPOSIntegrationsByLocation = (state: RootState, locationId: string) =>
-  state.posIntegration.integrations.filter(integration => (integration as any).locationId === locationId);
 
 export default posIntegrationSlice.reducer;

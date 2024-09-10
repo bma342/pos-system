@@ -1,54 +1,58 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '../redux/store';
+import { AppDispatch, RootState } from '../redux/store';
 import {
   fetchPendingReviews,
   approveReview,
   deleteReview,
 } from '../redux/slices/reviewSlice';
+import { useAuth } from '../hooks/useAuth';
 import {
+  Box,
   Typography,
   List,
   ListItem,
   ListItemText,
   Button,
-  Box,
-  Rating,
+  CircularProgress,
 } from '@mui/material';
-import { fetchReviews, updateReview } from 'frontend/src/api/reviewApi';
+import { Review } from '../types/reviewTypes';
 
 const ReviewManager: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const pendingReviews = useSelector(
-    (state: RootState) => state.reviews.pendingReviews
-  );
+  const { user } = useAuth();
+  const pendingReviews = useSelector((state: RootState) => state.review.pendingReviews);
+  const loading = useSelector((state: RootState) => state.review.loading);
+  const error = useSelector((state: RootState) => state.review.error);
 
   useEffect(() => {
-    dispatch(fetchPendingReviews());
-  }, [dispatch]);
+    if (user?.clientId) {
+      dispatch(fetchPendingReviews(user.clientId));
+    }
+  }, [dispatch, user]);
 
-  const handleApprove = (reviewId: number) => {
+  const handleApprove = (reviewId: string) => {
     dispatch(approveReview(reviewId));
   };
 
-  const handleDelete = (reviewId: number) => {
+  const handleDelete = (reviewId: string) => {
     dispatch(deleteReview(reviewId));
   };
 
+  if (loading) return <CircularProgress />;
+  if (error) return <Typography color="error">{error}</Typography>;
+
   return (
     <Box>
-      <Typography variant="h5">Pending Reviews</Typography>
+      <Typography variant="h4" gutterBottom>
+        Pending Reviews
+      </Typography>
       <List>
-        {pendingReviews.map((review) => (
+        {pendingReviews.map((review: Review) => (
           <ListItem key={review.id}>
             <ListItemText
-              primary={`${review.firstName} ${review.lastInitial}. - ${review.MenuItem.name}`}
-              secondary={
-                <>
-                  <Rating value={review.rating} readOnly size="small" />
-                  <Typography variant="body2">{review.comment}</Typography>
-                </>
-              }
+              primary={review.content}
+              secondary={`By: ${review.userName} | Rating: ${review.rating}`}
             />
             <Button onClick={() => handleApprove(review.id)}>Approve</Button>
             <Button onClick={() => handleDelete(review.id)}>Delete</Button>

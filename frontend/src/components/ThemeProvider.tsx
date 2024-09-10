@@ -1,23 +1,14 @@
-import React from 'react';
-import { ThemeProvider as EmotionThemeProvider } from '@emotion/react';
-import { createTheme, Theme } from '@mui/material/styles';
+import React, { ReactNode } from 'react';
+import { ThemeProvider as MuiThemeProvider, createTheme } from '@mui/material/styles';
 
-const theme: Theme = createTheme({
-  palette: {
-    primary: {
-      main: '#0070f3',
-    },
-    secondary: {
-      main: '#ff4081',
-    },
-  },
-  typography: {
-    fontFamily: 'Arial, sans-serif',
-  },
+const theme = createTheme({
+  // Your theme configuration
 });
 
-const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => <EmotionThemeProvider theme={theme}>{children}</EmotionThemeProvider>;
+interface ThemeProviderProps {
+  children: ReactNode;
+}
 
-export default ThemeProvider;
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  return <MuiThemeProvider theme={theme}>{children}</MuiThemeProvider>;
+};

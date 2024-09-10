@@ -1,11 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { RootState } from '../store';
-import { fetchRevenueData } from '../../api/revenueApi';
-
-interface RevenueData {
-  date: string;
-  amount: number;
-}
+import { fetchRevenueData as fetchRevenueDataApi } from '../../api/revenueApi';
+import { RevenueData } from '../../types/revenueTypes';
 
 interface RevenueState {
   data: RevenueData[];
@@ -19,18 +14,11 @@ const initialState: RevenueState = {
   error: null,
 };
 
-export const fetchRevenue = createAsyncThunk(
-  'revenue/fetchRevenue',
-  async (dateRange: { startDate: string; endDate: string }, { rejectWithValue }) => {
-    try {
-      const data = await fetchRevenueData(dateRange);
-      return data;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('An unknown error occurred');
-    }
+export const fetchRevenueData = createAsyncThunk(
+  'revenue/fetchRevenueData',
+  async ({ clientId, startDate, endDate }: { clientId: string; startDate: string; endDate: string }) => {
+    const data = await fetchRevenueDataApi(clientId, startDate, endDate);
+    return data;
   }
 );
 
@@ -40,23 +28,19 @@ const revenueSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchRevenue.pending, (state) => {
+      .addCase(fetchRevenueData.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchRevenue.fulfilled, (state, action) => {
+      .addCase(fetchRevenueData.fulfilled, (state, action) => {
         state.loading = false;
         state.data = action.payload;
       })
-      .addCase(fetchRevenue.rejected, (state, action) => {
+      .addCase(fetchRevenueData.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.error.message || 'An error occurred';
       });
   },
 });
-
-export const selectRevenueData = (state: RootState) => state.revenue.data;
-export const selectRevenueLoading = (state: RootState) => state.revenue.loading;
-export const selectRevenueError = (state: RootState) => state.revenue.error;
 
 export default revenueSlice.reducer;

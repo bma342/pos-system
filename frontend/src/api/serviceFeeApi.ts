@@ -1,85 +1,23 @@
-import api from './axios';
-import { ServiceFee } from '../types/serviceFeeTypes';
-import logger from '../utils/logger';
+import axios from 'axios';
+import { ServiceFee, ServiceFeeCreateData } from '../types/serviceFeeTypes';
 
-export const ServiceFeeApi = {
-  async getServiceFees(clientId: string): Promise<ServiceFee[]> {
-    try {
-      const response = await api.get<ServiceFee[]>(
-        `/clients/${clientId}/service-fees`
-      );
-      logger.info('Fetched service fees successfully', { clientId });
-      return response.data;
-    } catch (error) {
-      logger.error('Error fetching service fees', { clientId, error });
-      throw error;
-    }
+export const serviceFeeApi = {
+  getServiceFees: async (clientId: string): Promise<ServiceFee[]> => {
+    const response = await axios.get(`/api/service-fees/${clientId}`);
+    return response.data;
   },
 
-  async createServiceFee(
-    clientId: string,
-    serviceFee: Omit<ServiceFee, 'id'>
-  ): Promise<ServiceFee> {
-    try {
-      const response = await api.post<ServiceFee>(
-        `/clients/${clientId}/service-fees`,
-        serviceFee
-      );
-      logger.info('Created service fee successfully', {
-        clientId,
-        serviceFeeId: response.data.id,
-      });
-      return response.data;
-    } catch (error) {
-      logger.error('Error creating service fee', { clientId, error });
-      throw error;
-    }
+  createServiceFee: async (clientId: string, serviceFee: ServiceFeeCreateData): Promise<ServiceFee> => {
+    const response = await axios.post(`/api/service-fees/${clientId}`, serviceFee);
+    return response.data;
   },
 
-  async updateServiceFee(
-    clientId: string,
-    serviceFeeId: string,
-    serviceFee: Partial<ServiceFee>
-  ): Promise<ServiceFee> {
-    try {
-      const response = await api.put<ServiceFee>(
-        `/clients/${clientId}/service-fees/${serviceFeeId}`,
-        serviceFee
-      );
-      logger.info('Updated service fee successfully', {
-        clientId,
-        serviceFeeId,
-      });
-      return response.data;
-    } catch (error) {
-      logger.error('Error updating service fee', {
-        clientId,
-        serviceFeeId,
-        error,
-      });
-      throw error;
-    }
+  updateServiceFee: async (clientId: string, serviceFee: ServiceFee): Promise<ServiceFee> => {
+    const response = await axios.put(`/api/service-fees/${clientId}/${serviceFee.id}`, serviceFee);
+    return response.data;
   },
 
-  async deleteServiceFee(
-    clientId: string,
-    serviceFeeId: string
-  ): Promise<void> {
-    try {
-      await api.delete(`/clients/${clientId}/service-fees/${serviceFeeId}`);
-      logger.info('Deleted service fee successfully', {
-        clientId,
-        serviceFeeId,
-      });
-    } catch (error) {
-      logger.error('Error deleting service fee', {
-        clientId,
-        serviceFeeId,
-        error,
-      });
-      throw error;
-    }
-  },
+  deleteServiceFee: async (clientId: string, serviceFeeId: string): Promise<void> => {
+    await axios.delete(`/api/service-fees/${clientId}/${serviceFeeId}`);
+  }
 };
-
-export default ServiceFeeApi;

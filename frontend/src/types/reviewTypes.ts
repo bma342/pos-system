@@ -1,31 +1,28 @@
-export interface ReviewCreateData {
-  orderId: string;
-  locationId: string;
-  menuItemId: string;
-  rating: number;
-  comment: string;
-  tags: string[];
-  images?: string[];
-}
-
 export interface Review {
   id: string;
-  orderId: string;
-  locationId: string;
   menuItemId: string;
   userId: string;
+  userName: string;
+  firstName: string;
+  lastInitial: string;
   rating: number;
-  comment: string;
-  tags: string[];
-  images: string[];
+  content: string;
   createdAt: string;
-  updatedAt: string;
-  helpfulCount: number;
-  responseFromBusiness?: string;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
+export interface ReviewCreateData {
+  menuItemId: string;
+  firstName: string;
+  lastInitial: string;
+  rating: number;
+  content: string;
 }
 
 export interface ReviewStats {
   averageRating: number;
   totalReviews: number;
-  ratingDistribution: { [key: number]: number };
+  ratingDistribution: {
+    [key: number]: number;
+  };
 }

@@ -28,3 +28,13 @@ export interface Discount {
     percentage: number;
     // Add other relevant properties
 }
+
+export interface WalletDrop {
+    id?: string;
+    amount: number;
+    expirationDate: string;
+    description: string;
+    status?: 'pending' | 'completed' | 'failed';
+    userId?: string;
+    walletId?: string;
+}

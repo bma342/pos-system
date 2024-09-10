@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUsers, updateUserProfile } from '../redux/slices/userSlice';
+import { fetchUsers, updateUser } from '../redux/slices/userSlice';
 import { RootState, AppDispatch } from '../redux/store';
 import { User, UserRole } from '../types/userTypes';
 import {
@@ -18,13 +18,14 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { Alert } from '@mui/material';
+import { useAuth } from '../hooks/useAuth';
 
 const UserManagement: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const users = useSelector((state: RootState) => state.user.users);
   const loading = useSelector((state: RootState) => state.user.loading);
   const error = useSelector((state: RootState) => state.user.error);
-  const currentUser = useSelector((state: RootState) => state.auth.currentUser);
+  const { user: currentUser } = useAuth();
 
   const [snackbar, setSnackbar] = useState<{
     message: string;
@@ -37,7 +38,7 @@ const UserManagement: React.FC = () => {
         let params: { clientId?: string; locationId?: string } = {};
         if (currentUser.role === UserRole.CLIENT_ADMIN) {
           params = { clientId: currentUser.clientId };
-        } else if (currentUser.role === UserRole.LOCATION_ADMIN) {
+        } else if (currentUser.role === UserRole.LOCATION_ADMIN && currentUser.locationId) {
           params = { locationId: currentUser.locationId };
         }
         dispatch(fetchUsers(params));
@@ -56,10 +57,12 @@ const UserManagement: React.FC = () => {
 
   const handleEditUser = (user: User) => {
     // Implement edit user functionality
+    console.log('Edit user:', user);
   };
 
   const handleDeleteUser = (userId: string) => {
     // Implement delete user functionality
+    console.log('Delete user:', userId);
   };
 
   if (loading) return <CircularProgress />;

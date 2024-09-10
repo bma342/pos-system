@@ -1,17 +1,17 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { ClientBrandingService } from '../../services/clientBrandingService';
 import { ClientBranding } from '../../types/clientTypes';
 import { RootState } from '../store';
 
-interface ClientBrandingState {
-  data: ClientBranding | null;
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+export interface ClientBrandingState {
+  branding: ClientBranding | null;
+  loading: boolean;
   error: string | null;
 }
 
 const initialState: ClientBrandingState = {
-  data: null,
-  status: 'idle',
+  branding: null,
+  loading: false,
   error: null,
 };
 
@@ -23,7 +23,8 @@ export const fetchClientBranding = createAsyncThunk<
   'clientBranding/fetchClientBranding',
   async (clientId, { rejectWithValue }) => {
     try {
-      return await ClientBrandingService.fetchClientBranding(clientId);
+      const branding = await ClientBrandingService.fetchClientBranding(clientId);
+      return branding;
     } catch (error) {
       return rejectWithValue('Failed to fetch client branding');
     }
@@ -38,7 +39,8 @@ export const updateClientBranding = createAsyncThunk<
   'clientBranding/updateClientBranding',
   async ({ clientId, brandingData }, { rejectWithValue }) => {
     try {
-      return await ClientBrandingService.updateClientBranding(clientId, brandingData);
+      const updatedBranding = await ClientBrandingService.updateClientBranding(clientId, brandingData);
+      return updatedBranding;
     } catch (error) {
       return rejectWithValue('Failed to update client branding');
     }
@@ -52,25 +54,29 @@ const clientBrandingSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchClientBranding.pending, (state) => {
-        state.status = 'loading';
+        state.loading = true;
+        state.error = null;
       })
-      .addCase(fetchClientBranding.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.data = action.payload;
+      .addCase(fetchClientBranding.fulfilled, (state, action: PayloadAction<ClientBranding>) => {
+        state.branding = action.payload;
+        state.loading = false;
+        state.error = null;
       })
       .addCase(fetchClientBranding.rejected, (state, action) => {
-        state.status = 'failed';
+        state.loading = false;
         state.error = action.payload || 'An unknown error occurred';
       })
       .addCase(updateClientBranding.pending, (state) => {
-        state.status = 'loading';
+        state.loading = true;
+        state.error = null;
       })
-      .addCase(updateClientBranding.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.data = action.payload;
+      .addCase(updateClientBranding.fulfilled, (state, action: PayloadAction<ClientBranding>) => {
+        state.branding = action.payload;
+        state.loading = false;
+        state.error = null;
       })
       .addCase(updateClientBranding.rejected, (state, action) => {
-        state.status = 'failed';
+        state.loading = false;
         state.error = action.payload || 'An unknown error occurred';
       });
   },
@@ -79,6 +85,6 @@ const clientBrandingSlice = createSlice({
 export default clientBrandingSlice.reducer;
 
 // Selectors
-export const selectClientBranding = (state: RootState) => state.clientBranding.data;
-export const selectClientBrandingStatus = (state: RootState) => state.clientBranding.status;
+export const selectClientBranding = (state: RootState) => state.clientBranding.branding;
+export const selectClientBrandingStatus = (state: RootState) => state.clientBranding.loading;
 export const selectClientBrandingError = (state: RootState) => state.clientBranding.error;

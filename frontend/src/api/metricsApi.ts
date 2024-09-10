@@ -1,9 +1,7 @@
 import axios from 'axios';
-import { RealtimeMetrics } from '../types';
+import { RealtimeMetrics } from '../types/metricsTypes';
 
-export const fetchRealtimeMetrics = async (
-  clientId: string
-): Promise<{ data: RealtimeMetrics }> => {
-  const response = await axios.get(`/api/clients/${clientId}/realtime-metrics`);
-  return response.data;
+export const fetchRealtimeMetrics = async (clientId: string) => {
+  const response = await axios.get<RealtimeMetrics>(`/api/metrics/realtime/${clientId}`);
+  return response;
 };

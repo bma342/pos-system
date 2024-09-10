@@ -1,139 +1,89 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../redux/store';
 import {
   fetchActiveOrders,
   cancelOrder,
   markItemOutOfStock,
+  selectActiveOrders,
 } from '../../redux/slices/orderSlice';
-import { Order, OrderItem } from '../../types';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native-web';
+import { Order, OrderItem } from '../../types/orderTypes';
+import { useAuth } from '../../hooks/useAuth';
+import { Box, Typography, List, ListItem, Button, Grid, Paper } from '@mui/material';
 
 const TabletOrderManager: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const activeOrders = useSelector(
-    (state: RootState) => state.orders.activeOrders
-  );
+  const activeOrders = useSelector(selectActiveOrders);
+  const { user } = useAuth();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   useEffect(() => {
-    dispatch(fetchActiveOrders());
-    const interval = setInterval(() => {
-      dispatch(fetchActiveOrders());
-    }, 30000); // Refresh every 30 seconds
-
-    return () => clearInterval(interval);
-  }, [dispatch]);
+    if (user?.locationId) {
+      dispatch(fetchActiveOrders(user.locationId));
+    }
+  }, [dispatch, user]);
 
   const handleCancelOrder = (orderId: string) => {
     dispatch(cancelOrder(orderId));
   };
 
-  const handleMarkItemOutOfStock = (itemId: string) => {
-    dispatch(markItemOutOfStock(itemId));
+  const handleMarkItemOutOfStock = (orderId: string, itemId: string) => {
+    dispatch(markItemOutOfStock({ orderId, itemId }));
   };
 
-  const renderOrderItem = ({ item }: { item: OrderItem }) => (
-    <View style={styles.orderItem}>
-      <Text>{item.name}</Text>
-      <Text>Quantity: {item.quantity}</Text>
-      {item.modifications &&
-        item.modifications.map((mod: string, index: number) => (
-          <Text key={index} style={styles.modification}>
-            {mod}
-          </Text>
-        ))}
-      <TouchableOpacity onPress={() => handleMarkItemOutOfStock(item.id)}>
-        <Text style={styles.outOfStockButton}>Mark Out of Stock</Text>
-      </TouchableOpacity>
-    </View>
+  const renderOrderItem = (order: Order) => (
+    <ListItem key={order.id} button onClick={() => setSelectedOrder(order)}>
+      <Box>
+        <Typography variant="subtitle1">Order #{order.id}</Typography>
+        <Typography variant="body2">Status: {order.status}</Typography>
+        <Typography variant="body2">Total: ${order.total.toFixed(2)}</Typography>
+        <Typography variant="body2">Estimated Completion: {order.estimatedCompletionTime}</Typography>
+      </Box>
+    </ListItem>
   );
 
-  const renderOrder = ({ item }: { item: Order }) => (
-    <TouchableOpacity
-      onPress={() => setSelectedOrder(item)}
-      style={styles.orderCard}
-    >
-      <Text style={styles.orderNumber}>Order #{item.id}</Text>
-      <Text>Promise Time: {item.promiseTime}</Text>
-      <Text>Total Items: {item.items.length}</Text>
-      <TouchableOpacity onPress={() => handleCancelOrder(item.id)}>
-        <Text style={styles.cancelButton}>Cancel Order</Text>
-      </TouchableOpacity>
-    </TouchableOpacity>
-  );
+  const renderOrderDetails = () => {
+    if (!selectedOrder) return null;
+
+    return (
+      <Paper elevation={3} sx={{ p: 2 }}>
+        <Typography variant="h6">Order #{selectedOrder.id} Details</Typography>
+        <Typography>Status: {selectedOrder.status}</Typography>
+        <Typography>Total: ${selectedOrder.total.toFixed(2)}</Typography>
+        <Typography>Estimated Completion: {selectedOrder.estimatedCompletionTime}</Typography>
+        <List>
+          {selectedOrder.items.map((item: OrderItem) => (
+            <ListItem key={item.id}>
+              <Box display="flex" justifyContent="space-between" width="100%">
+                <Typography>{item.name} x{item.quantity}</Typography>
+                <Button onClick={() => handleMarkItemOutOfStock(selectedOrder.id, item.id)}>
+                  Mark Out of Stock
+                </Button>
+              </Box>
+            </ListItem>
+          ))}
+        </List>
+        <Button variant="contained" color="secondary" onClick={() => handleCancelOrder(selectedOrder.id)}>
+          Cancel Order
+        </Button>
+      </Paper>
+    );
+  };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.orderList}>
-        <Text style={styles.title}>Active Orders</Text>
-        <FlatList
-          data={activeOrders}
-          renderItem={renderOrder}
-          keyExtractor={(item) => item.id}
-        />
-      </View>
-      {selectedOrder && (
-        <View style={styles.orderDetails}>
-          <Text style={styles.title}>Order Details</Text>
-          <Text>Order #{selectedOrder.id}</Text>
-          <Text>Promise Time: {selectedOrder.promiseTime}</Text>
-          <FlatList
-            data={selectedOrder.items}
-            renderItem={renderOrderItem}
-            keyExtractor={(item) => item.id}
-          />
-        </View>
-      )}
-    </View>
+    <Grid container spacing={2}>
+      <Grid item xs={12} md={4}>
+        <Paper elevation={3} sx={{ height: '100vh', overflowY: 'auto' }}>
+          <List>
+            {activeOrders.map(renderOrderItem)}
+          </List>
+        </Paper>
+      </Grid>
+      <Grid item xs={12} md={8}>
+        {renderOrderDetails()}
+      </Grid>
+    </Grid>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'row',
-  },
-  orderList: {
-    flex: 1,
-    padding: 10,
-  },
-  orderDetails: {
-    flex: 2,
-    padding: 10,
-    backgroundColor: '#f0f0f0',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  orderCard: {
-    backgroundColor: 'white',
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-  },
-  orderNumber: {
-    fontWeight: 'bold',
-  },
-  cancelButton: {
-    color: 'red',
-    marginTop: 5,
-  },
-  orderItem: {
-    backgroundColor: 'white',
-    padding: 10,
-    marginBottom: 5,
-    borderRadius: 5,
-  },
-  modification: {
-    fontStyle: 'italic',
-  },
-  outOfStockButton: {
-    color: 'orange',
-    marginTop: 5,
-  },
-});
 
 export default TabletOrderManager;

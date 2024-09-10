@@ -1,9 +1,9 @@
 export interface Settings {
-    id: string;
-    clientId: string;
-    theme: ThemeSettings;
-    notifications: NotificationSettings;
-    general: GeneralSettings;
+    [key: string]: string | number | boolean;
+    // Add specific settings properties here, for example:
+    // theme: string;
+    // notificationsEnabled: boolean;
+    // orderConfirmationEmail: string;
   }
   
   export interface ThemeSettings {

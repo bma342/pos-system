@@ -1,49 +1,68 @@
-import React, { useEffect, useState } from 'react';
-import { Typography, Box, Paper } from '@mui/material';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '../redux/store';
-import { fetchRealtimeMetrics } from '../api/metricsApi';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/store';
+import { fetchRealtimeMetrics } from '../redux/slices/metricsSlice';
+import { useAuth } from '../hooks/useAuth';
+import { Box, Typography, CircularProgress } from '@mui/material';
+import { styled } from '@mui/material/styles';
+
+const MetricBox = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-around',
+  padding: theme.spacing(2),
+  backgroundColor: 'var(--color-background)',
+  borderRadius: 'var(--border-radius)',
+  boxShadow: theme.shadows[1],
+  [theme.breakpoints.down('sm')]: {
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+}));
+
+const MetricItem = styled(Box)(({ theme }) => ({
+  textAlign: 'center',
+  [theme.breakpoints.down('sm')]: {
+    marginBottom: theme.spacing(2),
+  },
+}));
 
 const RealtimeMetricsTicker: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const realtimeMetrics = useSelector((state: RootState) => state.realtimeMetrics.metrics);
-  const [currentMetricIndex, setCurrentMetricIndex] = useState(0);
+  const { user } = useAuth();
+  const { data: metrics, loading, error } = useSelector((state: RootState) => state.metrics);
 
   useEffect(() => {
     const fetchMetrics = () => {
-      dispatch(fetchRealtimeMetrics());
+      if (user?.clientId) {
+        dispatch(fetchRealtimeMetrics(user.clientId));
+      }
     };
 
     fetchMetrics();
     const interval = setInterval(fetchMetrics, 60000); // Fetch every minute
 
     return () => clearInterval(interval);
-  }, [dispatch]);
+  }, [dispatch, user]);
 
-  useEffect(() => {
-    const rotateMetrics = setInterval(() => {
-      setCurrentMetricIndex((prevIndex) => (prevIndex + 1) % Object.keys(realtimeMetrics).length);
-    }, 5000);
-
-    return () => clearInterval(rotateMetrics);
-  }, [realtimeMetrics]);
-
-  const currentMetric = Object.entries(realtimeMetrics)[currentMetricIndex];
+  if (loading) return <CircularProgress size={24} />;
+  if (error) return <Typography color="error">{error}</Typography>;
+  if (!metrics) return null;
 
   return (
-    <Paper elevation={3}>
-      <Box p={2}>
-        <Typography variant="h6">Real-time Metrics</Typography>
-        {currentMetric && (
-          <Typography variant="h5">
-            {currentMetric[0]}: {currentMetric[1]}
-          </Typography>
-        )}
-        <Typography variant="caption">
-          Data updates every minute. Metric rotates every 5 seconds. Check the dashboard for more metrics.
-        </Typography>
-      </Box>
-    </Paper>
+    <MetricBox aria-label="Real-time metrics">
+      <MetricItem>
+        <Typography variant="h6">{metrics.orders}</Typography>
+        <Typography variant="body2">Orders</Typography>
+      </MetricItem>
+      <MetricItem>
+        <Typography variant="h6">${metrics.revenue.toFixed(2)}</Typography>
+        <Typography variant="body2">Revenue</Typography>
+      </MetricItem>
+      <MetricItem>
+        <Typography variant="h6">{metrics.customers}</Typography>
+        <Typography variant="body2">Customers</Typography>
+      </MetricItem>
+    </MetricBox>
   );
 };
 

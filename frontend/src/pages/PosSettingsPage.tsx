@@ -1,42 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../redux/store';
-import { fetchPOSSettings, updatePOSSettings } from '../redux/slices/posSettingsSlice';
-import { useSelectedLocation } from '../hooks/useSelectedLocation';
-import { Typography, CircularProgress, Box, Button, TextField } from '@mui/material';
+import React from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
+import { Typography, Box } from '@mui/material';
+import POSSettingsForm from '../components/POSSettingsForm';
 
 const PosSettingsPage: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { selectedLocation } = useSelectedLocation();
+  const selectedLocationId = useSelector((state: RootState) => state.location.selectedLocation);
+  const locations = useSelector((state: RootState) => state.location.locations);
+  const selectedLocation = locations.find(loc => loc.id === selectedLocationId);
   const posSettings = useSelector((state: RootState) => 
-    selectedLocation ? state.posSettings.settings[selectedLocation.id] : null
+    selectedLocationId ? state.posSettings.settings[selectedLocationId] : null
   );
-  const [localSettings, setLocalSettings] = useState(posSettings);
 
-  useEffect(() => {
-    if (selectedLocation) {
-      dispatch(fetchPOSSettings(selectedLocation.id));
-    }
-  }, [dispatch, selectedLocation]);
-
-  useEffect(() => {
-    setLocalSettings(posSettings);
-  }, [posSettings]);
-
-  const handleSave = () => {
-    if (selectedLocation && localSettings) {
-      dispatch(updatePOSSettings({ locationId: selectedLocation.id, settings: localSettings }));
-    }
-  };
-
-  if (!selectedLocation) return <Typography>No location selected</Typography>;
-  if (!posSettings) return <CircularProgress />;
+  if (!selectedLocationId) {
+    return <Typography>Please select a location</Typography>;
+  }
 
   return (
     <Box>
-      <Typography variant="h1">POS Settings for {selectedLocation.name}</Typography>
-      {/* Render form fields for POS settings here */}
-      <Button onClick={handleSave}>Save Settings</Button>
+      <Typography variant="h4" gutterBottom>
+        POS Settings for {selectedLocation ? selectedLocation.name : `Location ID: ${selectedLocationId}`}
+      </Typography>
+      {posSettings ? (
+        <POSSettingsForm locationId={selectedLocationId} initialSettings={posSettings} />
+      ) : (
+        <Typography>Loading POS settings...</Typography>
+      )}
     </Box>
   );
 };

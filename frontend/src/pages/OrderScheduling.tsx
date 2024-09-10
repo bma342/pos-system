@@ -12,7 +12,7 @@ const OrderScheduling: React.FC = () => {
   const { selectedLocation } = useSelectedLocation();
   const selectedClient = useSelectedClient();
   const locations = useSelector((state: RootState) => state.location.locations);
-  const loading = useSelector((state: RootState) => state.location.status === 'loading');
+  const loading = useSelector((state: RootState) => state.location.loading);
   const error = useSelector((state: RootState) => state.location.error);
 
   const handleLocationChange = (event: SelectChangeEvent<string>) => {

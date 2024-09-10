@@ -1,26 +1,25 @@
-import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Location } from '../../types/locationTypes';
-import { locationService } from '../../services/locationService';
+import { fetchLocations as fetchLocationsApi } from '../../api/locationApi';
 
 interface LocationState {
   locations: Location[];
   selectedLocation: string | null;
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  loading: boolean;
   error: string | null;
 }
 
 const initialState: LocationState = {
   locations: [],
   selectedLocation: null,
-  status: 'idle',
+  loading: false,
   error: null,
 };
 
 export const fetchLocations = createAsyncThunk(
   'location/fetchLocations',
   async (clientId: string) => {
-    const response = await locationService.fetchLocations(clientId);
-    return response;
+    return await fetchLocationsApi(clientId);
   }
 );
 
@@ -28,6 +27,9 @@ const locationSlice = createSlice({
   name: 'location',
   initialState,
   reducers: {
+    setLocations: (state, action: PayloadAction<Location[]>) => {
+      state.locations = action.payload;
+    },
     setSelectedLocation: (state, action: PayloadAction<string>) => {
       state.selectedLocation = action.payload;
     },
@@ -35,18 +37,19 @@ const locationSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchLocations.pending, (state) => {
-        state.status = 'loading';
+        state.loading = true;
+        state.error = null;
       })
-      .addCase(fetchLocations.fulfilled, (state, action: PayloadAction<Location[]>) => {
-        state.status = 'succeeded';
+      .addCase(fetchLocations.fulfilled, (state, action) => {
+        state.loading = false;
         state.locations = action.payload;
       })
       .addCase(fetchLocations.rejected, (state, action) => {
-        state.status = 'failed';
+        state.loading = false;
         state.error = action.error.message || 'Failed to fetch locations';
       });
   },
 });
 
-export const { setSelectedLocation } = locationSlice.actions;
+export const { setLocations, setSelectedLocation } = locationSlice.actions;
 export default locationSlice.reducer;

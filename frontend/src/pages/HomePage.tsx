@@ -1,101 +1,86 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
 import { fetchLocations } from '../redux/slices/locationSlice';
 import { Location } from '../types/locationTypes';
-import { Typography, TextField, Grid, Card, CardContent, CardMedia, Button } from '@mui/material';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import { selectCurrentUser } from '../redux/slices/authSlice';
+import { Card, TextField, CircularProgress, Typography, Grid } from '@mui/material';
+import { Map, Marker } from 'react-map-gl';
+import { useAuth } from '../hooks/useAuth';
+import { LazyLoadComponent } from 'react-lazy-load-image-component';
 
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const { user } = useAuth();
   const locations = useSelector((state: RootState) => state.location.locations);
-  const loading = useSelector((state: RootState) => state.location.status === 'loading');
+  const loading = useSelector((state: RootState) => state.location.loading);
   const error = useSelector((state: RootState) => state.location.error);
-  const currentUser = useSelector(selectCurrentUser);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    if (currentUser?.clientId) {
-      dispatch(fetchLocations(currentUser.clientId));
+    if (user?.clientId) {
+      dispatch(fetchLocations(user.clientId));
     }
-  }, [dispatch, currentUser]);
+  }, [dispatch, user]);
 
-  const filteredLocations = locations.filter((location) =>
+  const filteredLocations = locations.filter((location: Location) =>
     location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     location.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (location.city && location.city.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const mapCenter = locations.length > 0 && locations[0].latitude && locations[0].longitude
-    ? [locations[0].latitude, locations[0].longitude]
-    : [0, 0];
+    ? [locations[0].longitude, locations[0].latitude]
+    : [-98.5795, 39.8283]; // Center of USA
 
-  if (loading) return <Typography>Loading...</Typography>;
+  if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
 
   return (
-    <div>
-      <Typography variant="h4" gutterBottom>Our Locations</Typography>
-      <TextField
-        fullWidth
-        variant="outlined"
-        placeholder="Search locations..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        style={{ marginBottom: '1rem' }}
-      />
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          {filteredLocations.map((location: Location) => (
-            <Card key={location.id} style={{ marginBottom: '1rem' }}>
-              <CardContent>
-                <Typography variant="h6">{location.name}</Typography>
-                <Typography variant="body2">{location.address}</Typography>
-                {location.city && (
-                  <Typography variant="body2">
-                    {location.city}, {location.state} {location.zipCode}
-                  </Typography>
-                )}
-                {location.isDropoffSite && (
-                  <Typography variant="body2" color="primary">
-                    Dropoff Site Available
-                  </Typography>
-                )}
-                <Button variant="contained" color="primary" style={{ marginTop: '0.5rem' }}>
-                  Order Now
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <MapContainer center={mapCenter as [number, number]} zoom={13} style={{ height: '400px', width: '100%' }}>
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />
-            {filteredLocations.map((location: Location) => (
-              <Marker
-                key={location.id}
-                position={[location.latitude || 0, location.longitude || 0]}
-              >
-                <Popup>
-                  <Typography variant="h6">{location.name}</Typography>
-                  <Typography variant="body2">{location.address}</Typography>
-                  {location.isDropoffSite && (
-                    <Typography variant="body2" color="primary">
-                      Dropoff Site Available
-                    </Typography>
-                  )}
-                </Popup>
-              </Marker>
-            ))}
-          </MapContainer>
-        </Grid>
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <TextField
+          fullWidth
+          label="Search locations"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          margin="normal"
+          aria-label="Search locations"
+        />
       </Grid>
-    </div>
+      <Grid item xs={12} md={6}>
+        {filteredLocations.map((location: Location) => (
+          <LazyLoadComponent key={location.id}>
+            <Card style={{ marginBottom: 'var(--spacing-md)' }}>
+              <Typography variant="h6">{location.name}</Typography>
+              <Typography>{location.address}</Typography>
+              <Typography>{`${location.city}, ${location.state} ${location.zipCode}`}</Typography>
+            </Card>
+          </LazyLoadComponent>
+        ))}
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Map
+          initialViewState={{
+            longitude: mapCenter[0],
+            latitude: mapCenter[1],
+            zoom: 3
+          }}
+          style={{width: '100%', height: 400}}
+          mapStyle="mapbox://styles/mapbox/streets-v11"
+        >
+          {filteredLocations.map((location: Location) => (
+            <Marker
+              key={location.id}
+              longitude={location.longitude}
+              latitude={location.latitude}
+              anchor="bottom"
+            >
+              <img src="/marker.png" alt={location.name} />
+            </Marker>
+          ))}
+        </Map>
+      </Grid>
+    </Grid>
   );
 };
 

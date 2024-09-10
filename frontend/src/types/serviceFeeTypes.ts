@@ -3,5 +3,7 @@ export interface ServiceFee {
     name: string;
     amount: number;
     type: 'fixed' | 'percentage';
-    // Add any other relevant fields
+    clientId: string;
 }
+
+export type ServiceFeeCreateData = Omit<ServiceFee, 'id'>;

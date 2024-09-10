@@ -1,30 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Button,
-  TextField,
-  Grid,
-  Typography,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Paper,
-  Box,
-} from '@mui/material';
-import SyncIcon from '@mui/icons-material/Sync';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '../redux/store';
+import { AppDispatch, RootState } from '../redux/store';
 import {
   fetchProfiles,
   createProfile,
@@ -32,244 +8,178 @@ import {
   deleteProfile,
   syncProfile,
 } from '../redux/slices/posIntegrationSlice';
-import { POSType, POSProfile } from '../types/posIntegrationTypes';
+import { POSProfile, POSType } from '../types/posTypes';
+import { useAuth } from '../hooks/useAuth';
+import {
+  Box,
+  Typography,
+  Select,
+  MenuItem,
+  Button,
+  TextField,
+  CircularProgress,
+  SelectChangeEvent,
+  Switch,
+  FormControlLabel,
+} from '@mui/material';
 
 const POSIntegrationSelector: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const { user } = useAuth();
   const { profiles, status, error } = useSelector((state: RootState) => state.posIntegration);
-  const [newProfile, setNewProfile] = useState<Partial<POSProfile>>({
+  const [selectedProfile, setSelectedProfile] = useState<POSProfile | null>(null);
+  const [newProfileData, setNewProfileData] = useState<Omit<POSProfile, 'id'>>({
     name: '',
-    posType: POSType.TOAST,
-    apiEndpoint: '',
+    type: 'SQUARE' as POSType,
     apiKey: '',
+    clientId: user?.clientId || '',
+    active: true,
   });
-  const [editingProfile, setEditingProfile] = useState<POSProfile | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchProfiles());
-  }, [dispatch]);
+    if (user?.clientId) {
+      dispatch(fetchProfiles(user.clientId));
+    }
+  }, [dispatch, user]);
 
-  const handleProfileInputChange = (
-    event: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
-  ) => {
-    const { name, value } = event.target;
-    setNewProfile((prev) => ({ ...prev, [name as string]: value }));
+  const handleProfileSelect = (event: SelectChangeEvent<string>) => {
+    const profileId = event.target.value;
+    const profile = profiles.find((p) => p.id === profileId) || null;
+    setSelectedProfile(profile);
   };
 
-  const handleCreateProfile = async () => {
-    dispatch(createProfile(newProfile as POSProfile));
-    setNewProfile({
-      name: '',
-      posType: POSType.TOAST,
-      apiEndpoint: '',
-      apiKey: '',
-    });
+  const handleProfileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = event.target;
+    setNewProfileData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
   };
 
-  const handleEditProfile = (profile: POSProfile) => {
-    setEditingProfile(profile);
-    setIsDialogOpen(true);
+  const handleCreateProfile = () => {
+    dispatch(createProfile(newProfileData));
   };
 
-  const handleUpdateProfile = async () => {
-    if (editingProfile) {
-      dispatch(updateProfile(editingProfile));
-      setIsDialogOpen(false);
+  const handleUpdateProfile = () => {
+    if (selectedProfile) {
+      dispatch(updateProfile(selectedProfile));
     }
   };
 
-  const handleDeleteProfile = async (profileId: number) => {
-    if (window.confirm('Are you sure you want to delete this profile?')) {
-      dispatch(deleteProfile(profileId));
+  const handleDeleteProfile = () => {
+    if (selectedProfile) {
+      dispatch(deleteProfile(selectedProfile.id));
+      setSelectedProfile(null);
     }
   };
 
-  const handleSyncProfile = async (profileId: number) => {
-    dispatch(syncProfile(profileId));
+  const handleSyncProfile = () => {
+    if (selectedProfile) {
+      dispatch(syncProfile(selectedProfile.id));
+    }
   };
 
-  if (status === 'loading') {
-    return <Typography>Loading POS profiles...</Typography>;
-  }
-
-  if (status === 'failed') {
-    return <Typography color="error">Error: {error}</Typography>;
-  }
+  if (status === 'loading') return <CircularProgress />;
+  if (error) return <Typography color="error">{error}</Typography>;
 
   return (
-    <Paper elevation={3}>
-      <Box p={2}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Typography variant="h4" gutterBottom>POS Integration Manager</Typography>
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="h5" gutterBottom>Create New POS Profile</Typography>
-            <TextField
-              name="name"
-              label="Profile Name"
-              value={newProfile.name}
+    <Box>
+      <Typography variant="h6">POS Integration</Typography>
+      <Select
+        value={selectedProfile?.id || ''}
+        onChange={handleProfileSelect}
+        displayEmpty
+        fullWidth
+      >
+        <MenuItem value="" disabled>
+          Select a POS profile
+        </MenuItem>
+        {profiles.map((profile) => (
+          <MenuItem key={profile.id} value={profile.id}>
+            {profile.name}
+          </MenuItem>
+        ))}
+      </Select>
+      {selectedProfile && (
+        <Box mt={2}>
+          <TextField
+            label="Profile Name"
+            value={selectedProfile.name}
+            onChange={(e) =>
+              setSelectedProfile({ ...selectedProfile, name: e.target.value })
+            }
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="API Key"
+            value={selectedProfile.apiKey}
+            onChange={(e) =>
+              setSelectedProfile({ ...selectedProfile, apiKey: e.target.value })
+            }
+            fullWidth
+            margin="normal"
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={selectedProfile.active}
+                onChange={(e) =>
+                  setSelectedProfile({ ...selectedProfile, active: e.target.checked })
+                }
+              />
+            }
+            label="Active"
+          />
+          <Button onClick={handleUpdateProfile}>Update Profile</Button>
+          <Button onClick={handleDeleteProfile}>Delete Profile</Button>
+          <Button onClick={handleSyncProfile}>Sync Profile</Button>
+        </Box>
+      )}
+      <Box mt={4}>
+        <Typography variant="h6">Create New Profile</Typography>
+        <TextField
+          label="Profile Name"
+          name="name"
+          value={newProfileData.name}
+          onChange={handleProfileInputChange}
+          fullWidth
+          margin="normal"
+        />
+        <Select
+          value={newProfileData.type}
+          onChange={(e: SelectChangeEvent<POSType>) =>
+            setNewProfileData({ ...newProfileData, type: e.target.value as POSType })
+          }
+          fullWidth
+        >
+          <MenuItem value="SQUARE">Square</MenuItem>
+          <MenuItem value="CLOVER">Clover</MenuItem>
+          <MenuItem value="TOAST">Toast</MenuItem>
+          <MenuItem value="LIGHTSPEED">Lightspeed</MenuItem>
+          <MenuItem value="REVEL">Revel</MenuItem>
+        </Select>
+        <TextField
+          label="API Key"
+          name="apiKey"
+          value={newProfileData.apiKey}
+          onChange={handleProfileInputChange}
+          fullWidth
+          margin="normal"
+        />
+        <FormControlLabel
+          control={
+            <Switch
+              name="active"
+              checked={newProfileData.active}
               onChange={handleProfileInputChange}
-              fullWidth
-              margin="normal"
             />
-            <FormControl fullWidth margin="normal">
-              <InputLabel id="pos-type-select-label">POS Type</InputLabel>
-              <Select
-                labelId="pos-type-select-label"
-                name="posType"
-                value={newProfile.posType}
-                onChange={handleProfileInputChange}
-              >
-                {Object.values(POSType).map((type) => (
-                  <MenuItem key={type} value={type}>
-                    {type}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              name="apiEndpoint"
-              label="API Endpoint"
-              value={newProfile.apiEndpoint}
-              onChange={handleProfileInputChange}
-              fullWidth
-              margin="normal"
-            />
-            <TextField
-              name="apiKey"
-              label="API Key"
-              value={newProfile.apiKey}
-              onChange={handleProfileInputChange}
-              fullWidth
-              margin="normal"
-            />
-            <Button
-              onClick={handleCreateProfile}
-              variant="contained"
-              color="primary"
-            >
-              Create Profile
-            </Button>
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="h5" gutterBottom>Existing POS Profiles</Typography>
-            <List>
-              {profiles.map((profile) => (
-                <ListItem key={profile.id}>
-                  <ListItemText
-                    primary={profile.name}
-                    secondary={`${profile.posType} - ${profile.apiEndpoint}`}
-                  />
-                  <ListItemSecondaryAction>
-                    <IconButton
-                      edge="end"
-                      aria-label="edit"
-                      onClick={() => handleEditProfile(profile)}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      edge="end"
-                      aria-label="delete"
-                      onClick={() => handleDeleteProfile(profile.id)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                    <IconButton
-                      edge="end"
-                      aria-label="sync"
-                      onClick={() => handleSyncProfile(profile.id)}
-                    >
-                      <SyncIcon />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </ListItem>
-              ))}
-            </List>
-          </Grid>
-        </Grid>
+          }
+          label="Active"
+        />
+        <Button onClick={handleCreateProfile}>Create Profile</Button>
       </Box>
-      <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
-        <DialogTitle>Edit POS Profile</DialogTitle>
-        <DialogContent>
-          {editingProfile && (
-            <>
-              <TextField
-                name="name"
-                label="Profile Name"
-                value={editingProfile.name}
-                onChange={(event) =>
-                  setEditingProfile({
-                    ...editingProfile,
-                    name: event.target.value,
-                  })
-                }
-                fullWidth
-                margin="normal"
-              />
-              <FormControl fullWidth margin="normal">
-                <InputLabel id="pos-type-select-label">POS Type</InputLabel>
-                <Select
-                  labelId="pos-type-select-label"
-                  name="posType"
-                  value={editingProfile.posType}
-                  onChange={(event) =>
-                    setEditingProfile({
-                      ...editingProfile,
-                      posType: event.target.value as POSType,
-                    })
-                  }
-                >
-                  {Object.values(POSType).map((type) => (
-                    <MenuItem key={type} value={type}>
-                      {type}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <TextField
-                name="apiEndpoint"
-                label="API Endpoint"
-                value={editingProfile.apiEndpoint}
-                onChange={(event) =>
-                  setEditingProfile({
-                    ...editingProfile,
-                    apiEndpoint: event.target.value,
-                  })
-                }
-                fullWidth
-                margin="normal"
-              />
-              <TextField
-                name="apiKey"
-                label="API Key"
-                value={editingProfile.apiKey}
-                onChange={(event) =>
-                  setEditingProfile({
-                    ...editingProfile,
-                    apiKey: event.target.value,
-                  })
-                }
-                fullWidth
-                margin="normal"
-              />
-            </>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-          <Button
-            onClick={handleUpdateProfile}
-            variant="contained"
-            color="primary"
-          >
-            Update
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Paper>
+    </Box>
   );
 };
 

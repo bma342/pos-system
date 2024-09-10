@@ -1,16 +1,9 @@
 export interface Provider {
   id: string;
   name: string;
-  type: 'third_party' | 'first_party';
-  orderType: 'pickup' | 'delivery' | 'catering_pickup' | 'catering_delivery';
+  type: string;
   isActive: boolean;
-  fee: number;
-  feeType: 'fixed' | 'percentage';
-  integrationDetails: {
-    apiKey?: string;
-    webhookUrl?: string;
-    // Add other integration-specific fields as needed
-  };
+  // Add other relevant properties
 }
 
 export interface PaginatedResponse<T> {

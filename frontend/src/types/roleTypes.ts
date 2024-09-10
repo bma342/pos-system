@@ -1,7 +1,7 @@
 export interface Role {
     id: string;
     name: string;
-    permissions: string[];
+    // Add other properties as needed
   }
   
   export interface Permission {

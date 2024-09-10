@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../redux/store';
-import { createReview } from '../api/reviewApi';
+import { createReview } from '../redux/slices/reviewSlice';
 import { fetchReviewsForMenuItem } from '../redux/slices/reviewSlice';
 import { TextField, Button, Rating, Box, Typography } from '@mui/material';
 
 interface SubmitReviewProps {
-  menuItemId: number;
+  menuItemId: string;
 }
 
 const SubmitReview: React.FC<SubmitReviewProps> = ({ menuItemId }) => {
@@ -14,26 +14,26 @@ const SubmitReview: React.FC<SubmitReviewProps> = ({ menuItemId }) => {
   const [firstName, setFirstName] = useState('');
   const [lastInitial, setLastInitial] = useState('');
   const [rating, setRating] = useState<number | null>(null);
-  const [comment, setComment] = useState('');
+  const [content, setContent] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (rating === null) return;
 
     try {
-      await createReview({
+      await dispatch(createReview({
         menuItemId,
         firstName,
         lastInitial,
         rating,
-        comment,
-      });
+        content,
+      })).unwrap();
       dispatch(fetchReviewsForMenuItem(menuItemId));
       // Reset form
       setFirstName('');
       setLastInitial('');
       setRating(null);
-      setComment('');
+      setContent('');
     } catch (error) {
       console.error('Error submitting review:', error);
     }
@@ -67,9 +67,9 @@ const SubmitReview: React.FC<SubmitReviewProps> = ({ menuItemId }) => {
         />
       </Box>
       <TextField
-        label="Comment"
-        value={comment}
-        onChange={(e) => setComment(e.target.value)}
+        label="Review"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
         multiline
         rows={4}
         fullWidth

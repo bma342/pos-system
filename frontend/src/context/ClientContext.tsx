@@ -1,87 +1,46 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from 'react';
-import { getSubdomain } from '../utils/subdomain';
-import { fetchClientBySubdomain } from '../api/clientApi';
-
-interface Client {
-  id: number;
-  name: string;
-  // Add other client properties
-}
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { Client } from '../types/clientTypes';
+import { fetchClientData } from '../api/clientApi';
 
 interface ClientContextType {
   client: Client | null;
-  clientId: number | null;
-  subdomain: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
-  setClientId: (id: number | null) => void;
-  setIsAuthenticated: (value: boolean) => void;
+  clientId: string | null;
+  setClient: (client: Client | null) => void;
+  setClientId: (id: string | null) => void;
 }
 
 const ClientContext = createContext<ClientContextType | undefined>(undefined);
 
-export const ClientProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [client, setClient] = useState<Client | null>(null);
-  const [subdomain, setSubdomain] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [clientId, setClientId] = useState<number | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [clientId, setClientId] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadClient = async () => {
-      const detectedSubdomain = getSubdomain();
-      setSubdomain(detectedSubdomain);
-
-      if (detectedSubdomain) {
+    const fetchClient = async () => {
+      if (clientId) {
         try {
-          const clientData = await fetchClientBySubdomain(detectedSubdomain);
+          const clientData = await fetchClientData(clientId);
           setClient(clientData);
-          setClientId(clientData.id); // Set clientId here
-        } catch (err) {
-          setError('Failed to load client data');
-          console.error(err);
+        } catch (error) {
+          console.error('Error fetching client:', error);
         }
-      } else {
-        setError('Invalid subdomain');
       }
-      setIsLoading(false);
     };
 
-    loadClient();
-  }, []);
+    fetchClient();
+  }, [clientId]);
 
   return (
-    <ClientContext.Provider
-      value={{
-        client,
-        clientId,
-        subdomain,
-        isAuthenticated,
-        isLoading,
-        error,
-        setClientId,
-        setIsAuthenticated,
-      }}
-    >
+    <ClientContext.Provider value={{ client, clientId, setClient, setClientId }}>
       {children}
     </ClientContext.Provider>
   );
 };
 
-export const useClientContext = () => {
+export const useClient = () => {
   const context = useContext(ClientContext);
   if (context === undefined) {
-    throw new Error('useClientContext must be used within a ClientProvider');
+    throw new Error('useClient must be used within a ClientProvider');
   }
   return context;
 };

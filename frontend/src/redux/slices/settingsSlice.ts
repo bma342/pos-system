@@ -1,36 +1,33 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import * as settingsApi from '../../api/settingsApi';
 import { Settings } from '../../types/settingsTypes';
+import * as settingsApi from '../../api/settingsApi';
 
-export const fetchSettings = createAsyncThunk(
+export const fetchSettings = createAsyncThunk<Settings, string>(
   'settings/fetchSettings',
-  async (clientId: number) => {
+  async (clientId: string) => {
     return await settingsApi.fetchSettings(clientId);
   }
 );
 
-export const updateSettings = createAsyncThunk(
+export const updateSettings = createAsyncThunk<
+  Settings,
+  { clientId: string; settings: Settings }
+>(
   'settings/updateSettings',
-  async ({
-    clientId,
-    settings,
-  }: {
-    clientId: number;
-    settings: Partial<Settings>;
-  }) => {
+  async ({ clientId, settings }) => {
     return await settingsApi.updateSettings(clientId, settings);
   }
 );
 
 interface SettingsState {
   data: Settings | null;
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  loading: boolean;
   error: string | null;
 }
 
 const initialState: SettingsState = {
   data: null,
-  status: 'idle',
+  loading: false,
   error: null,
 };
 
@@ -41,18 +38,28 @@ const settingsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchSettings.pending, (state) => {
-        state.status = 'loading';
+        state.loading = true;
+        state.error = null;
       })
       .addCase(fetchSettings.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.loading = false;
         state.data = action.payload;
       })
       .addCase(fetchSettings.rejected, (state, action) => {
-        state.status = 'failed';
+        state.loading = false;
         state.error = action.error.message || 'Failed to fetch settings';
       })
+      .addCase(updateSettings.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(updateSettings.fulfilled, (state, action) => {
+        state.loading = false;
         state.data = action.payload;
+      })
+      .addCase(updateSettings.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to update settings';
       });
   },
 });

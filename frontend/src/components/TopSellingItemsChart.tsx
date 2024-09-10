@@ -1,91 +1,68 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Typography, Box } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import React, { useState, useEffect } from 'react';
 import {
   BarChart,
   Bar,
   XAxis,
   YAxis,
+  CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { format } from 'date-fns';
-import { TopSellingItem } from '../types/analyticsTypes';
-import { AnalyticsService } from '../services/AnalyticsService';
-import { fetchTopSellingItems } from '../api/analyticsApi';
+import { Typography, Box, CircularProgress } from '@mui/material';
+import { analyticsService, TopSellingItem } from '../services/analyticsService';
+import { useAuth } from '../hooks/useAuth';
 
 const TopSellingItemsChart: React.FC = () => {
   const [topSellingItems, setTopSellingItems] = useState<TopSellingItem[]>([]);
-  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
-    null,
-    null,
-  ]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const analyticsService = useMemo(() => new AnalyticsService(), []);
-
-  const fetchTopSellingItems = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const [startDate, endDate] = dateRange;
-      const formattedStartDate = startDate
-        ? format(startDate, 'yyyy-MM-dd')
-        : undefined;
-      const formattedEndDate = endDate
-        ? format(endDate, 'yyyy-MM-dd')
-        : undefined;
-      const items = await analyticsService.getTopSellingItems(
-        formattedStartDate,
-        formattedEndDate
-      );
-      setTopSellingItems(items);
-    } catch (err) {
-      setError('Failed to fetch top selling items');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [dateRange, analyticsService]);
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchTopSellingItems();
-  }, [fetchTopSellingItems]);
+    const fetchTopSellingItems = async () => {
+      if (!user?.clientId) return;
 
-  if (isLoading) return <Typography>Loading top selling items...</Typography>;
+      setLoading(true);
+      try {
+        const endDate = new Date().toISOString();
+        const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days ago
+        const items = await analyticsService.getTopSellingItems(user.clientId, startDate, endDate);
+        setTopSellingItems(items);
+      } catch (err) {
+        setError('Failed to fetch top selling items');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTopSellingItems();
+  }, [user]);
+
+  if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
 
   return (
-    <Box>
+    <Box sx={{ width: '100%', height: 300 }}>
       <Typography variant="h6" gutterBottom>
         Top Selling Items
       </Typography>
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <Box display="flex" justifyContent="space-between" mb={2}>
-          <DatePicker
-            label="Start Date"
-            value={dateRange[0]}
-            onChange={(newValue: Date | null) =>
-              setDateRange([newValue, dateRange[1]])
-            }
-          />
-          <DatePicker
-            label="End Date"
-            value={dateRange[1]}
-            onChange={(newValue: Date | null) =>
-              setDateRange([dateRange[0], newValue])
-            }
-          />
-        </Box>
-      </LocalizationProvider>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={topSellingItems}>
-          <XAxis dataKey="name" />
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={topSellingItems}
+          margin={{
+            top: 5,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="itemName" />
           <YAxis />
           <Tooltip />
+          <Legend />
           <Bar dataKey="quantity" fill="#8884d8" />
         </BarChart>
       </ResponsiveContainer>

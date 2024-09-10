@@ -28,13 +28,15 @@ export interface Client {
 }
 
 export interface ClientBranding {
-  id: number;
-  clientId: number;
-  logoUrl: string;
+  id: string;
+  clientId: string;
   primaryColor: string;
   secondaryColor: string;
+  logoUrl: string;
   fontFamily: string;
-  customCss: string;
+  customCss?: string;
+  restaurantName: string;
+  // ... any other properties
 }
 
 export interface ClientConfig {

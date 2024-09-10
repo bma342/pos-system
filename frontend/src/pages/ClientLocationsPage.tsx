@@ -1,44 +1,39 @@
 import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '../redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/store';
 import { fetchLocations } from '../redux/slices/locationSlice';
-import LocationCard from '../components/LocationCard';
 import { Location } from '../types/locationTypes';
-import { Grid, Typography, Box, CircularProgress } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { Grid, Card, CardContent, Typography, CircularProgress } from '@mui/material';
+import { useAuth } from '../hooks/useAuth';
 
 const ClientLocationsPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { clientId } = useParams<{ clientId: string }>();
-  const { locations, status, error } = useSelector((state: RootState) => state.location);
+  const { user } = useAuth();
+  const { locations, loading, error } = useSelector((state: RootState) => state.location);
 
   useEffect(() => {
-    if (clientId) {
-      dispatch(fetchLocations(clientId));
+    if (user?.clientId) {
+      dispatch(fetchLocations(user.clientId));
     }
-  }, [dispatch, clientId]);
+  }, [dispatch, user]);
 
-  if (status === 'loading') {
-    return <CircularProgress />;
-  }
-
-  if (status === 'failed') {
-    return <Typography color="error">{error}</Typography>;
-  }
+  if (loading) return <CircularProgress />;
+  if (error) return <Typography color="error">{error}</Typography>;
 
   return (
-    <Box sx={{ flexGrow: 1, padding: 3 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Client Locations
-      </Typography>
-      <Grid container spacing={3}>
-        {locations.map((location: Location) => (
-          <Grid item xs={12} sm={6} md={4} key={location.id}>
-            <LocationCard location={location} />
-          </Grid>
-        ))}
-      </Grid>
-    </Box>
+    <Grid container spacing={2}>
+      {locations.map((location: Location) => (
+        <Grid item xs={12} sm={6} md={4} key={location.id}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">{location.name}</Typography>
+              <Typography>{location.address}</Typography>
+              <Typography>{`${location.city}, ${location.state} ${location.zipCode}`}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
   );
 };
 

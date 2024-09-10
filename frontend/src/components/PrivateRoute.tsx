@@ -2,38 +2,26 @@ import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { useClientContext } from '../context/ClientContext';
+import { CircularProgress } from '@mui/material';
 import { UserRole } from '../types/userTypes';
-import { CircularProgress, Box } from '@mui/material';
 
 interface PrivateRouteProps {
   allowedRoles: UserRole[];
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ allowedRoles }) => {
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
-  const { client, isLoading } = useClientContext();
+  const { user, isAuthenticated, loading } = useSelector((state: RootState) => state.auth);
 
-  if (isLoading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (!client) {
-    return <Navigate to="/login" replace />;
+  if (loading) {
+    return <CircularProgress />;
   }
 
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
 
-  const hasAllowedRole = user.roles.some((role) => allowedRoles.includes(role as UserRole));
-
-  if (!hasAllowedRole) {
-    return <Navigate to="/" replace />;
+  if (!allowedRoles.includes(user.role)) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return <Outlet />;

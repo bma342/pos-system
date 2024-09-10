@@ -53,19 +53,13 @@ const GuestLandingPage: React.FC = () => {
               <CardMedia
                 component="img"
                 height="140"
-                image={
-                  location.imageUrl || 'https://via.placeholder.com/300x140'
-                }
+                image={location.imageUrl || 'https://via.placeholder.com/300x140'}
                 alt={location.name}
               />
               <CardContent>
-                <Typography gutterBottom variant="h5" component="div">
-                  {location.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {location.address}, {location.city}, {location.state}{' '}
-                  {location.zipCode}
-                </Typography>
+                <Typography variant="h6">{location.name}</Typography>
+                <Typography>{location.address}</Typography>
+                <Typography>{`${location.city}, ${location.state} ${location.zipCode}`}</Typography>
                 <Button
                   component={Link}
                   to={`/order/${location.id}`}

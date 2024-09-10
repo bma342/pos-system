@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
@@ -11,8 +11,8 @@ import { FixedSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import '../styles/variables.css';
 
-const MenuItemCard = lazy(() => import('../components/MenuItemCard'));
-const MenuItemModal = lazy(() => import('../components/MenuItemModal'));
+const LazyMenuItemCard = lazy(() => import('../components/MenuItemCard'));
+const LazyMenuItemModal = lazy(() => import('../components/MenuItemModal'));
 
 const GuestMenuPage: React.FC = () => {
   const { clientId, locationId } = useParams<{ clientId: string; locationId: string }>();
@@ -21,7 +21,7 @@ const GuestMenuPage: React.FC = () => {
   const status = useSelector((state: RootState) => state.menuItems.status);
   const error = useSelector((state: RootState) => state.menuItems.error);
   const selectedGroupId = useSelector((state: RootState) => state.menuItems.selectedGroupId);
-  const clientBranding = useClientBranding();
+  const { branding } = useClientBranding();
 
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -39,7 +39,7 @@ const GuestMenuPage: React.FC = () => {
 
   const groupedMenuItems = useMemo(() => {
     const groups: Record<string, MenuItem[]> = { all: [] };
-    menuItems.forEach(item => {
+    menuItems.forEach((item: MenuItem) => {
       groups.all.push(item);
       if (!groups[item.groupName]) {
         groups[item.groupName] = [];
@@ -51,7 +51,7 @@ const GuestMenuPage: React.FC = () => {
 
   const sortedMenuItems = useMemo(() => {
     const items = groupedMenuItems[selectedGroupId || 'all'] || [];
-    return items.sort((a, b) => {
+    return items.sort((a: MenuItem, b: MenuItem) => {
       if (sortOrder === 'asc') {
         return a.name.localeCompare(b.name);
       } else {
@@ -65,7 +65,7 @@ const GuestMenuPage: React.FC = () => {
     return (
       <div style={style}>
         <Suspense fallback={<LoadingSpinner />}>
-          <MenuItemCard
+          <LazyMenuItemCard
             item={item}
             onSelect={() => setSelectedItem(item)}
           />
@@ -96,7 +96,7 @@ const GuestMenuPage: React.FC = () => {
       }}
     >
       <Typography variant="h1" sx={{ color: 'var(--primary-color)', marginBottom: 3 }}>
-        {clientBranding?.restaurantName} Menu
+        {branding?.restaurantName} Menu
       </Typography>
       
       <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
@@ -151,7 +151,7 @@ const GuestMenuPage: React.FC = () => {
 
       {selectedItem && (
         <Suspense fallback={<LoadingSpinner />}>
-          <MenuItemModal
+          <LazyMenuItemModal
             item={selectedItem}
             onClose={() => setSelectedItem(null)}
             onAddToCart={handleAddToCart}

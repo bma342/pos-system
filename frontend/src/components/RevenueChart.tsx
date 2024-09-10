@@ -1,43 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import { RevenueData } from '../types/revenueTypes';
-import { Box, Paper, Typography, TextField } from '@mui/material';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import { TextField, Box, Typography } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchRevenueData } from '../redux/slices/revenueSlice';
+import { AppDispatch, RootState } from '../redux/store';
+import { useAuth } from '../hooks/useAuth';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-interface Props {
-  data: RevenueData[];
-  dateRange: { start: Date; end: Date };
-  setDateRange: (dateRange: { start: Date; end: Date }) => void;
-}
+const RevenueChart: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { user } = useAuth();
+  const revenueData = useSelector((state: RootState) => state.revenue.data);
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
 
-const RevenueChart: React.FC<Props> = ({ data, dateRange, setDateRange }) => {
+  useEffect(() => {
+    if (user?.clientId && startDate && endDate) {
+      dispatch(fetchRevenueData({ clientId: user.clientId, startDate, endDate }));
+    }
+  }, [dispatch, user, startDate, endDate]);
+
   const chartData = {
-    labels: data.map((item) => new Date(item.date).toLocaleDateString()),
+    labels: revenueData.map((item) => item.date),
     datasets: [
       {
         label: 'Revenue',
-        data: data.map((item) => item.amount),
-        borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1,
+        data: revenueData.map((item) => item.revenue),
+        fill: false,
+        backgroundColor: 'rgb(75, 192, 192)',
+        borderColor: 'rgba(75, 192, 192, 0.2)',
       },
     ],
   };
@@ -50,52 +43,47 @@ const RevenueChart: React.FC<Props> = ({ data, dateRange, setDateRange }) => {
       },
       title: {
         display: true,
-        text: 'Revenue Over Time',
+        text: 'Revenue Chart',
       },
     },
   };
 
-  const handleDateChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: 'start' | 'end'
-  ) => {
-    setDateRange({
-      ...dateRange,
-      [type]: new Date(e.target.value),
-    });
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'start' | 'end') => {
+    const date = e.target.value;
+    if (type === 'start') {
+      setStartDate(date);
+    } else {
+      setEndDate(date);
+    }
   };
 
   return (
-    <Paper elevation={3}>
-      <Box p={3}>
-        <Typography variant="h5" gutterBottom>
-          Revenue Chart
-        </Typography>
-        <Box display="flex" justifyContent="space-between" mb={2}>
-          <TextField
-            label="Start Date"
-            type="date"
-            value={dateRange.start.toISOString().split('T')[0]}
-            onChange={(e) => handleDateChange(e, 'start')}
-            InputLabelProps={{
-              shrink: true,
-            }}
-          />
-          <TextField
-            label="End Date"
-            type="date"
-            value={dateRange.end.toISOString().split('T')[0]}
-            onChange={(e) => handleDateChange(e, 'end')}
-            InputLabelProps={{
-              shrink: true,
-            }}
-          />
-        </Box>
-        <Box height={400}>
-          <Line data={chartData} options={options} />
-        </Box>
+    <Box>
+      <Typography variant="h6" gutterBottom>
+        Revenue Chart
+      </Typography>
+      <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+        <TextField
+          label="Start Date"
+          type="date"
+          value={startDate}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleDateChange(e, 'start')}
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
+        <TextField
+          label="End Date"
+          type="date"
+          value={endDate}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleDateChange(e, 'end')}
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
       </Box>
-    </Paper>
+      <Line options={options} data={chartData} />
+    </Box>
   );
 };
 

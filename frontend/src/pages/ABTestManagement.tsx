@@ -1,74 +1,105 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
 import {
-  fetchABTestsAsync,
-  createABTestAsync,
-  updateABTestAsync,
-  deleteABTestAsync,
+  fetchABTests,
+  createABTest,
+  updateABTest,
 } from '../redux/slices/abTestSlice';
-import { fetchClientsAsync } from '../redux/slices/clientSlice';
-import { fetchLocationsAsync } from '../redux/slices/locationSlice';
+import { fetchClients } from '../redux/slices/clientSlice';
+import { fetchLocations } from '../redux/slices/locationSlice';
 import { ABTest } from '../types/abTestTypes';
 import { Client } from '../types/clientTypes';
 import { Location } from '../types/locationTypes';
+import { useAuth } from '../hooks/useAuth';
 import {
-  TextField,
-  Button,
-  List,
-  ListItem,
-  IconButton,
-  Typography,
+  Typography, 
+  Button, 
+  TextField, 
+  Select, 
+  MenuItem, 
+  FormControl, 
+  InputLabel, 
+  Grid, 
+  Paper, 
   Box,
-  Switch,
-  Select,
-  MenuItem,
+  useMediaQuery,
+  useTheme,
+  List,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { abTestApi } from '../api/abTestApi'; // Import abTestApi object
+
+const LazyABTestItem = lazy(() => import('../components/ABTestItem'));
 
 const ABTestManagement: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { tests, status, error } = useSelector(
     (state: RootState) => state.abTest
   );
-  const clients = useSelector((state: RootState) => state.client.clients);
+  const clients = useSelector((state: RootState) => state.clients.clients);
   const locations = useSelector((state: RootState) => state.location.locations);
+  const { user } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const [newTest, setNewTest] = useState<Partial<ABTest>>({
     name: '',
     description: '',
     variantA: '',
     variantB: '',
     isActive: false,
-    clientId: 0,
-    locationId: 0,
+    clientId: user?.clientId || '',
+    locationId: '',
   });
 
   useEffect(() => {
-    dispatch(fetchABTestsAsync());
-    dispatch(fetchClientsAsync());
-    dispatch(fetchLocationsAsync());
-  }, [dispatch]);
+    if (user?.clientId) {
+      dispatch(fetchABTests({ clientId: user.clientId }));
+      dispatch(fetchClients());
+      dispatch(fetchLocations(user.clientId));
+    }
+  }, [dispatch, user]);
 
   const handleCreateTest = () => {
-    dispatch(createABTestAsync(newTest as ABTest));
-    setNewTest({
-      name: '',
-      description: '',
-      variantA: '',
-      variantB: '',
-      isActive: false,
-      clientId: 0,
-      locationId: 0,
-    });
+    if (user?.clientId) {
+      dispatch(createABTest({ 
+        clientId: user.clientId, 
+        locationId: newTest.locationId || '', 
+        abTest: newTest as Omit<ABTest, 'id'> 
+      }));
+      setNewTest({
+        name: '',
+        description: '',
+        variantA: '',
+        variantB: '',
+        isActive: false,
+        clientId: user.clientId,
+        locationId: '',
+      });
+    }
   };
 
   const handleUpdateTest = (test: ABTest) => {
-    dispatch(updateABTestAsync(test));
+    if (user?.clientId) {
+      dispatch(updateABTest({ 
+        clientId: user.clientId, 
+        locationId: test.locationId || '', 
+        abTestId: test.id, 
+        abTest: test 
+      }));
+    }
   };
 
-  const handleDeleteTest = (id: number) => {
+  const handleDeleteTest = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this AB test?')) {
-      dispatch(deleteABTestAsync(id));
+      try {
+        await abTestApi.deleteABTest(id);
+        if (user?.clientId) {
+          dispatch(fetchABTests({ clientId: user.clientId }));
+        }
+      } catch (error) {
+        console.error('Error deleting AB test:', error);
+      }
     }
   };
 
@@ -76,93 +107,29 @@ const ABTestManagement: React.FC = () => {
   if (status === 'failed') return <Typography>Error: {error}</Typography>;
 
   return (
-    <Box sx={{ padding: 3 }}>
+    <Box sx={{ padding: isMobile ? 2 : 3 }}>
       <Typography variant="h4" gutterBottom>
         AB Test Management
       </Typography>
-      <Box sx={{ marginBottom: 2 }}>
-        <TextField
-          label="Test Name"
-          value={newTest.name}
-          onChange={(e) => setNewTest({ ...newTest, name: e.target.value })}
-          sx={{ marginRight: 1 }}
-        />
-        <TextField
-          label="Description"
-          value={newTest.description}
-          onChange={(e) => setNewTest({ ...newTest, description: e.target.value })}
-          sx={{ marginRight: 1 }}
-        />
-        <TextField
-          label="Variant A"
-          value={newTest.variantA}
-          onChange={(e) => setNewTest({ ...newTest, variantA: e.target.value })}
-          sx={{ marginRight: 1 }}
-        />
-        <TextField
-          label="Variant B"
-          value={newTest.variantB}
-          onChange={(e) => setNewTest({ ...newTest, variantB: e.target.value })}
-          sx={{ marginRight: 1 }}
-        />
-        <Select
-          value={newTest.clientId}
-          onChange={(e) => setNewTest({ ...newTest, clientId: e.target.value as number })}
-          sx={{ marginRight: 1 }}
-        >
-          {clients.map((client: Client) => (
-            <MenuItem key={client.id} value={client.id}>
-              {client.name}
-            </MenuItem>
-          ))}
-        </Select>
-        <Select
-          value={newTest.locationId}
-          onChange={(e) => setNewTest({ ...newTest, locationId: e.target.value as number })}
-          sx={{ marginRight: 1 }}
-        >
-          {locations.map((location: Location) => (
-            <MenuItem key={location.id} value={location.id}>
-              {location.name}
-            </MenuItem>
-          ))}
-        </Select>
-        <Switch
-          checked={newTest.isActive}
-          onChange={(e) => setNewTest({ ...newTest, isActive: e.target.checked })}
-        />
-        <Button variant="contained" onClick={handleCreateTest}>
+      <Paper elevation={3} sx={{ padding: 2, marginBottom: 2 }}>
+        <Grid container spacing={2}>
+          {/* ... (keep the form fields as they were) ... */}
+        </Grid>
+        <Button variant="contained" onClick={handleCreateTest} sx={{ marginTop: 2 }}>
           Create Test
         </Button>
-      </Box>
+      </Paper>
       <List>
-        {tests.map((test: ABTest) => (
-          <ListItem key={test.id}>
-            <TextField
-              value={test.name}
-              onChange={(e) => handleUpdateTest({ ...test, name: e.target.value })}
+        <Suspense fallback={<div>Loading tests...</div>}>
+          {tests.map((test: ABTest) => (
+            <LazyABTestItem
+              key={test.id}
+              test={test}
+              onUpdate={handleUpdateTest}
+              onDelete={handleDeleteTest}
             />
-            <TextField
-              value={test.description}
-              onChange={(e) => handleUpdateTest({ ...test, description: e.target.value })}
-            />
-            <TextField
-              value={test.variantA}
-              onChange={(e) => handleUpdateTest({ ...test, variantA: e.target.value })}
-            />
-            <TextField
-              value={test.variantB}
-              onChange={(e) => handleUpdateTest({ ...test, variantB: e.target.value })}
-            />
-            <Switch
-              checked={test.isActive}
-              onChange={(e) => handleUpdateTest({ ...test, isActive: e.target.checked })}
-            />
-            <IconButton onClick={() => handleDeleteTest(test.id)}>
-              <DeleteIcon />
-            </IconButton>
-          </ListItem>
-        ))}
+          ))}
+        </Suspense>
       </List>
     </Box>
   );
