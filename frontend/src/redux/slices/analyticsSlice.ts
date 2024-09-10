@@ -6,17 +6,10 @@ export interface SalesByCategory {
   sales: number;
 }
 
-interface AnalyticsState {
-  salesByCategory: SalesByCategory[];
-  loading: boolean;
-  error: string | null;
+export interface AnalyticsData {
+  labels: string[];
+  orderCounts: number[];
 }
-
-const initialState: AnalyticsState = {
-  salesByCategory: [],
-  loading: false,
-  error: null,
-};
 
 export const fetchSalesByCategory = createAsyncThunk(
   'analytics/fetchSalesByCategory',
@@ -25,6 +18,27 @@ export const fetchSalesByCategory = createAsyncThunk(
   }
 );
 
+export const fetchAnalytics = createAsyncThunk(
+  'analytics/fetchAnalytics',
+  async (clientId: string) => {
+    return await analyticsService.getAnalytics(clientId);
+  }
+);
+
+interface AnalyticsState {
+  salesByCategory: SalesByCategory[];
+  analyticsData: AnalyticsData | null;
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  error: string | null;
+}
+
+const initialState: AnalyticsState = {
+  salesByCategory: [],
+  analyticsData: null,
+  status: 'idle',
+  error: null,
+};
+
 const analyticsSlice = createSlice({
   name: 'analytics',
   initialState,
@@ -32,16 +46,26 @@ const analyticsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchSalesByCategory.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+        state.status = 'loading';
       })
       .addCase(fetchSalesByCategory.fulfilled, (state, action) => {
-        state.loading = false;
+        state.status = 'succeeded';
         state.salesByCategory = action.payload;
       })
       .addCase(fetchSalesByCategory.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Failed to fetch sales by category';
+        state.status = 'failed';
+        state.error = action.error.message || null;
+      })
+      .addCase(fetchAnalytics.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchAnalytics.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.analyticsData = action.payload;
+      })
+      .addCase(fetchAnalytics.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message || null;
       });
   },
 });

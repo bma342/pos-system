@@ -1,78 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
-import { updateOrderProvider } from '../../redux/slices/orderProviderSlice';
+import { fetchOrderProvider, updateOrderProvider } from '../redux/slices/orderProviderSlice';
 import DoordashMarketplaceSettings from './DoordashMarketplaceSettings';
+import UberEatsSettings from './UberEatsSettings';
+import CateringSettings from './CateringSettings';
 import {
-  TextField,
-  Button,
-  Switch,
-  FormControlLabel,
   Typography,
   Box,
+  CircularProgress,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { useSelectedLocation } from '../hooks/useSelectedLocation';
+import { OrderProvider as OrderProviderType } from '../types/orderProviderTypes';
 
 interface OrderProviderProps {
-  providerId: number;
+  providerId: string;
 }
 
 const OrderProvider: React.FC<OrderProviderProps> = ({ providerId }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const provider = useSelector((state: RootState) =>
-    state.orderProviders.providers.find((p) => p.id === providerId)
+  const { selectedLocation } = useSelectedLocation();
+  const provider = useSelector((state: RootState) => 
+    state.orderProvider.providers.find(p => p.id === providerId)
   );
+  const [loading, setLoading] = useState(true);
 
-  const [handleScheduledOrders, setHandleScheduledOrders] = useState(
-    provider?.handleScheduledOrders || false
-  );
-  const [scheduledOrderLeadTime, setScheduledOrderLeadTime] = useState(
-    provider?.scheduledOrderLeadTime || 30
-  );
+  useEffect(() => {
+    if (selectedLocation) {
+      dispatch(fetchOrderProvider({ locationId: selectedLocation.id, providerId }))
+        .then(() => setLoading(false))
+        .catch((error: Error) => {
+          console.error('Error fetching order provider:', error);
+          setLoading(false);
+        });
+    }
+  }, [dispatch, selectedLocation, providerId]);
 
-  if (!provider) {
-    return <div>Provider not found</div>;
+  if (loading) {
+    return <CircularProgress />;
   }
 
-  const handleSave = () => {
-    dispatch(
-      updateOrderProvider({
-        id: providerId,
-        handleScheduledOrders,
-        scheduledOrderLeadTime,
-      })
-    );
-  };
+  if (!provider) {
+    return <Typography color="error">Order provider not found</Typography>;
+  }
 
   return (
     <Box>
-      <Typography variant="h5">{provider.name}</Typography>
-      <FormControlLabel
-        control={
-          <Switch
-            checked={handleScheduledOrders}
-            onChange={(e) => setHandleScheduledOrders(e.target.checked)}
-          />
-        }
-        label="Handle Scheduled Orders"
-      />
-      <TextField
-        fullWidth
-        margin="normal"
-        label="Scheduled Order Lead Time (minutes)"
-        type="number"
-        value={scheduledOrderLeadTime}
-        onChange={(e) => setScheduledOrderLeadTime(parseInt(e.target.value))}
-        disabled={!handleScheduledOrders}
-      />
-      <Button onClick={handleSave} variant="contained" color="primary">
-        Save General Settings
-      </Button>
-
-      {/* Provider-specific settings */}
-      {provider.type === 'doordash' && (
-        <DoordashMarketplaceSettings providerId={providerId} />
-      )}
-      {/* Add other provider-specific settings components here */}
+      <Typography variant="h5">Order Provider: {provider.name}</Typography>
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography>{provider.name} Settings</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          {provider.type === 'doordash' && (
+            <DoordashMarketplaceSettings providerId={provider.id} />
+          )}
+          {provider.type === 'ubereats' && (
+            <UberEatsSettings provider={provider} />
+          )}
+          {provider.type === 'catering' && (
+            <CateringSettings provider={provider} />
+          )}
+          {/* Add other provider-specific settings components here */}
+        </AccordionDetails>
+      </Accordion>
     </Box>
   );
 };

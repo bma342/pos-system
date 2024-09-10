@@ -1,113 +1,115 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { AppDispatch, RootState } from '../redux/store';
-import { createOrder } from '../redux/slices/orderSlice';
+import { Typography, Button, CircularProgress } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
+import { RootState, AppDispatch } from '../redux/store';
 import { fetchGuestRewards } from '../redux/slices/rewardSlice';
-import { clearCart } from '../redux/slices/cartSlice';
-import { Order } from '../types/orderTypes';
-import {
-  Typography,
-  Button,
-  CircularProgress,
-  Box,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from '@mui/material';
+import { createOrder } from '../redux/slices/orderSlice';
+import { CartItem } from '../types/cartTypes';
+import { Order, OrderStatus } from '../types/orderTypes';
+import { useSelectedLocation } from '../hooks/useSelectedLocation';
+import { OrderItemModifier } from '../types/orderTypes';
+import { User } from '../types/userTypes';
+
+const LazyOrderSummary = lazy(() => import('../components/OrderSummary'));
 
 const CheckoutPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
   const { user } = useAuth();
   const cart = useSelector((state: RootState) => state.cart);
-  const selectedLocation = useSelector((state: RootState) => state.location.selectedLocation);
-  const [availableRewards, setAvailableRewards] = useState<any[]>([]);
-  const [selectedReward, setSelectedReward] = useState<string>('');
-  const [paymentMethod, setPaymentMethod] = useState<string>('');
+  const { selectedLocation } = useSelectedLocation();
+  const [availableRewards, setAvailableRewards] = useState([]);
+  const [selectedReward, setSelectedReward] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    if (user?.id) {
-      fetchGuestRewards(user.id).then(setAvailableRewards);
+    if (user) {
+      dispatch(fetchGuestRewards({ guestId: user.id, clientId: user.clientId }))
+        .unwrap()
+        .then(setAvailableRewards)
+        .catch(console.error);
     }
-  }, [user]);
+  }, [dispatch, user]);
 
-  const handleCheckout = async () => {
-    if (!selectedLocation || !user?.id) {
-      alert('Please select a location and ensure you are logged in.');
-      return;
-    }
+  const handleCheckout = () => {
+    if (!user || !selectedLocation) return;
 
-    const orderData: Omit<Order, 'id'> = {
-      userId: user.id,
-      locationId: selectedLocation.id,
-      items: cart.items,
-      total: cart.total,
-      status: 'pending',
-      paymentMethod,
-      appliedRewardId: selectedReward,
+    const getCustomerName = (user: User) => {
+      if (user.firstName && user.lastName) {
+        return `${user.firstName} ${user.lastName}`;
+      } else if (user.firstName) {
+        return user.firstName;
+      } else if (user.email) {
+        return user.email.split('@')[0]; // Use the part before @ in email
+      } else {
+        return 'Guest';
+      }
     };
 
-    try {
-      const response = await dispatch(createOrder({ clientId: user.clientId, orderData })).unwrap();
-      dispatch(clearCart());
-      navigate(`/order-confirmation/${response.id}`);
-    } catch (error) {
-      console.error('Failed to create order:', error);
-      alert('Failed to create order. Please try again.');
-    }
+    const orderData: Omit<Order, 'id'> = {
+      clientId: user.clientId,
+      guestId: user.id,
+      locationId: selectedLocation.id,
+      locationName: selectedLocation.name,
+      customerName: getCustomerName(user),
+      orderDate: new Date().toISOString(),
+      items: cart.items.map(item => ({
+        itemId: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        modifiers: item.modifiers.map(mod => ({
+          modifierId: mod.id,
+          quantity: 1,
+          price: mod.price
+        } as OrderItemModifier))
+      })),
+      totalAmount: calculateTotal(),
+      total: calculateTotal(),
+      status: OrderStatus.PENDING,
+      paymentMethod: 'credit_card',
+      appliedRewardId: selectedReward,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    dispatch(createOrder({ clientId: user.clientId, orderData }));
   };
 
-  if (!selectedLocation) {
-    return <Typography>Please select a location before proceeding to checkout.</Typography>;
-  }
+  const calculateTotal = (): number => {
+    return cart.items.reduce((total, item) => total + item.price * item.quantity, 0);
+  };
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>Checkout</Typography>
-      <Typography variant="h6">Order Summary</Typography>
-      {cart.items.map((item) => (
-        <Typography key={item.id}>{item.name} - ${item.price.toFixed(2)} x {item.quantity}</Typography>
-      ))}
-      <Typography variant="h6">Total: ${cart.total.toFixed(2)}</Typography>
+    <div className="checkout-page">
+      <Typography variant="h4" component="h1">Checkout</Typography>
+      <Suspense fallback={<CircularProgress />}>
+        <LazyOrderSummary items={cart.items} total={calculateTotal()} />
+      </Suspense>
 
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Apply Reward</InputLabel>
-        <Select
-          value={selectedReward}
-          onChange={(e) => setSelectedReward(e.target.value as string)}
-        >
-          <MenuItem value="">None</MenuItem>
-          {availableRewards.map((reward) => (
-            <MenuItem key={reward.id} value={reward.id}>{reward.name}</MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <Typography variant="h6" component="h2">Available Rewards:</Typography>
+      <div className="rewards-container" role="group" aria-label="Available rewards">
+        {availableRewards.map((reward: any) => (
+          <Button
+            key={reward.id}
+            onClick={() => setSelectedReward(reward.id)}
+            variant={selectedReward === reward.id ? 'contained' : 'outlined'}
+            aria-pressed={selectedReward === reward.id}
+          >
+            {reward.name}
+          </Button>
+        ))}
+      </div>
 
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Payment Method</InputLabel>
-        <Select
-          value={paymentMethod}
-          onChange={(e) => setPaymentMethod(e.target.value as string)}
-        >
-          <MenuItem value="credit_card">Credit Card</MenuItem>
-          <MenuItem value="paypal">PayPal</MenuItem>
-          <MenuItem value="cash">Cash</MenuItem>
-        </Select>
-      </FormControl>
-
-      <Button
-        variant="contained"
+      <Button 
+        onClick={handleCheckout} 
+        variant="contained" 
         color="primary"
-        onClick={handleCheckout}
-        disabled={cart.items.length === 0 || !paymentMethod}
+        aria-label="Complete order"
+        disabled={cart.items.length === 0}
       >
-        Place Order
+        Complete Order
       </Button>
-    </Box>
+    </div>
   );
 };
 

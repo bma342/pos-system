@@ -7,8 +7,10 @@ import { addToCart, removeFromCart, updateCartItemQuantity } from '../redux/slic
 import { useSelectedClient } from '../hooks/useSelectedClient';
 import { useSelectedLocation } from '../hooks/useSelectedLocation';
 import { MenuItem, Modifier } from '../types/menuTypes';
+import { CartItem } from '../types/cartTypes';
 import { Typography, Button, Grid, Box, useMediaQuery, useTheme } from '@mui/material';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useAuth } from '../hooks/useAuth';
 
 const LazyMenuItemComponent = lazy(() => import('../components/MenuItemComponent'));
 
@@ -23,22 +25,30 @@ const OrderPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  const { user } = useAuth();
+  const { selectedLocation } = useSelectedLocation();
+
   useEffect(() => {
     if (clientId && locationId) {
       dispatch(fetchMenuItemsAsync({ clientId, locationId }));
     }
   }, [dispatch, clientId, locationId]);
 
-  const handleAddToCart = (menuItem: MenuItem, quantity: number, selectedModifiers: Modifier[]) => {
-    if (clientId && locationId) {
-      dispatch(addToCart({
-        clientId,
-        locationId,
-        menuItem,
-        quantity,
-        selectedModifiers
-      }));
-    }
+  const handleAddToCart = (item: MenuItem, quantity: number, modifiers: Modifier[]) => {
+    if (!user || !selectedLocation) return;
+
+    const cartItem: CartItem = {
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      quantity,
+      clientId: user.clientId,
+      locationId: selectedLocation.id,
+      modifiers,
+      menuItem: item // Add this line
+    };
+
+    dispatch(addToCart(cartItem));
   };
 
   const handleRemoveFromCart = (menuItemId: string) => {
@@ -60,7 +70,7 @@ const OrderPage: React.FC = () => {
     <LazyMenuItemComponent 
       key={item.id} 
       item={item}
-      onAddToCart={(quantity: number, modifiers: Modifier[]) => handleAddToCart(item, quantity, modifiers)}
+      onAddToCart={(quantity, modifiers) => handleAddToCart(item, quantity, modifiers)}
     />
   )), [menuItems, handleAddToCart]);
 
@@ -80,22 +90,22 @@ const OrderPage: React.FC = () => {
             Cart
           </Typography>
           {cart.map(item => (
-            <Box key={item.menuItem.id} sx={{ mb: 2 }}>
+            <Box key={item.id} sx={{ mb: 2 }}>
               <Typography>{item.menuItem.name} - Quantity: {item.quantity}</Typography>
               <Button 
-                onClick={() => handleRemoveFromCart(item.menuItem.id)}
+                onClick={() => handleRemoveFromCart(item.id)}
                 aria-label={`Remove ${item.menuItem.name} from cart`}
               >
                 Remove
               </Button>
               <Button 
-                onClick={() => handleUpdateQuantity(item.menuItem.id, item.quantity + 1)}
+                onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                 aria-label={`Increase quantity of ${item.menuItem.name}`}
               >
                 +
               </Button>
               <Button 
-                onClick={() => handleUpdateQuantity(item.menuItem.id, Math.max(0, item.quantity - 1))}
+                onClick={() => handleUpdateQuantity(item.id, Math.max(0, item.quantity - 1))}
                 aria-label={`Decrease quantity of ${item.menuItem.name}`}
               >
                 -

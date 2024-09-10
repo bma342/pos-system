@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
-import { MenuService } from '../../services/MenuService';
+import { MenuService } from '../services/MenuService'; // Update the import path
 import { Menu, MenuGroup } from '../types/menuTypes';
-import { updateLocationMenu } from '../redux/slices/menuSlice';
+import { updateMenu } from '../redux/slices/menuSlice'; // Change this import
 import {
   Box,
   Typography,
@@ -23,7 +23,7 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
 } from '@mui/icons-material';
-import { fetchMenuItems, updateMenuItem } from 'frontend/src/api/menuApi';
+import { fetchMenuItems, updateMenuItem } from '../api/menuApi'; // Update the import path
 
 const MenuBuilder: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -42,7 +42,7 @@ const MenuBuilder: React.FC = () => {
     if (locationId) {
       try {
         const fetchedMenu: Menu = await menuService.getLocationMenu(locationId);
-        dispatch(updateLocationMenu(fetchedMenu));
+        dispatch(updateMenu(fetchedMenu));
       } catch (error) {
         console.error('Failed to fetch menu:', error);
       }
@@ -60,7 +60,7 @@ const MenuBuilder: React.FC = () => {
           locationId,
           newGroupName
         );
-        dispatch(updateLocationMenu(updatedMenu));
+        dispatch(updateMenu(updatedMenu));
         setNewGroupName('');
         setIsAddingGroup(false);
       } catch (error) {
@@ -77,7 +77,7 @@ const MenuBuilder: React.FC = () => {
           editingGroup.id,
           editingGroup.name
         );
-        dispatch(updateLocationMenu(updatedMenu));
+        dispatch(updateMenu(updatedMenu));
         setEditingGroup(null);
       } catch (error) {
         console.error('Failed to update menu group:', error);
@@ -93,7 +93,7 @@ const MenuBuilder: React.FC = () => {
             locationId,
             groupId
           );
-          dispatch(updateLocationMenu(updatedMenu));
+          dispatch(updateMenu(updatedMenu));
         } catch (error) {
           console.error('Failed to delete menu group:', error);
         }

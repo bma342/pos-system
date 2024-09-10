@@ -1,31 +1,39 @@
 export interface Menu {
   id: string;
-  locationId: string;
   name: string;
+  clientId: string;
+  locationId: string;
   menuGroups: MenuGroup[];
+  isModified?: boolean;
+  // ... any other properties
 }
 
 export interface MenuGroup {
   id: string;
   name: string;
   items: MenuItem[];
+  isModified?: boolean;
 }
 
 export interface MenuItem {
   id: string;
   name: string;
-  description: string;
   price: number;
   imageUrl: string;
   groupName: string;
   modifiers: Modifier[];
   defaultModifiers: Modifier[];
-  reviewsEnabled: boolean;
+  isModified?: boolean;
+  description?: string;
+  reviewsEnabled?: boolean;
   averageRating?: number;
   reviewCount?: number;
-  showQuantityAvailable: boolean;
+  showQuantityAvailable?: boolean;
   quantityAvailable?: number;
-  isAvailable: boolean;
+  isAvailable?: boolean;
+  calories?: number;
+  allergens?: string[];
+  nutritionalInfo?: string;
   image?: string;
 }
 
@@ -78,7 +86,7 @@ export interface MenuStatistics {
   totalItems: number;
   averagePrice: number;
   mostPopularItem: string;
-  mostPopularItems: MenuItem[]; // Add this line
+  mostPopularItems: MenuItem[];
   leastPopularItem: string;
   averageOrderValue: number;
   // Add any other relevant statistics for your multi-location restaurant system

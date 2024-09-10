@@ -18,7 +18,7 @@ import { Typography, Box, CircularProgress } from '@mui/material';
 const SalesByCategoryChart: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth();
-  const { salesByCategory, loading, error } = useSelector((state: RootState) => state.analytics);
+  const { salesByCategory, status, error } = useSelector((state: RootState) => state.analytics);
 
   useEffect(() => {
     if (user?.clientId) {
@@ -26,7 +26,7 @@ const SalesByCategoryChart: React.FC = () => {
     }
   }, [dispatch, user]);
 
-  if (loading) return <CircularProgress />;
+  if (status === 'loading') return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
 
   const chartData = salesByCategory.map((item) => ({

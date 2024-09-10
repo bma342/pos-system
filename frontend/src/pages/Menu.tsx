@@ -1,13 +1,16 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, lazy, Suspense } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
 import { fetchMenu } from '../redux/slices/menuSlice';
 import { useSelectedLocation } from '../hooks/useSelectedLocation';
 import { useSelectedClient } from '../hooks/useSelectedClient';
 import { Typography, CircularProgress, Box, Grid, TextField, useMediaQuery, useTheme } from '@mui/material';
-import MenuItemDisplay from '../components/MenuItemDisplay';
 import { MenuItem, MenuGroup } from '../types/menuTypes';
 import { addToCart } from '../redux/slices/cartSlice';
+
+// Remove the socket-related code if it's not being used
+
+const LazyMenuItemDisplay = lazy(() => import('../components/MenuItemDisplay'));
 
 const Menu: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -28,17 +31,20 @@ const Menu: React.FC = () => {
     }
   }, [dispatch, selectedClient, selectedLocation]);
 
-  const handleAddToCart = useCallback((item: MenuItem) => {
+  const handleAddToCart = (menuItem: MenuItem) => {
     if (selectedClient && selectedLocation) {
       dispatch(addToCart({
+        id: `${Date.now()}-${menuItem.id}`,
         clientId: selectedClient.id.toString(),
-        locationId: selectedLocation.id.toString(),
-        menuItem: item,
+        locationId: selectedLocation.id,
+        name: menuItem.name,
+        price: menuItem.price,
         quantity: 1,
-        selectedModifiers: []
+        modifiers: [],
+        menuItem // Add this line
       }));
     }
-  }, [dispatch, selectedClient, selectedLocation]);
+  };
 
   const filterMenuItems = useCallback((group: MenuGroup) => {
     return group.items.filter(item =>
@@ -72,14 +78,16 @@ const Menu: React.FC = () => {
         aria-label="Search menu items"
       />
       <Grid container spacing={2}>
-        {menu.menuGroups.map((group) => (
+        {menu.menuGroups?.map((group) => (
           <Grid item xs={12} md={6} key={group.id}>
             <Box mb={4}>
               <Typography variant="h5" component="h2" gutterBottom>{group.name}</Typography>
               <Grid container spacing={2}>
                 {filterMenuItems(group).map((item) => (
                   <Grid item xs={12} sm={isMobile ? 12 : 6} key={item.id}>
-                    <MenuItemDisplay item={item} onAddToCart={handleAddToCart} />
+                    <Suspense fallback={<CircularProgress />}>
+                      <LazyMenuItemDisplay item={item} onAddToCart={handleAddToCart} />
+                    </Suspense>
                   </Grid>
                 ))}
               </Grid>

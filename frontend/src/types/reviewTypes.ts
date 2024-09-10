@@ -1,14 +1,13 @@
 export interface Review {
   id: string;
-  menuItemId: string;
+  content: string;
+  rating: number;
   userId: string;
-  userName: string;
+  menuItemId: string;
+  createdAt: string;
   firstName: string;
   lastInitial: string;
-  rating: number;
-  content: string;
-  createdAt: string;
-  status: 'pending' | 'approved' | 'rejected';
+  // ... any other relevant fields
 }
 
 export interface ReviewCreateData {

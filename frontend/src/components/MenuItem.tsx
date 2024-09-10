@@ -1,44 +1,41 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
 import { fetchReviewsForMenuItem } from '../redux/slices/reviewSlice';
-import { Typography, Box, Button } from '@mui/material';
-import ItemReviews from './ItemReviews';
+import { MenuItem as MenuItemType } from '../types/menuTypes';
+import MenuItemDisplay from './MenuItemDisplay';
 import SubmitReview from './SubmitReview';
+import { Review } from '../types/reviewTypes';
 
 interface MenuItemProps {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  addToCart: (itemId: number) => void;
+  item: MenuItemType;
 }
 
-const MenuItem: React.FC<MenuItemProps> = ({
-  id,
-  name,
-  description,
-  price,
-  addToCart,
-}) => {
+const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
   const dispatch = useDispatch<AppDispatch>();
   const reviews = useSelector(
-    (state: RootState) => state.reviews.itemReviews[id] || []
+    (state: RootState) => state.review.reviews[item.id] || []
   );
 
   useEffect(() => {
-    dispatch(fetchReviewsForMenuItem(id));
-  }, [dispatch, id]);
+    if (item.reviewsEnabled) {
+      dispatch(fetchReviewsForMenuItem(item.id));
+    }
+  }, [dispatch, item.id, item.reviewsEnabled]);
 
   return (
-    <Box>
-      <Typography variant="h6">{name}</Typography>
-      <Typography variant="body1">{description}</Typography>
-      <Typography variant="body2">${price.toFixed(2)}</Typography>
-      <Button onClick={() => addToCart(id)}>Add to Cart</Button>
-      <ItemReviews reviews={reviews} />
-      <SubmitReview menuItemId={id} />
-    </Box>
+    <div>
+      <MenuItemDisplay item={item} />
+      {item.reviewsEnabled && (
+        <>
+          <h3>Reviews</h3>
+          {reviews.map((review: Review) => (
+            <div key={review.id}>{review.content}</div>
+          ))}
+          <SubmitReview menuItemId={item.id} />
+        </>
+      )}
+    </div>
   );
 };
 

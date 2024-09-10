@@ -1,22 +1,30 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { Review, ReviewCreateData, ReviewStats } from '../../types/reviewTypes';
-import { reviewApi } from '../../api/reviewApi';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { Review, ReviewCreateData } from '../../types/reviewTypes';
+import { reviewApi } from '../../api/reviewApi'; // Make sure this import exists
 
 interface ReviewState {
+  reviews: {
+    [menuItemId: string]: Review[];
+  };
   pendingReviews: Review[];
-  menuItemReviews: Review[];
-  reviewStats: ReviewStats | null;
-  loading: boolean;
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
 
 const initialState: ReviewState = {
+  reviews: {},
   pendingReviews: [],
-  menuItemReviews: [],
-  reviewStats: null,
-  loading: false,
+  status: 'idle',
   error: null,
 };
+
+export const fetchReviewsForMenuItem = createAsyncThunk(
+  'review/fetchReviewsForMenuItem',
+  async (menuItemId: string) => {
+    const response = await reviewApi.getReviewsForMenuItem(menuItemId);
+    return { menuItemId, reviews: response };
+  }
+);
 
 export const fetchPendingReviews = createAsyncThunk(
   'review/fetchPendingReviews',
@@ -40,24 +48,10 @@ export const deleteReview = createAsyncThunk(
   }
 );
 
-export const fetchReviewsForMenuItem = createAsyncThunk(
-  'review/fetchReviewsForMenuItem',
-  async (menuItemId: string) => {
-    return await reviewApi.getReviewsForMenuItem(menuItemId);
-  }
-);
-
 export const createReview = createAsyncThunk(
   'review/createReview',
   async (reviewData: ReviewCreateData) => {
     return await reviewApi.createReview(reviewData);
-  }
-);
-
-export const fetchReviewStats = createAsyncThunk(
-  'review/fetchReviewStats',
-  async (menuItemId: string) => {
-    return await reviewApi.getReviewStats(menuItemId);
   }
 );
 
@@ -67,6 +61,17 @@ const reviewSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(fetchReviewsForMenuItem.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchReviewsForMenuItem.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.reviews[action.payload.menuItemId] = action.payload.reviews;
+      })
+      .addCase(fetchReviewsForMenuItem.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message || null;
+      })
       .addCase(fetchPendingReviews.fulfilled, (state, action) => {
         state.pendingReviews = action.payload;
       })
@@ -76,14 +81,12 @@ const reviewSlice = createSlice({
       .addCase(deleteReview.fulfilled, (state, action) => {
         state.pendingReviews = state.pendingReviews.filter(review => review.id !== action.payload);
       })
-      .addCase(fetchReviewsForMenuItem.fulfilled, (state, action) => {
-        state.menuItemReviews = action.payload;
-      })
       .addCase(createReview.fulfilled, (state, action) => {
-        state.menuItemReviews.push(action.payload);
-      })
-      .addCase(fetchReviewStats.fulfilled, (state, action) => {
-        state.reviewStats = action.payload;
+        const { menuItemId } = action.payload;
+        if (!state.reviews[menuItemId]) {
+          state.reviews[menuItemId] = [];
+        }
+        state.reviews[menuItemId].push(action.payload);
       });
   },
 });

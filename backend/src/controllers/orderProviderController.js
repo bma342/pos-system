@@ -1,5 +1,5 @@
 const { Request, Response } = require 'express';
-const *  = require '../services/orderProviderService';
+const orderProviderService = require('../services/orderProviderService');
 const { AppError } = require '../utils/errorHandler';
 
 const createOrderProviderController = async (req, res) => {
@@ -81,3 +81,33 @@ const createLocationMenuController = async (req, res) => {
 };
 
 // ... add other controllers for updateLocationMenu, getLocationMenus, deleteLocationMenu
+
+exports.getOrderProviders = async (req, res) => {
+  try {
+    const providers = await orderProviderService.getOrderProviders(req.params.locationId);
+    res.json(providers);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching order providers' });
+  }
+};
+
+exports.getOrderProvider = async (req, res) => {
+  try {
+    const provider = await orderProviderService.getOrderProvider(req.params.locationId, req.params.providerId);
+    if (!provider) {
+      return res.status(404).json({ message: 'Order provider not found' });
+    }
+    res.json(provider);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching order provider' });
+  }
+};
+
+exports.updateOrderProvider = async (req, res) => {
+  try {
+    const updatedProvider = await orderProviderService.updateOrderProvider(req.params.locationId, req.params.providerId, req.body);
+    res.json(updatedProvider);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating order provider' });
+  }
+};

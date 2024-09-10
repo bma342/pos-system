@@ -40,7 +40,7 @@ const Orders: React.FC = () => {
           <TableHead>
             <TableRow>
               <TableCell>Order ID</TableCell>
-              <TableCell>Customer</TableCell>
+              <TableCell>Guest ID</TableCell>
               <TableCell>Total</TableCell>
               <TableCell>Status</TableCell>
             </TableRow>
@@ -49,8 +49,8 @@ const Orders: React.FC = () => {
             {orders.map((order: Order) => (
               <TableRow key={order.id}>
                 <TableCell>{order.id}</TableCell>
-                <TableCell>{order.customerName}</TableCell>
-                <TableCell>${order.total.toFixed(2)}</TableCell>
+                <TableCell>{order.guestId}</TableCell>
+                <TableCell>${order.totalAmount.toFixed(2)}</TableCell>
                 <TableCell>{order.status}</TableCell>
               </TableRow>
             ))}

@@ -22,20 +22,37 @@ export const menuService = {
     return await menuApi.createMenu(clientId, menuData);
   },
 
-  createMenuGroup: async (clientId: string, menuId: string, groupData: Partial<MenuGroup>): Promise<MenuGroup> => {
-    return await menuApi.createMenuGroup(clientId, menuId, groupData);
+  createMenuGroup: async (clientId: string, menuId: string, menuGroupData: Partial<MenuGroup>): Promise<MenuGroup> => {
+    return await menuApi.createMenuGroup(clientId, menuId, menuGroupData);
   },
 
-  updateMenuGroup: async (clientId: string, menuId: string, groupId: string, groupData: Partial<MenuGroup>): Promise<MenuGroup> => {
-    return await menuApi.updateMenuGroup(clientId, menuId, groupId, groupData);
+  updateMenuGroup: async (clientId: string, menuId: string, menuGroupId: string, menuGroupData: Partial<MenuGroup>): Promise<MenuGroup> => {
+    return await menuApi.updateMenuGroup(clientId, menuId, menuGroupId, menuGroupData);
   },
 
-  createMenuItem: async (clientId: string, locationId: string, menuItemData: Omit<MenuItem, 'id'>): Promise<MenuItem> => {
-    return await menuApi.createMenuItem(clientId, locationId, menuItemData);
+  createMenuItem: async (clientId: string, menuGroupId: string, menuItemData: Partial<MenuItem>): Promise<MenuItem> => {
+    // Ensure required fields are present
+    if (!menuItemData.name) {
+      throw new Error("MenuItem name is required");
+    }
+    
+    // Create a new object with required fields, excluding 'id'
+    const newMenuItem: Omit<MenuItem, "id"> = {
+      name: menuItemData.name,
+      description: menuItemData.description || "",
+      price: menuItemData.price || 0,
+      imageUrl: menuItemData.imageUrl || "",
+      groupName: menuItemData.groupName || "",
+      modifiers: menuItemData.modifiers || [],
+      defaultModifiers: menuItemData.defaultModifiers || [],
+      // Add any other fields that are part of the MenuItem type
+    };
+
+    return await menuApi.createMenuItem(clientId, menuGroupId, newMenuItem);
   },
 
-  updateMenuItem: async (clientId: string, locationId: string, menuItemId: string, menuItemData: MenuItem): Promise<MenuItem> => {
-    return await menuApi.updateMenuItem(clientId, locationId, menuItemId, menuItemData);
+  updateMenuItem: async (clientId: string, menuGroupId: string, menuItemId: string, menuItemData: Partial<MenuItem>): Promise<MenuItem> => {
+    return await menuApi.updateMenuItem(clientId, menuGroupId, menuItemId, menuItemData);
   },
 
   createModifier: async (clientId: string, menuId: string, groupId: string, itemId: string, modifierData: Partial<Modifier>): Promise<Modifier> => {
@@ -47,11 +64,11 @@ export const menuService = {
   },
 
   deleteItem: async (clientId: string, type: string, id: string): Promise<void> => {
-    await menuApi.deleteItem(clientId, type, id);
+    return await menuApi.deleteItem(clientId, type, id);
   },
 
   syncMenus: async (clientId: string): Promise<void> => {
-    await menuApi.syncMenus(clientId);
+    return await menuApi.syncMenus(clientId);
   },
 };
 

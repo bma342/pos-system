@@ -1,7 +1,7 @@
-import { Menu } from '../types/menuTypes';
+import { Menu, MenuItem, MenuGroup, Modifier } from '../types/menuTypes';
 import apiClient from './apiClient';
 import axios from 'axios';
-import { MenuGroup, MenuItem, Modifier, MenuStatistics } from '../types/menuTypes';
+import { MenuStatistics } from '../types/menuTypes';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '';
 
@@ -56,7 +56,7 @@ export const menuApi = {
     return response.data;
   },
 
-  updateMenuItem: async (clientId: string, locationId: string, menuItemId: string, menuItemData: MenuItem): Promise<MenuItem> => {
+  updateMenuItem: async (clientId: string, locationId: string, menuItemId: string, menuItemData: Partial<MenuItem>): Promise<MenuItem> => {
     const response = await apiClient.put(`/clients/${clientId}/locations/${locationId}/menu-items/${menuItemId}`, menuItemData);
     return response.data;
   },
@@ -101,6 +101,12 @@ export const menuApi = {
   deleteMenu: async (clientId: string, menuId: string): Promise<void> => {
     await apiClient.delete(`/clients/${clientId}/menus/${menuId}`);
   },
+
+  // Add this function to handle POS synchronization
+  syncMenuItemsWithPOS: async (clientId: string, locationId: string, groupId: string): Promise<MenuItem[]> => {
+    const response = await apiClient.post(`/clients/${clientId}/locations/${locationId}/menu-groups/${groupId}/sync-pos`);
+    return response.data;
+  },
 };
 
 // Export individual functions
@@ -123,7 +129,8 @@ export const {
   deleteItem, 
   syncMenus,
   fetchMenuItems,
-  deleteMenu // Add this line
+  deleteMenu, 
+  syncMenuItemsWithPOS
 } = menuApi;
 
 export default menuApi;

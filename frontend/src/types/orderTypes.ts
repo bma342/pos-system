@@ -1,14 +1,32 @@
 export interface Order {
   id: string;
+  clientId: string;
+  guestId: string;
+  locationId: string;
+  locationName: string;
   customerName: string;
+  orderDate: string;
+  totalAmount: number;
   total: number;
   status: string;
-  // Add other relevant properties
+  items: OrderItem[];
+  createdAt: string;
+  updatedAt: string;
+  paymentMethod: string; // Add this line
+  appliedRewardId?: string; // Add this line
 }
 
 export interface OrderItem {
-  id: string;
+  itemId: string;
   name: string;
+  quantity: number;
+  price: number;
+  modifiers: OrderItemModifier[];
+  outOfStock?: boolean;
+}
+
+export interface OrderItemModifier {
+  modifierId: string;
   quantity: number;
   price: number;
 }

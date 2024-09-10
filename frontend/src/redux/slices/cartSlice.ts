@@ -20,14 +20,14 @@ const cartSlice = createSlice({
       state.items = state.items.filter(item => 
         item.clientId !== action.payload.clientId ||
         item.locationId !== action.payload.locationId ||
-        item.menuItem.id !== action.payload.menuItemId
+        item.id !== action.payload.menuItemId
       );
     },
     updateCartItemQuantity: (state, action: PayloadAction<{ clientId: string; locationId: string; menuItemId: string; quantity: number }>) => {
       const item = state.items.find(item => 
         item.clientId === action.payload.clientId &&
         item.locationId === action.payload.locationId &&
-        item.menuItem.id === action.payload.menuItemId
+        item.id === action.payload.menuItemId
       );
       if (item) {
         item.quantity = action.payload.quantity;

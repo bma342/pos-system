@@ -2,14 +2,23 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../redux/store';
 import { updateMenu } from '../redux/slices/menuSlice';
-import { Menu, MenuGroup, MenuItem } from '../types/menuTypes';
+import { MenuGroup, MenuItem } from '../types/menuTypes';
+
+// Explicitly define the Menu type here
+interface Menu {
+  clientId: string;
+  locationId: string;
+  menuGroups: MenuGroup[];
+  isModified?: boolean;
+}
 
 interface MenuGroupComponentProps {
   menu: Menu;
   group: MenuGroup;
+  isClientAdmin?: boolean;
 }
 
-const MenuGroupComponent: React.FC<MenuGroupComponentProps> = ({ menu, group }) => {
+const MenuGroupComponent: React.FC<MenuGroupComponentProps> = ({ menu, group, isClientAdmin = false }) => {
   const dispatch = useDispatch<AppDispatch>();
 
   const handleAddItem = (newItem: Omit<MenuItem, 'id' | 'isModified'>) => {
@@ -20,13 +29,16 @@ const MenuGroupComponent: React.FC<MenuGroupComponentProps> = ({ menu, group }) 
     };
     const updatedMenu = {
       ...menu,
-      groups: menu.groups.map((g: MenuGroup) => g.id === group.id ? updatedGroup : g),
+      menuGroups: menu.menuGroups.map((g: MenuGroup) => 
+        g.id === group.id ? updatedGroup : g
+      ),
       isModified: true,
     };
     dispatch(updateMenu({
+      clientId: menu.clientId,
       locationId: menu.locationId,
-      menuId: menu.id,
       menuData: updatedMenu,
+      isClientAdmin,
     }));
   };
 
@@ -40,13 +52,16 @@ const MenuGroupComponent: React.FC<MenuGroupComponentProps> = ({ menu, group }) 
     };
     const updatedMenu = {
       ...menu,
-      groups: menu.groups.map((g: MenuGroup) => g.id === group.id ? updatedGroup : g),
+      menuGroups: menu.menuGroups.map((g: MenuGroup) => 
+        g.id === group.id ? updatedGroup : g
+      ),
       isModified: true,
     };
     dispatch(updateMenu({
+      clientId: menu.clientId,
       locationId: menu.locationId,
-      menuId: menu.id,
       menuData: updatedMenu,
+      isClientAdmin,
     }));
   };
 
@@ -58,20 +73,23 @@ const MenuGroupComponent: React.FC<MenuGroupComponentProps> = ({ menu, group }) 
     };
     const updatedMenu = {
       ...menu,
-      groups: menu.groups.map((g: MenuGroup) => g.id === group.id ? updatedGroup : g),
+      menuGroups: menu.menuGroups.map((g: MenuGroup) => 
+        g.id === group.id ? updatedGroup : g
+      ),
       isModified: true,
     };
     dispatch(updateMenu({
+      clientId: menu.clientId,
       locationId: menu.locationId,
-      menuId: menu.id,
       menuData: updatedMenu,
+      isClientAdmin,
     }));
   };
 
   return (
     <div>
       <h2>{group.name}</h2>
-      {group.items.map((item) => (
+      {group.items.map((item: MenuItem) => (
         <div key={item.id}>
           <span>{item.name} - ${item.price}</span>
           {item.isModified && <span> (Modified)</span>}
@@ -81,7 +99,7 @@ const MenuGroupComponent: React.FC<MenuGroupComponentProps> = ({ menu, group }) 
           <button onClick={() => handleRemoveItem(item.id)}>Remove</button>
         </div>
       ))}
-      <button onClick={() => handleAddItem({ name: 'New Item', price: 9.99 })}>
+      <button onClick={() => handleAddItem({ name: 'New Item', price: 9.99, imageUrl: '', groupName: group.name, modifiers: [], defaultModifiers: [] })}>
         Add New Item
       </button>
     </div>

@@ -1,29 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
-import { fetchOrders, updateOrderStatus } from '../redux/slices/orderSlice';
-import { selectSelectedLocations, selectCurrentUser } from '../redux/slices/userSlice';
+import { fetchOrders, updateOrder } from '../redux/slices/orderSlice';
+import { selectSelectedLocation, selectCurrentUser } from '../redux/slices/userSlice';
 import { 
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, 
   Select, MenuItem, Typography, CircularProgress, Box, Tabs, Tab
 } from '@mui/material';
 import LocationSelector from './LocationSelector';
+import { UserRole } from '../types/userTypes'; // Make sure this import exists
+
+interface Order {
+  id: string;
+  locationName: string;
+  customerName: string;
+  orderDate: string;
+  totalAmount: number;
+  total: number; // Add this for compatibility with OrderManagement
+  status: string;
+}
 
 const OrderDashboard: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { orders, status, error } = useSelector((state: RootState) => state.orders);
-  const selectedLocations = useSelector(selectSelectedLocations);
+  const { orders, status, error } = useSelector((state: RootState) => state.order);
+  const selectedLocation = useSelector(selectSelectedLocation);
   const user = useSelector(selectCurrentUser);
   const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
-    if (selectedLocations.length > 0) {
-      dispatch(fetchOrders(selectedLocations));
+    if (selectedLocation) {
+      dispatch(fetchOrders(selectedLocation));
     }
-  }, [dispatch, selectedLocations]);
+  }, [dispatch, selectedLocation]);
 
   const handleStatusChange = (orderId: string, newStatus: string) => {
-    dispatch(updateOrderStatus({ orderId, status: newStatus }));
+    dispatch(updateOrder({ orderId, status: newStatus }));
   };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -36,7 +47,7 @@ const OrderDashboard: React.FC = () => {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>Order Dashboard</Typography>
-      {user?.role === 'admin' && <LocationSelector />}
+      {user?.role === UserRole.GLOBAL_ADMIN && <LocationSelector />}
       
       <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 2 }}>
         <Tab label="All Orders" />

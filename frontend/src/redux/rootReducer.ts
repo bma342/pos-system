@@ -32,8 +32,10 @@ import analyticsReducer from './slices/analyticsSlice';
 import metricsReducer from './slices/metricsSlice';
 import posDiscountReducer from './slices/posDiscountSlice';
 import posAlertsReducer from './slices/posAlertsSlice';
+import orderProviderReducer from './slices/orderProviderSlice';
 
 const rootReducer = combineReducers({
+  orderProvider: orderProviderReducer,
   settings: settingsReducer,
   location: locationReducer,
   auth: authReducer,
